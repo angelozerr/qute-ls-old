@@ -1,34 +1,21 @@
 package com.redhat.qute.parser;
 
-import java.util.function.Function;
-
 import qute.Node;
 
 public class TempNodes {
 
 	public static Node findNodeAt(Node node, int line, int column) {
-		int idx = findFirst(node, c -> isStartNodeIsAfter(node, line, column)) - 1;
-		if (idx >= 0) {
-			Node child = node.getChild(idx);
-			if (isIncluded(child, line, column)) {
-				return findNodeAt(child, line, column);
+		if (!isIncluded(node, line, column)) {
+			return null;
+		}
+		for (int i = 0; i < node.getChildCount(); i++) {
+			Node child = node.getChild(i);
+			Node match = findNodeAt(child, line, column);
+			if (match != null) {
+				return match;
 			}
 		}
 		return node;
-	}
-
-	private static boolean isStartNodeIsAfter(Node node, int line, int column) {
-		return isAfter(node.getBeginLine() - 1, node.getBeginColumn() - 1, line, column);
-	}
-
-	private static boolean isAfter(int line1, int column1, int line2, int column2) {
-		if (line1 > line2) {
-			return true;
-		}
-		if (line1 == line2) {
-			return column1 >= column2;
-		}
-		return false;
 	}
 
 	/**
@@ -42,8 +29,8 @@ public class TempNodes {
 		if (node == null) {
 			return false;
 		}
-		return isIncluded(node.getBeginLine() - 1, node.getBeginColumn() - 1, node.getEndLine() - 1,
-				node.getEndColumn() - 1, line, column);
+		return isIncluded(node.getBeginLine(), node.getBeginColumn(), node.getEndLine(), node.getEndColumn(), line,
+				column);
 	}
 
 	private static boolean isIncluded(int beginLine, int beginColumn, int endLine, int endColumn, int line,
@@ -51,32 +38,13 @@ public class TempNodes {
 		return !isAfter(beginLine, beginColumn, line, column) && isAfter(endLine, endColumn, line, column);
 	}
 
-	public static boolean isIncluded(int start, int end, int offset) {
-		return offset >= start && offset <= end;
-	}
-
-	/**
-	 * Takes a sorted array and a function p. The array is sorted in such a way that
-	 * all elements where p(x) is false are located before all elements where p(x)
-	 * is true.
-	 * 
-	 * @returns the least x for which p(x) is true or array.length if no element
-	 *          full fills the given function.
-	 */
-	private static int findFirst(Node array, Function<Node, Boolean> p) {
-		int low = 0, high = array.getChildCount();
-		if (high == 0) {
-			return 0; // no children
+	private static boolean isAfter(int line1, int column1, int line2, int column2) {
+		if (line1 > line2) {
+			return true;
 		}
-		while (low < high) {
-			int mid = (int) Math.floor((low + high) / 2);
-			if (p.apply(array.getChild(mid))) {
-				high = mid;
-			} else {
-				low = mid + 1;
-			}
+		if (line1 == line2) {
+			return column1 >= column2;
 		}
-		return low;
+		return false;
 	}
-
 }

@@ -5,23 +5,12 @@ import org.eclipse.lsp4j.LocationLink;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 
+import com.redhat.qute.parser.TempNodes;
+import com.redhat.qute.parser.Template;
+
 import qute.Node;
 
 public class QutePositionUtility {
-
-	/*
-	 * public static Range selectStartTag(SectionTag sectionTag, TextDocument
-	 * document) throws BadLocationException { String tag = sectionTag.getTag(); if
-	 * (tag == null) { return null; } int start = sectionTag.getStartTagOpenOffset()
-	 * + 1; int end = tag.length() + start + 1; return new
-	 * Range(document.positionAt(start), document.positionAt(end)); }
-	 * 
-	 * public static Range selectEndTag(SectionTag sectionTag, TextDocument
-	 * document) throws BadLocationException { int start =
-	 * sectionTag.getEndTagOpenOffset(); if (start == -1) { return null; } start++;
-	 * int end = sectionTag.getEndTagCloseOffset(); if (end == -1) { return null; }
-	 * return new Range(document.positionAt(start), document.positionAt(end)); }
-	 */
 
 	public static Location toLocation(LocationLink locationLink) {
 		return new Location(locationLink.getTargetUri(), locationLink.getTargetRange());
@@ -29,7 +18,11 @@ public class QutePositionUtility {
 
 	public static Range toRange(Node node) {
 		Position start = new Position(node.getBeginLine() - 1, node.getBeginColumn() - 1);
-		Position end = new Position(node.getEndLine() - 1, node.getEndColumn() - 1);
+		Position end = new Position(node.getEndLine() - 1, node.getEndColumn());
 		return new Range(start, end);
+	}
+
+	public static Node findNodeAt(Template template, Position position) {
+		return TempNodes.findNodeAt(template.getRoot(), position.getLine() + 1, position.getCharacter() + 1);
 	}
 }

@@ -42,14 +42,14 @@ public class QuteLanguageService {
 		this.diagnostics = new QuteDiagnostics();
 	}
 
-	public List<DocumentHighlight> findDocumentHighlights(Template template, TextDocument document, Position position,
+	public List<DocumentHighlight> findDocumentHighlights(Template template, Position position,
 			CancelChecker cancelChecker) {
-		return highlighting.findDocumentHighlights(template, document, position, cancelChecker);
+		return highlighting.findDocumentHighlights(template, position, cancelChecker);
 	}
 
-	public List<? extends LocationLink> findDefinition(Template template, TextDocument document, Position position,
+	public List<? extends LocationLink> findDefinition(Template template, Position position,
 			CancelChecker cancelChecker) {
-		return definition.findDefinition(template, document, position, cancelChecker);
+		return definition.findDefinition(template, position, cancelChecker);
 	}
 
 	public List<DocumentSymbol> findDocumentSymbols(Template template, CancelChecker cancelChecker) {

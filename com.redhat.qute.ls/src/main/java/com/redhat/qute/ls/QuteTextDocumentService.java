@@ -38,7 +38,6 @@ import org.eclipse.lsp4j.services.TextDocumentService;
 
 import com.redhat.qute.ls.commons.ModelTextDocument;
 import com.redhat.qute.ls.commons.ModelTextDocuments;
-import com.redhat.qute.ls.commons.TextDocument;
 import com.redhat.qute.parser.QuteParser;
 import com.redhat.qute.parser.Template;
 import com.redhat.qute.services.QuteLanguageService;
@@ -116,9 +115,7 @@ public class QuteTextDocumentService implements TextDocumentService {
 	@Override
 	public CompletableFuture<List<? extends DocumentHighlight>> documentHighlight(TextDocumentPositionParams params) {
 		return getTemplate(params.getTextDocument(), (cancelChecker, template) -> {
-			TextDocument document = getDocument(params.getTextDocument().getUri());
-			return getQuteLanguageService().findDocumentHighlights(template, document, params.getPosition(),
-					cancelChecker);
+			return getQuteLanguageService().findDocumentHighlights(template, params.getPosition(), cancelChecker);
 		});
 	}
 
@@ -126,13 +123,12 @@ public class QuteTextDocumentService implements TextDocumentService {
 	public CompletableFuture<Either<List<? extends Location>, List<? extends LocationLink>>> definition(
 			TextDocumentPositionParams params) {
 		return getTemplate(params.getTextDocument(), (cancelChecker, template) -> {
-			TextDocument document = getDocument(params.getTextDocument().getUri());
 			if (definitionLinkSupport) {
-				return Either.forRight(getQuteLanguageService().findDefinition(template, document, params.getPosition(),
-						cancelChecker));
+				return Either.forRight(
+						getQuteLanguageService().findDefinition(template, params.getPosition(), cancelChecker));
 			}
 			List<? extends Location> locations = getQuteLanguageService()
-					.findDefinition(template, document, params.getPosition(), cancelChecker) //
+					.findDefinition(template, params.getPosition(), cancelChecker) //
 					.stream() //
 					.map(locationLink -> QutePositionUtility.toLocation(locationLink)) //
 					.collect(Collectors.toList());
@@ -142,9 +138,6 @@ public class QuteTextDocumentService implements TextDocumentService {
 
 	public CompletableFuture<List<Either<SymbolInformation, DocumentSymbol>>> documentSymbol(
 			DocumentSymbolParams params) {
-
-		TextDocument document = getDocument(params.getTextDocument().getUri());
-
 		return getTemplate(params.getTextDocument(), (cancelChecker, template) -> {
 			if (hierarchicalDocumentSymbolSupport) {
 				return getQuteLanguageService().findDocumentSymbols(template, cancelChecker) //

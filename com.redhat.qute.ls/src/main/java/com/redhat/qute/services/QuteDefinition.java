@@ -21,8 +21,6 @@ import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.jsonrpc.CancelChecker;
 
 import com.redhat.qute.ls.commons.BadLocationException;
-import com.redhat.qute.ls.commons.TextDocument;
-import com.redhat.qute.parser.TempNodes;
 import com.redhat.qute.parser.Template;
 import com.redhat.qute.utils.QutePositionUtility;
 
@@ -40,17 +38,16 @@ class QuteDefinition {
 
 	private static final Logger LOGGER = Logger.getLogger(QuteDefinition.class.getName());
 
-	public List<? extends LocationLink> findDefinition(Template template, TextDocument document, Position position,
+	public List<? extends LocationLink> findDefinition(Template template, Position position,
 			CancelChecker cancelChecker) {
 		try {
-			int offset = document.offsetAt(position);
-			Node node = TempNodes.findNodeAt(template.getRoot(), position.getLine(), position.getCharacter());
+			Node node = QutePositionUtility.findNodeAt(template, position);
 			if (node == null) {
 				return Collections.emptyList();
 			}
 			List<LocationLink> locations = new ArrayList<>();
 			// Start end tag definition
-			findStartEndTagDefinition(node, template, document, offset, locations);
+			findStartEndTagDefinition(node, template, locations);
 			return locations;
 		} catch (BadLocationException e) {
 			LOGGER.log(Level.SEVERE, "In QuteDefinition the client provided Position is at a BadLocation", e);
@@ -69,8 +66,8 @@ class QuteDefinition {
 	 * @param locations the locations
 	 * @throws BadLocationException
 	 */
-	private static void findStartEndTagDefinition(Node node, Template template, TextDocument document, int offset,
-			List<LocationLink> locations) throws BadLocationException {
+	private static void findStartEndTagDefinition(Node node, Template template, List<LocationLink> locations)
+			throws BadLocationException {
 		Node originNode = null;
 		Node targetNode = null;
 		if (node instanceof START_SECTION || node instanceof IF) {

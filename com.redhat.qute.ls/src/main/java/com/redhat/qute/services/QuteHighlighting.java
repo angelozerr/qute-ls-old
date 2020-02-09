@@ -13,25 +13,28 @@ import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.jsonrpc.CancelChecker;
 
 import com.redhat.qute.ls.commons.BadLocationException;
-import com.redhat.qute.ls.commons.TextDocument;
 import com.redhat.qute.parser.Template;
+import com.redhat.qute.utils.QutePositionUtility;
 
+import qute.ENDIF;
+import qute.END_SECTION;
+import qute.IF;
 import qute.Node;
+import qute.START_SECTION;
 
 class QuteHighlighting {
 
 	private static final Logger LOGGER = Logger.getLogger(QuteHighlighting.class.getName());
 
-	public List<DocumentHighlight> findDocumentHighlights(Template template, TextDocument document, Position position,
+	public List<DocumentHighlight> findDocumentHighlights(Template template, Position position,
 			CancelChecker cancelChecker) {
 		try {
-			int offset = document.offsetAt(position);
-			Node node = null; //template.findNodeAt(offset);
+			Node node = QutePositionUtility.findNodeAt(template, position);
 			if (node == null) {
 				return Collections.emptyList();
 			}
 			List<DocumentHighlight> highlights = new ArrayList<>();
-			fillWithDefaultHighlights(node, document, position, offset, highlights, cancelChecker);
+			fillWithDefaultHighlights(node, position, highlights, cancelChecker);
 			return highlights;
 		} catch (BadLocationException e) {
 			LOGGER.log(Level.SEVERE, "In QuteHighlighting the client provided Position is at a BadLocation", e);
@@ -39,18 +42,26 @@ class QuteHighlighting {
 		}
 	}
 
-	private static void fillWithDefaultHighlights(Node node, TextDocument document, Position position, int offset,
-			List<DocumentHighlight> highlights, CancelChecker cancelChecker) throws BadLocationException {
-		/*if (node.getKind() != NodeKind.SectionTag || ((SectionTag) node).getTag() == null) {
-			return;
+	private static void fillWithDefaultHighlights(Node node, Position position, List<DocumentHighlight> highlights,
+			CancelChecker cancelChecker) throws BadLocationException {
+		Node originNode = null;
+		Node targetNode = null;
+		if (node instanceof START_SECTION || node instanceof IF) {
+			originNode = node;
+			Node section = originNode.getParent();
+			targetNode = section.getChild(section.getChildCount() - 1);
+		} else if (node instanceof END_SECTION || node instanceof ENDIF) {
+			originNode = node;
+			Node section = originNode.getParent();
+			targetNode = section.getChild(0);
 		}
-
-		SectionTag sectionTag = (SectionTag) node;
-		Range startTagRange = QutePositionUtility.selectStartTag(sectionTag, document);
-		Range endTagRange = QutePositionUtility.selectEndTag(sectionTag, document);
-		if (doesTagCoverPosition(startTagRange, endTagRange, position)) {
-			fillHighlightsList(startTagRange, endTagRange, highlights);
-		}*/
+		if (originNode != null && targetNode != null) {
+			Range startTagRange = QutePositionUtility.toRange(originNode);
+			Range endTagRange = QutePositionUtility.toRange(targetNode);
+			if (doesTagCoverPosition(startTagRange, endTagRange, position)) {
+				fillHighlightsList(startTagRange, endTagRange, highlights);
+			}
+		}
 	}
 
 	private static void fillHighlightsList(Range startTagRange, Range endTagRange, List<DocumentHighlight> result) {
