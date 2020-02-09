@@ -18,17 +18,17 @@ public class TempNodes {
 	}
 
 	private static boolean isStartNodeIsAfter(Node node, int line, int column) {
-		return isAfter(node.getBeginLine(), node.getBeginColumn(), line, column);
+		return isAfter(node.getBeginLine() - 1, node.getBeginColumn() - 1, line, column);
 	}
 
 	private static boolean isAfter(int line1, int column1, int line2, int column2) {
 		if (line1 > line2) {
-			return false;
+			return true;
 		}
 		if (line1 == line2) {
-			return column1 <= column2;
+			return column1 >= column2;
 		}
-		return (line1 < line2);
+		return false;
 	}
 
 	/**
@@ -42,13 +42,13 @@ public class TempNodes {
 		if (node == null) {
 			return false;
 		}
-		return isIncluded(node.getBeginLine(), node.getBeginColumn(), node.getEndLine(), node.getEndColumn(), line,
-				column);
+		return isIncluded(node.getBeginLine() - 1, node.getBeginColumn() - 1, node.getEndLine() - 1,
+				node.getEndColumn() - 1, line, column);
 	}
 
 	private static boolean isIncluded(int beginLine, int beginColumn, int endLine, int endColumn, int line,
 			int column) {
-		return isAfter(beginLine, beginColumn, line, column) && !isAfter(endLine, endColumn, line, column);
+		return !isAfter(beginLine, beginColumn, line, column) && isAfter(endLine, endColumn, line, column);
 	}
 
 	public static boolean isIncluded(int start, int end, int offset) {

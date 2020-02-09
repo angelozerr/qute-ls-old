@@ -17,14 +17,18 @@ import java.util.logging.Logger;
 
 import org.eclipse.lsp4j.LocationLink;
 import org.eclipse.lsp4j.Position;
+import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.jsonrpc.CancelChecker;
 
 import com.redhat.qute.ls.commons.BadLocationException;
 import com.redhat.qute.ls.commons.TextDocument;
 import com.redhat.qute.parser.TempNodes;
 import com.redhat.qute.parser.Template;
+import com.redhat.qute.utils.QutePositionUtility;
 
+import qute.END_SECTION;
 import qute.Node;
+import qute.START_SECTION;
 
 /**
  * Qute definition support.
@@ -65,28 +69,22 @@ class QuteDefinition {
 	 */
 	private static void findStartEndTagDefinition(Node node, Template template, TextDocument document, int offset,
 			List<LocationLink> locations) throws BadLocationException {
-		/*if (node != null && node.getKind() == NodeKind.SectionTag) {
-			// Node is a Qute section tag
-			SectionTag sectionTag = (SectionTag) node;
-			if (sectionTag.hasStartTag() && sectionTag.hasEndTag()) {
-				// The DOM element has end and start tag
-				Range startRange = QutePositionUtility.selectStartTag(sectionTag, document);
-				if (startRange == null) {
-					return;
-				}
-				Range endRange = QutePositionUtility.selectEndTag(sectionTag, document);
-				if (endRange == null) {
-					return;
-				}
-				if (sectionTag.isInStartTag(offset)) {
-					// Start tag was clicked, jump to the end tag
-					locations.add(new LocationLink(template.getId(), endRange, endRange, startRange));
-				} else if (sectionTag.isInEndTag(offset)) {
-					// End tag was clicked, jump to the start tag
-					locations.add(new LocationLink(template.getId(), startRange, startRange, endRange));
-				}
-			}
-		}*/
+		Node originNode = null;
+		Node targetNode = null;
+		if (node instanceof START_SECTION) {
+			originNode = node;
+			Node section = originNode.getParent();
+			targetNode = section.getChild(section.getChildCount() - 1);
+		} else if (node instanceof END_SECTION) {
+			originNode = node;
+			Node section = originNode.getParent();
+			targetNode = section.getChild(0);
+		}
+		if (originNode != null && targetNode != null) {
+			Range originRange = QutePositionUtility.toRange(originNode);
+			Range targetRange = QutePositionUtility.toRange(targetNode);
+			locations.add(new LocationLink(template.getId(), targetRange, targetRange, originRange));
+		}
 	}
 
 }
