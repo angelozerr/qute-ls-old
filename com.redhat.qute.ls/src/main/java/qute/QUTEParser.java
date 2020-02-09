@@ -195,7 +195,7 @@ public class QUTEParser implements QUTEConstants {
     private Token jj_nt;
     private int jj_ntk;
     private int jj_gen;
-    final private int[] jj_la1=new int[9];
+    final private int[] jj_la1=new int[10];
     static private int[] jj_la1_0;
     static private int[] jj_la1_1;
     static {
@@ -203,11 +203,11 @@ public class QUTEParser implements QUTEConstants {
         jj_la1_init_1();
     }
     private static void jj_la1_init_0() {
-        jj_la1_0=new int[]{0x6110,0x1000000,0x2000000,0xc00000,0x6110,0x8800000,0x80000000,0x4380000,0x4380000};
+        jj_la1_0=new int[]{0x6110,0x1000000,0x2000000,0xc00000,0x6110,0x8800000,0x80000000,0x4380000,0x4380000,0x4380000};
     }
 
     private static void jj_la1_init_1() {
-        jj_la1_1=new int[]{0x0,0x0,0x0,0x0,0x0,0x0,0x1,0x0,0x0};
+        jj_la1_1=new int[]{0x0,0x0,0x0,0x0,0x0,0x0,0x1,0x0,0x0,0x0};
     }
 
     public QUTEParser(java.io.InputStream stream) {
@@ -220,7 +220,7 @@ public class QUTEParser implements QUTEConstants {
         current_token=new Token();
         jj_ntk=-1;
         for(int i=0; 
-        i<9; 
+        i<10; 
         i++) jj_la1[i]=-1; 
     }
 
@@ -230,7 +230,7 @@ public class QUTEParser implements QUTEConstants {
         current_token=new Token();
         jj_ntk=-1;
         for(int i=0; 
-        i<9; 
+        i<10; 
         i++) jj_la1[i]=-1; 
     }
 
@@ -288,7 +288,7 @@ public class QUTEParser implements QUTEConstants {
             jj_kind=-1;
         }
         for(int i=0; 
-        i<9; 
+        i<10; 
         i++) {
             if (jj_la1[i]==jj_gen) {
                 for(int j=0; 
@@ -831,7 +831,16 @@ public class QUTEParser implements QUTEConstants {
         boolean hitException9=false;
         try {
             // QUTE.javacc, line 121
-            Block();
+            int int5=(jj_ntk==-1)?jj_ntk():
+            jj_ntk;
+            if (int5==TEXT||int5==OPEN_CURLY||int5==IF||int5==START_SECTION) {
+                // QUTE.javacc, line 121
+                // QUTE.javacc, line 121
+                Block();
+            }
+            else {
+                jj_la1[9]=jj_gen;
+            }
             // QUTE.javacc, line 122
             jj_consume_token(0);
         }

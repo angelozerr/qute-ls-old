@@ -95,6 +95,16 @@ public class Token implements QUTEConstants,Node {
 
     public static Token newToken(int ofKind,String image) {
         switch(ofKind) {
+            case C_IDENTIFIER:
+            return new C_IDENTIFIER(ofKind,image);
+            case STRING_LITERAL:
+            return new StringLiteral(ofKind,image);
+            case NUMBER:
+            return new NumberLiteral(ofKind,image);
+            case OPEN_PAREN:
+            return new Delimiter(ofKind,image);
+            case CLOSE_PAREN:
+            return new Delimiter(ofKind,image);
             case TEXT:
             return new Text(ofKind,image);
             case OPEN_CURLY:
@@ -117,8 +127,6 @@ public class Token implements QUTEConstants,Node {
             return new OPEN_COMMENT(ofKind,image);
             case CLOSE_COMMENT:
             return new Comment(ofKind,image);
-            case C_IDENTIFIER:
-            return new C_IDENTIFIER(ofKind,image);
             case CLOSE_CURLY:
             return new CLOSE_CURLY(ofKind,image);
             case CLOSE_EMPTY:

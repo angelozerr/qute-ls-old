@@ -25,7 +25,7 @@ public class QuteParser {
 		}
 		Template template = new Template(templateId);
 		QUTEParser parser = new QUTEParser(new StringReader(content));
-		parser.setBuildTree(true);
+		// parser.setBuildTree(true);
 		try {
 			parser.Root();
 			

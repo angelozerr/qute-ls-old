@@ -26,7 +26,9 @@ import com.redhat.qute.parser.TempNodes;
 import com.redhat.qute.parser.Template;
 import com.redhat.qute.utils.QutePositionUtility;
 
+import qute.ENDIF;
 import qute.END_SECTION;
+import qute.IF;
 import qute.Node;
 import qute.START_SECTION;
 
@@ -71,11 +73,11 @@ class QuteDefinition {
 			List<LocationLink> locations) throws BadLocationException {
 		Node originNode = null;
 		Node targetNode = null;
-		if (node instanceof START_SECTION) {
+		if (node instanceof START_SECTION || node instanceof IF) {
 			originNode = node;
 			Node section = originNode.getParent();
 			targetNode = section.getChild(section.getChildCount() - 1);
-		} else if (node instanceof END_SECTION) {
+		} else if (node instanceof END_SECTION || node instanceof ENDIF) {
 			originNode = node;
 			Node section = originNode.getParent();
 			targetNode = section.getChild(0);
