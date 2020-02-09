@@ -21,6 +21,7 @@ import org.eclipse.lsp4j.jsonrpc.CancelChecker;
 
 import com.redhat.qute.ls.commons.BadLocationException;
 import com.redhat.qute.ls.commons.TextDocument;
+import com.redhat.qute.parser.TempNodes;
 import com.redhat.qute.parser.Template;
 
 import qute.Node;
@@ -37,7 +38,7 @@ class QuteDefinition {
 			CancelChecker cancelChecker) {
 		try {
 			int offset = document.offsetAt(position);
-			Node node = null; //template.findNodeAt(offset);
+			Node node = TempNodes.findNodeAt(template.getRoot(), position.getLine(), position.getCharacter());
 			if (node == null) {
 				return Collections.emptyList();
 			}

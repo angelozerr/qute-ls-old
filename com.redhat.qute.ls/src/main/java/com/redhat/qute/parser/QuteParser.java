@@ -5,6 +5,7 @@ import java.util.Arrays;
 
 import org.eclipse.lsp4j.jsonrpc.CancelChecker;
 
+import qute.LexicalException;
 import qute.ParseException;
 import qute.QUTEParser;
 
