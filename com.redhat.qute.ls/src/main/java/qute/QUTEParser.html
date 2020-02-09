@@ -1,0 +1,190 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+  <HEAD>
+    <TITLE>BNF for QUTEParser</TITLE>
+  </HEAD>
+  <BODY>
+   <H1 ALIGN=CENTER>BNF for QUTEParser</H1>
+
+   <H2 ALIGN=CENTER>NON-TERMINALS</H2>
+      <TABLE>
+    <TR><TD><PRE>
+
+</PRE></TD></TR>
+    <TR>
+     <TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod1">Expression</A></TD>
+     <TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
+     <TD ALIGN=LEFT VALIGN=BASELINE>
+        &lt;C_IDENTIFIER&gt;
+ |        &lt;STRING_LITERAL&gt;
+ |        &lt;NUMBER&gt;
+ |    <A HREF="#prod2">Parenthesis</A>
+      </TD>
+    </TR>
+    <TR><TD><PRE>
+
+</PRE></TD></TR>
+    <TR>
+     <TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod2">Parenthesis</A></TD>
+     <TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
+     <TD ALIGN=LEFT VALIGN=BASELINE>
+        &lt;OPEN_PAREN&gt;
+    <A HREF="#prod1">Expression</A>
+        &lt;CLOSE_PAREN&gt;
+      </TD>
+    </TR>
+    <TR><TD><PRE>
+
+</PRE></TD></TR>
+    <TR>
+     <TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod3">Interpolation</A></TD>
+     <TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
+     <TD ALIGN=LEFT VALIGN=BASELINE>
+        &lt;OPEN_CURLY&gt;
+    <A HREF="#prod1">Expression</A>
+        &lt;CLOSE_CURLY&gt;
+      </TD>
+    </TR>
+    <TR><TD><PRE>
+
+</PRE></TD></TR>
+    <TR>
+     <TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod4">IfBlock</A></TD>
+     <TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
+     <TD ALIGN=LEFT VALIGN=BASELINE>
+        &lt;IF&gt;
+    <A HREF="#prod1">Expression</A>
+        &lt;CLOSE_CURLY&gt;
+    <A HREF="#prod5">Block</A>
+        (    <A HREF="#prod6">ElseIfBlock</A>
+ )*
+        (    <A HREF="#prod7">ElseBlock</A>
+ )?
+ (        &lt;ENDIF&gt;
+ |        &lt;ABBREVIATED_END&gt;
+  )     </TD>
+    </TR>
+    <TR><TD><PRE>
+
+</PRE></TD></TR>
+    <TR>
+     <TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod6">ElseIfBlock</A></TD>
+     <TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
+     <TD ALIGN=LEFT VALIGN=BASELINE>
+        &lt;ELSEIF&gt;
+    <A HREF="#prod1">Expression</A>
+        &lt;CLOSE_CURLY&gt;
+    <A HREF="#prod5">Block</A>
+      </TD>
+    </TR>
+    <TR><TD><PRE>
+
+</PRE></TD></TR>
+    <TR>
+     <TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod7">ElseBlock</A></TD>
+     <TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
+     <TD ALIGN=LEFT VALIGN=BASELINE>
+        &lt;ELSE&gt;
+    <A HREF="#prod5">Block</A>
+      </TD>
+    </TR>
+    <TR><TD><PRE>
+
+</PRE></TD></TR>
+    <TR>
+     <TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod8">Section</A></TD>
+     <TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
+     <TD ALIGN=LEFT VALIGN=BASELINE>
+        &lt;START_SECTION&gt;
+        (    <A HREF="#prod1">Expression</A>
+ )?
+ (        &lt;CLOSE_EMPTY&gt;
+ | (        &lt;CLOSE_CURLY&gt;
+    <A HREF="#prod5">Block</A>
+ (        &lt;END_SECTION&gt;
+ |        &lt;ABBREVIATED_END&gt;
+  ) ) )     </TD>
+    </TR>
+    <TR><TD><PRE>
+
+
+</PRE></TD></TR>
+    <TR>
+     <TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod5">Block</A></TD>
+     <TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
+     <TD ALIGN=LEFT VALIGN=BASELINE>
+        (        &lt;TEXT&gt;
+ |    <A HREF="#prod3">Interpolation</A>
+ |    <A HREF="#prod4">IfBlock</A>
+ |    <A HREF="#prod8">Section</A>
+ )+
+      </TD>
+    </TR>
+    <TR><TD><PRE>
+
+
+</PRE></TD></TR>
+    <TR>
+     <TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod9">Root</A></TD>
+     <TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
+     <TD ALIGN=LEFT VALIGN=BASELINE>
+    <A HREF="#prod5">Block</A>
+        &lt;EOF&gt;
+      </TD>
+    </TR>
+      </TABLE>
+<HR>
+  <H2 ALIGN=CENTER>TOKENS</H2>
+  <TABLE>
+<TR><TD><PRE>&lt;QUTE_EXPRESSION&gt; SKIP : { 
+&lt;(&quot; &quot; | &quot;\t&quot; | &quot;\n&quot; | &quot;\r&quot;)+&gt;
+}
+
+</PRE></TD></TR><TR><TD><PRE>&lt;QUTE_EXPRESSION&gt; TOKEN : { 
+&lt;C_IDENTIFIER: (&quot;_&quot; | &lt;ASCII_LETTER&gt;) (&quot;_&quot; | &lt;ASCII_LETTER&gt; | &lt;ASCII_DIGIT&gt;)*&gt;
+}
+
+</PRE></TD></TR><TR><TD><PRE>&lt;QUTE_EXPRESSION&gt; TOKEN : { 
+&lt;STRING_LITERAL: &quot;\&quot;&quot; (&lt;REGULAR_CHAR&gt; | &lt;ESCAPE2&gt; | &lt;ESCAPE1&gt;)* &quot;\&quot;&quot;&gt;
+|&lt;NUMBER: (&quot;-&quot;)? (&lt;ZERO&gt; | &lt;NON_ZERO&gt;) (&lt;FRACTION&gt;)? (&lt;EXPONENT&gt;)?&gt;
+}
+
+</PRE></TD></TR><TR><TD><PRE>&lt;QUTE_EXPRESSION&gt; TOKEN : { 
+&lt;OPEN_PAREN: &quot;(&quot;&gt;
+|&lt;CLOSE_PAREN: &quot;)&quot;&gt;
+}
+
+</PRE></TD></TR><TR><TD><PRE>&lt;QUTE_TEXT&gt; TOKEN : { 
+&lt;TEXT: (&lt;NO_OPEN_CURLY&gt; | &lt;ESCAPED_OPEN_CURLY&gt;)+&gt;
+|&lt;OPEN_CURLY: &quot;{&quot;&gt;
+|&lt;IF: &quot;{#if&quot; &lt;WS&gt;&gt;
+|&lt;ENDIF: &quot;{/if}&quot;&gt;
+|&lt;ABBREVIATED_END: &quot;{/}&quot;&gt;
+|&lt;ELSEIF: &quot;{#else&quot; &lt;WS&gt; &quot;if&quot; &lt;WS&gt;&gt;
+|&lt;ELSE: &quot;{#else&quot; (&lt;WS&gt;)? &quot;}&quot;&gt;
+|&lt;START_SECTION: &quot;{#&quot; (&lt;ASCII_LETTER&gt;)+&gt;
+|&lt;END_SECTION: &quot;{/&quot; (&lt;ASCII_LETTER&gt;)+ (&lt;WS&gt;)? &quot;}&quot;&gt;
+}
+
+</PRE></TD></TR><TR><TD><PRE>&lt;QUTE_TEXT&gt; MORE : { 
+&lt;OPEN_COMMENT: &quot;{!&quot;&gt;
+}
+
+</PRE></TD></TR><TR><TD><PRE>&lt;IN_COMMENT&gt; MORE : { 
+&lt;~[]&gt;
+}
+
+</PRE></TD></TR><TR><TD><PRE>&lt;IN_COMMENT&gt; SPECIAL_TOKEN : { 
+&lt;CLOSE_COMMENT: &quot;!}&quot;&gt;
+}
+
+</PRE></TD></TR><TR><TD><PRE>&lt;QUTE_EXPRESSION&gt; TOKEN : { 
+&lt;CLOSE_CURLY: &quot;}&quot;&gt;
+|&lt;CLOSE_EMPTY: &quot;/}&quot;&gt;
+}
+
+</PRE></TD></TR>  </TABLE>
+
+  </BODY>
+</HTML>
+
