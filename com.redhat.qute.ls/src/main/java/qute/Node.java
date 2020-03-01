@@ -11,6 +11,29 @@ public interface Node {
      * added. 
      */
     void close();
+    /**
+     * Returns the first child of this node. If there is no such node, this returns
+     * <code>null</code>.
+     * 
+     * @return the first child of this node. If there is no such node, this returns
+     *         <code>null</code>.
+     */
+    Node getFirstChild();
+    /**
+     * Returns the last child of this node. If there is no such node, this returns
+     * <code>null</code>.
+     * 
+     * @return the last child of this node. If there is no such node, this returns
+     *         <code>null</code>.
+     */
+    Node getLastChild();
+    /**
+     * Returns whether this node has any children.
+     * 
+     * @return Returns <code>true</code> if this node has any children,
+     *         <code>false</code> otherwise.
+     */
+    boolean hasChildNodes();
     void setParent(Node n);
     Node getParent();
     // The following 9 methods will typically just 
@@ -46,4 +69,17 @@ public interface Node {
     void setEndLine(int endLine);
     void setBeginColumn(int beginColumn);
     void setEndColumn(int endColumn);
+    default boolean isDirty() {
+        return false;
+    }
+
+    /**
+     * Returns the node at the given position (line,column) and null otherwise.
+     * 
+     * @param line   the line position
+     * @param column the column position
+     * 
+     * @return the node at the given position (line,column) and null otherwise.
+     */
+    Node findNodeAt(int line,int column);
 }

@@ -1,8 +1,10 @@
 /*******************************************************************************
-* Copyright (c) 2019 Red Hat Inc. and others.
+* Copyright (c) 2020 Red Hat Inc. and others.
 * All rights reserved. This program and the accompanying materials
 * which accompanies this distribution, and is available at
 * http://www.eclipse.org/legal/epl-v20.html
+*
+* SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
 *     Red Hat Inc. - initial API and implementation
@@ -11,6 +13,7 @@ package com.redhat.qute.services;
 
 import java.util.List;
 
+import org.eclipse.lsp4j.CompletionList;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DocumentHighlight;
 import org.eclipse.lsp4j.DocumentSymbol;
@@ -21,6 +24,8 @@ import org.eclipse.lsp4j.jsonrpc.CancelChecker;
 
 import com.redhat.qute.ls.commons.TextDocument;
 import com.redhat.qute.parser.Template;
+import com.redhat.qute.settings.QuteCompletionSettings;
+import com.redhat.qute.settings.QuteFormattingSettings;
 import com.redhat.qute.settings.QuteValidationSettings;
 
 /**
@@ -30,16 +35,34 @@ import com.redhat.qute.settings.QuteValidationSettings;
  *
  */
 public class QuteLanguageService {
+
+	private final QuteCompletions completions;
 	private final QuteHighlighting highlighting;
 	private final QuteDefinition definition;
 	private final QuteSymbolsProvider symbolsProvider;
 	private final QuteDiagnostics diagnostics;
 
 	public QuteLanguageService() {
+		this.completions = new QuteCompletions();
 		this.highlighting = new QuteHighlighting();
 		this.definition = new QuteDefinition();
 		this.symbolsProvider = new QuteSymbolsProvider();
 		this.diagnostics = new QuteDiagnostics();
+	}
+
+	/**
+	 * Returns completion list for the given position
+	 * 
+	 * @param template           the Qute template
+	 * @param position           the position where completion was triggered
+	 * @param completionSettings the completion settings.
+	 * @param formattingSettings the formatting settings.
+	 * @param cancelChecker      the cancel checker
+	 * @return completion list for the given position
+	 */
+	public CompletionList doComplete(Template template, Position position, QuteCompletionSettings completionSettings,
+			QuteFormattingSettings formattingSettings, CancelChecker cancelChecker) {
+		return completions.doComplete(template, position, completionSettings, formattingSettings, cancelChecker);
 	}
 
 	public List<DocumentHighlight> findDocumentHighlights(Template template, Position position,

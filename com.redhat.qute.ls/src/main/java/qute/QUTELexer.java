@@ -67,9 +67,12 @@ public class QUTELexer implements QUTEConstants {
     }
 
     /** Switch to specified lex state. */
+    // TODO: Switch this to using enums
     public void SwitchTo(int lexState) {
-        if (lexState>=3||lexState<0) throw new LexicalException("Error: Ignoring invalid lexical state : "+lexState+". State unchanged.",LexicalException.INVALID_LEXICAL_STATE);
-        else curLexState=lexState;
+        if (lexState>=3||lexState<0) {
+            throw new RuntimeException("Switch to invalid lexical state: "+lexState);
+        }
+        this.curLexState=lexState;
     }
 
     /** Get the next Token. */

@@ -17,6 +17,9 @@ import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import org.eclipse.lsp4j.ClientCapabilities;
+import org.eclipse.lsp4j.CompletionItem;
+import org.eclipse.lsp4j.CompletionList;
+import org.eclipse.lsp4j.CompletionParams;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DidChangeTextDocumentParams;
 import org.eclipse.lsp4j.DidCloseTextDocumentParams;
@@ -77,6 +80,7 @@ public class QuteTextDocumentService implements TextDocumentService {
 	public void updateClientCapabilities(ClientCapabilities capabilities) {
 		TextDocumentClientCapabilities textDocumentClientCapabilities = capabilities.getTextDocument();
 		if (textDocumentClientCapabilities != null) {
+			sharedSettings.getCompletionSettings().setCapabilities(textDocumentClientCapabilities.getCompletion());
 			hierarchicalDocumentSymbolSupport = textDocumentClientCapabilities.getDocumentSymbol() != null
 					&& textDocumentClientCapabilities.getDocumentSymbol().getHierarchicalDocumentSymbolSupport() != null
 					&& textDocumentClientCapabilities.getDocumentSymbol().getHierarchicalDocumentSymbolSupport();
@@ -110,6 +114,14 @@ public class QuteTextDocumentService implements TextDocumentService {
 	@Override
 	public void didSave(DidSaveTextDocumentParams params) {
 
+	}
+
+	public CompletableFuture<Either<List<CompletionItem>, CompletionList>> completion(CompletionParams params) {
+		return getTemplate(params.getTextDocument(), (cancelChecker, template) -> {
+			CompletionList list = getQuteLanguageService().doComplete(template, params.getPosition(),
+					sharedSettings.getCompletionSettings(), sharedSettings.getFormattingSettings(), cancelChecker);
+			return Either.forRight(list);
+		});
 	}
 
 	@Override

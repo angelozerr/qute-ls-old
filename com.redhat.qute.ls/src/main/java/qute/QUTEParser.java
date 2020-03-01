@@ -3,6 +3,21 @@ package qute;
 
 @SuppressWarnings("unused")
 public class QUTEParser implements QUTEConstants {
+    private boolean tolerantParsing=true;
+    /**
+    * Is tolerant parsing turned on?
+    */
+    public boolean isParserTolerant() {
+        return tolerantParsing;
+    }
+
+    /**
+     * Toggles tolerant parsing
+     */
+    public void setParserTolerant(boolean tolerantParsing) {
+        this.tolerantParsing=tolerantParsing;
+    }
+
     private boolean buildTree=true;
     private boolean tokensAreNodes=true;
     private boolean specialTokensAreNodes=true;
@@ -127,7 +142,7 @@ public class QUTEParser implements QUTEConstants {
     }
 
     /** 
-	 * A conditional node is constructed if its condition is true.  All
+	 * A conditional node is constructed if the condition is true.  All
 	 * the nodes that have been pushed since the node was opened are
 	 * made children of the conditional node, which is then pushed
 	 * on to the stack.  If the condition is false the node is not
@@ -181,7 +196,7 @@ public class QUTEParser implements QUTEConstants {
     QUTEParser jjtree=this;
     /** Generated Lexer. */
     public QUTELexer token_source;
-    SimpleCharStream jj_input_stream;
+    SimpleCharStream inputStream;
     public void setInputSource(String inputSource) {
         token_source.setInputSource(inputSource);
     }
@@ -191,9 +206,6 @@ public class QUTEParser implements QUTEConstants {
     }
 
     Token current_token;
-    /** Next token. */
-    private Token jj_nt;
-    private int jj_ntk;
     private int jj_gen;
     final private int[] jj_la1=new int[10];
     static private int[] jj_la1_0;
@@ -215,10 +227,9 @@ public class QUTEParser implements QUTEConstants {
     }
 
     public QUTEParser(java.io.Reader stream) {
-        jj_input_stream=new SimpleCharStream(stream,1,1);
-        token_source=new QUTELexer(jj_input_stream);
+        inputStream=new SimpleCharStream(stream,1,1);
+        token_source=new QUTELexer(inputStream);
         current_token=new Token();
-        jj_ntk=-1;
         for(int i=0; 
         i<10; 
         i++) jj_la1[i]=-1; 
@@ -228,34 +239,47 @@ public class QUTEParser implements QUTEConstants {
     public QUTEParser(QUTELexer tm) {
         token_source=tm;
         current_token=new Token();
-        jj_ntk=-1;
         for(int i=0; 
         i<10; 
         i++) jj_la1[i]=-1; 
     }
 
-    private Token jj_consume_token(int kind) throws ParseException {
+    private Token consumeToken(int kind) throws ParseException {
+        return consumeToken(kind,false);
+    }
+
+    private Token consumeToken(int kind,boolean forced) throws ParseException {
         Token oldToken=current_token;
         if (current_token.next!=null) current_token=current_token.next;
         else current_token=current_token.next=token_source.getNextToken();
-        jj_ntk=-1;
-        if (current_token.kind==kind) {
-            jj_gen++;
-            if (buildTree&&tokensAreNodes) {
-                pushNode(current_token);
+        if (current_token.kind!=kind) {
+            jj_kind=kind;
+            if (forced&&tolerantParsing) {
+                Token t=Token.newToken(kind,"");
+                t.setVirtual(true);
+                t.setBeginLine(oldToken.getEndLine());
+                t.setBeginColumn(oldToken.getEndColumn());
+                t.setEndLine(current_token.getBeginLine());
+                t.setEndColumn(current_token.getBeginColumn());
+                t.next=current_token;
+                current_token=t;
             }
-            return current_token;
+            else {
+                current_token=oldToken;
+                throw generateParseException();
+            }
         }
-        current_token=oldToken;
-        jj_kind=kind;
-        throw generateParseException();
+        jj_gen++;
+        if (buildTree&&tokensAreNodes) {
+            pushNode(current_token);
+        }
+        return current_token;
     }
 
     /** Get the next Token. */
     final public Token getNextToken() {
         if (current_token.next!=null) current_token=current_token.next;
         else current_token=current_token.next=token_source.getNextToken();
-        jj_ntk=-1;
         jj_gen++;
         return current_token;
     }
@@ -272,9 +296,11 @@ public class QUTEParser implements QUTEConstants {
         return t;
     }
 
-    private int jj_ntk() {
-        if ((jj_nt=current_token.next)==null) return(jj_ntk=(current_token.next=token_source.getNextToken()).kind);
-        else return(jj_ntk=jj_nt.kind);
+    private int nextTokenKind() {
+        if (current_token.next==null) {
+            current_token.next=token_source.getNextToken();
+        }
+        return current_token.next.kind;
     }
 
     private java.util.ArrayList<int[]>jj_expentries=new java.util.ArrayList<int[]>();
@@ -343,22 +369,21 @@ public class QUTEParser implements QUTEConstants {
         }
         boolean hitException1=false;
         try {
-            switch((jj_ntk==-1)?jj_ntk():
-            jj_ntk) {
+            switch(nextTokenKind()) {
                 case C_IDENTIFIER:
                 // QEL.javacc, line 51
                 // QEL.javacc, line 51
-                jj_consume_token(C_IDENTIFIER);
+                consumeToken(C_IDENTIFIER,false);
                 break;
                 case STRING_LITERAL:
                 // QEL.javacc, line 53
                 // QEL.javacc, line 53
-                jj_consume_token(STRING_LITERAL);
+                consumeToken(STRING_LITERAL,false);
                 break;
                 case NUMBER:
                 // QEL.javacc, line 55
                 // QEL.javacc, line 55
-                jj_consume_token(NUMBER);
+                consumeToken(NUMBER,false);
                 break;
                 case OPEN_PAREN:
                 // QEL.javacc, line 57
@@ -367,7 +392,7 @@ public class QUTEParser implements QUTEConstants {
                 break;
                 default:
                 jj_la1[0]=jj_gen;
-                jj_consume_token(-1);
+                consumeToken(-1);
                 throw new ParseException();
             }
         }
@@ -408,11 +433,11 @@ public class QUTEParser implements QUTEConstants {
         boolean hitException2=false;
         try {
             // QEL.javacc, line 62
-            jj_consume_token(OPEN_PAREN);
+            consumeToken(OPEN_PAREN,false);
             // QEL.javacc, line 63
             Expression();
             // QEL.javacc, line 64
-            jj_consume_token(CLOSE_PAREN);
+            consumeToken(CLOSE_PAREN,true);
         }
         catch(Exception e2) {
             hitException2=false;
@@ -436,9 +461,9 @@ public class QUTEParser implements QUTEConstants {
         }
     }
 
-    // QUTE.javacc, line 59
+    // QUTE.javacc, line 60
     final public void Interpolation() throws ParseException {
-        // QUTE.javacc, line 61
+        // QUTE.javacc, line 62
         Interpolation node3=null;
         if (buildTree) {
             node3=new Interpolation();
@@ -450,12 +475,12 @@ public class QUTEParser implements QUTEConstants {
         }
         boolean hitException3=false;
         try {
-            // QUTE.javacc, line 61
-            jj_consume_token(OPEN_CURLY);
-            // QUTE.javacc, line 61
+            // QUTE.javacc, line 62
+            consumeToken(OPEN_CURLY,false);
+            // QUTE.javacc, line 62
             Expression();
-            // QUTE.javacc, line 61
-            jj_consume_token(CLOSE_CURLY);
+            // QUTE.javacc, line 62
+            consumeToken(CLOSE_CURLY,false);
         }
         catch(Exception e3) {
             hitException3=false;
@@ -479,9 +504,9 @@ public class QUTEParser implements QUTEConstants {
         }
     }
 
-    // QUTE.javacc, line 64
+    // QUTE.javacc, line 65
     final public void IfBlock() throws ParseException {
-        // QUTE.javacc, line 66
+        // QUTE.javacc, line 67
         IfBlock node4=null;
         if (buildTree) {
             node4=new IfBlock();
@@ -493,54 +518,53 @@ public class QUTEParser implements QUTEConstants {
         }
         boolean hitException4=false;
         try {
-            // QUTE.javacc, line 66
-            jj_consume_token(IF);
             // QUTE.javacc, line 67
-            Expression();
+            consumeToken(IF,false);
             // QUTE.javacc, line 68
-            jj_consume_token(CLOSE_CURLY);
+            Expression();
             // QUTE.javacc, line 69
-            Block();
+            consumeToken(CLOSE_CURLY,false);
             // QUTE.javacc, line 70
+            Block();
+            // QUTE.javacc, line 71
             label_1:
             while (true) {
-                int int1=(jj_ntk==-1)?jj_ntk():
-                jj_ntk;
+                int int1=nextTokenKind();
+                ;
                 if (!(int1==ELSEIF)) {
                     jj_la1[1]=jj_gen;
                     break label_1;
                 }
-                // QUTE.javacc, line 70
-                // QUTE.javacc, line 70
+                // QUTE.javacc, line 71
+                // QUTE.javacc, line 71
                 ElseIfBlock();
             }
-            // QUTE.javacc, line 71
-            int int2=(jj_ntk==-1)?jj_ntk():
-            jj_ntk;
+            // QUTE.javacc, line 72
+            int int2=nextTokenKind();
+            ;
             if (int2==ELSE) {
-                // QUTE.javacc, line 71
-                // QUTE.javacc, line 71
+                // QUTE.javacc, line 72
+                // QUTE.javacc, line 72
                 ElseBlock();
             }
             else {
                 jj_la1[2]=jj_gen;
             }
-            // QUTE.javacc, line 72
-            switch((jj_ntk==-1)?jj_ntk():
-            jj_ntk) {
+            // QUTE.javacc, line 73
+            switch(nextTokenKind()) {
                 case ENDIF:
-                // QUTE.javacc, line 72
-                // QUTE.javacc, line 72
-                jj_consume_token(ENDIF);
+                // QUTE.javacc, line 73
+                // QUTE.javacc, line 73
+                consumeToken(ENDIF,false);
                 break;
                 case ABBREVIATED_END:
-                // QUTE.javacc, line 72
-                // QUTE.javacc, line 72
-                jj_consume_token(ABBREVIATED_END);
+                // QUTE.javacc, line 73
+                // QUTE.javacc, line 73
+                consumeToken(ABBREVIATED_END,false);
                 break;
                 default:
                 jj_la1[3]=jj_gen;
-                jj_consume_token(-1);
+                consumeToken(-1);
                 throw new ParseException();
             }
         }
@@ -566,9 +590,9 @@ public class QUTEParser implements QUTEConstants {
         }
     }
 
-    // QUTE.javacc, line 75
+    // QUTE.javacc, line 76
     final public void ElseIfBlock() throws ParseException {
-        // QUTE.javacc, line 77
+        // QUTE.javacc, line 78
         ElseIfBlock node5=null;
         if (buildTree) {
             node5=new ElseIfBlock();
@@ -580,13 +604,13 @@ public class QUTEParser implements QUTEConstants {
         }
         boolean hitException5=false;
         try {
-            // QUTE.javacc, line 77
-            jj_consume_token(ELSEIF);
             // QUTE.javacc, line 78
-            Expression();
+            consumeToken(ELSEIF,false);
             // QUTE.javacc, line 79
-            jj_consume_token(CLOSE_CURLY);
+            Expression();
             // QUTE.javacc, line 80
+            consumeToken(CLOSE_CURLY,false);
+            // QUTE.javacc, line 81
             Block();
         }
         catch(Exception e5) {
@@ -611,9 +635,9 @@ public class QUTEParser implements QUTEConstants {
         }
     }
 
-    // QUTE.javacc, line 83
+    // QUTE.javacc, line 84
     final public void ElseBlock() throws ParseException {
-        // QUTE.javacc, line 85
+        // QUTE.javacc, line 86
         ElseBlock node6=null;
         if (buildTree) {
             node6=new ElseBlock();
@@ -625,9 +649,9 @@ public class QUTEParser implements QUTEConstants {
         }
         boolean hitException6=false;
         try {
-            // QUTE.javacc, line 85
-            jj_consume_token(ELSE);
             // QUTE.javacc, line 86
+            consumeToken(ELSE,false);
+            // QUTE.javacc, line 87
             Block();
         }
         catch(Exception e6) {
@@ -652,9 +676,9 @@ public class QUTEParser implements QUTEConstants {
         }
     }
 
-    // QUTE.javacc, line 89
+    // QUTE.javacc, line 90
     final public void Section() throws ParseException {
-        // QUTE.javacc, line 91
+        // QUTE.javacc, line 92
         Section node7=null;
         if (buildTree) {
             node7=new Section();
@@ -666,56 +690,54 @@ public class QUTEParser implements QUTEConstants {
         }
         boolean hitException7=false;
         try {
-            // QUTE.javacc, line 91
-            jj_consume_token(START_SECTION);
-            // QUTE.javacc, line 91
-            int int3=(jj_ntk==-1)?jj_ntk():
-            jj_ntk;
+            // QUTE.javacc, line 92
+            consumeToken(START_SECTION,false);
+            // QUTE.javacc, line 92
+            int int3=nextTokenKind();
+            ;
             if (int3==C_IDENTIFIER||int3==STRING_LITERAL||int3==NUMBER||int3==OPEN_PAREN) {
-                // QUTE.javacc, line 91
-                // QUTE.javacc, line 91
+                // QUTE.javacc, line 92
+                // QUTE.javacc, line 92
                 Expression();
             }
             else {
                 jj_la1[4]=jj_gen;
             }
-            // QUTE.javacc, line 93
-            switch((jj_ntk==-1)?jj_ntk():
-            jj_ntk) {
+            // QUTE.javacc, line 94
+            switch(nextTokenKind()) {
                 case CLOSE_EMPTY:
-                // QUTE.javacc, line 93
-                // QUTE.javacc, line 93
-                jj_consume_token(CLOSE_EMPTY);
+                // QUTE.javacc, line 94
+                // QUTE.javacc, line 94
+                consumeToken(CLOSE_EMPTY,false);
                 break;
                 case CLOSE_CURLY:
-                // QUTE.javacc, line 95
                 // QUTE.javacc, line 96
-                // QUTE.javacc, line 96
-                jj_consume_token(CLOSE_CURLY);
                 // QUTE.javacc, line 97
+                // QUTE.javacc, line 97
+                consumeToken(CLOSE_CURLY,false);
+                // QUTE.javacc, line 98
                 Block();
-                // QUTE.javacc, line 99
-                switch((jj_ntk==-1)?jj_ntk():
-                jj_ntk) {
+                // QUTE.javacc, line 100
+                switch(nextTokenKind()) {
                     case END_SECTION:
-                    // QUTE.javacc, line 99
-                    // QUTE.javacc, line 99
-                    jj_consume_token(END_SECTION);
+                    // QUTE.javacc, line 100
+                    // QUTE.javacc, line 100
+                    consumeToken(END_SECTION,false);
                     break;
                     case ABBREVIATED_END:
-                    // QUTE.javacc, line 99
-                    // QUTE.javacc, line 99
-                    jj_consume_token(ABBREVIATED_END);
+                    // QUTE.javacc, line 100
+                    // QUTE.javacc, line 100
+                    consumeToken(ABBREVIATED_END,false);
                     break;
                     default:
                     jj_la1[5]=jj_gen;
-                    jj_consume_token(-1);
+                    consumeToken(-1);
                     throw new ParseException();
                 }
                 break;
                 default:
                 jj_la1[6]=jj_gen;
-                jj_consume_token(-1);
+                consumeToken(-1);
                 throw new ParseException();
             }
         }
@@ -741,9 +763,9 @@ public class QUTEParser implements QUTEConstants {
         }
     }
 
-    // QUTE.javacc, line 105
+    // QUTE.javacc, line 106
     final public void Block() throws ParseException {
-        // QUTE.javacc, line 107
+        // QUTE.javacc, line 108
         Block node8=null;
         if (buildTree) {
             node8=new Block();
@@ -755,39 +777,38 @@ public class QUTEParser implements QUTEConstants {
         }
         boolean hitException8=false;
         try {
-            // QUTE.javacc, line 115
+            // QUTE.javacc, line 116
             label_2:
             while (true) {
-                // QUTE.javacc, line 108
-                switch((jj_ntk==-1)?jj_ntk():
-                jj_ntk) {
+                // QUTE.javacc, line 109
+                switch(nextTokenKind()) {
                     case TEXT:
-                    // QUTE.javacc, line 108
-                    // QUTE.javacc, line 108
-                    jj_consume_token(TEXT);
+                    // QUTE.javacc, line 109
+                    // QUTE.javacc, line 109
+                    consumeToken(TEXT,false);
                     break;
                     case OPEN_CURLY:
-                    // QUTE.javacc, line 110
-                    // QUTE.javacc, line 110
+                    // QUTE.javacc, line 111
+                    // QUTE.javacc, line 111
                     Interpolation();
                     break;
                     case IF:
-                    // QUTE.javacc, line 112
-                    // QUTE.javacc, line 112
+                    // QUTE.javacc, line 113
+                    // QUTE.javacc, line 113
                     IfBlock();
                     break;
                     case START_SECTION:
-                    // QUTE.javacc, line 114
-                    // QUTE.javacc, line 114
+                    // QUTE.javacc, line 115
+                    // QUTE.javacc, line 115
                     Section();
                     break;
                     default:
                     jj_la1[7]=jj_gen;
-                    jj_consume_token(-1);
+                    consumeToken(-1);
                     throw new ParseException();
                 }
-                int int4=(jj_ntk==-1)?jj_ntk():
-                jj_ntk;
+                int int4=nextTokenKind();
+                ;
                 if (!(int4==TEXT||int4==OPEN_CURLY||int4==IF||int4==START_SECTION)) {
                     jj_la1[8]=jj_gen;
                     break label_2;
@@ -816,9 +837,9 @@ public class QUTEParser implements QUTEConstants {
         }
     }
 
-    // QUTE.javacc, line 119
+    // QUTE.javacc, line 120
     final public void Root() throws ParseException {
-        // QUTE.javacc, line 121
+        // QUTE.javacc, line 122
         Root node9=null;
         if (buildTree) {
             node9=new Root();
@@ -830,19 +851,19 @@ public class QUTEParser implements QUTEConstants {
         }
         boolean hitException9=false;
         try {
-            // QUTE.javacc, line 121
-            int int5=(jj_ntk==-1)?jj_ntk():
-            jj_ntk;
+            // QUTE.javacc, line 122
+            int int5=nextTokenKind();
+            ;
             if (int5==TEXT||int5==OPEN_CURLY||int5==IF||int5==START_SECTION) {
-                // QUTE.javacc, line 121
-                // QUTE.javacc, line 121
+                // QUTE.javacc, line 122
+                // QUTE.javacc, line 122
                 Block();
             }
             else {
                 jj_la1[9]=jj_gen;
             }
-            // QUTE.javacc, line 122
-            jj_consume_token(0);
+            // QUTE.javacc, line 123
+            consumeToken(0,false);
         }
         catch(Exception e9) {
             hitException9=false;

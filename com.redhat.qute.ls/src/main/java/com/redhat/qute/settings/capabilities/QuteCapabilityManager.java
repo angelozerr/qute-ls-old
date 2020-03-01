@@ -7,9 +7,12 @@
  *******************************************************************************/
 package com.redhat.qute.settings.capabilities;
 
+import static com.redhat.qute.settings.capabilities.ServerCapabilitiesConstants.COMPLETION_ID;
+import static com.redhat.qute.settings.capabilities.ServerCapabilitiesConstants.DEFAULT_COMPLETION_OPTIONS;
 import static com.redhat.qute.settings.capabilities.ServerCapabilitiesConstants.DOCUMENT_DEFINITION_ID;
 import static com.redhat.qute.settings.capabilities.ServerCapabilitiesConstants.DOCUMENT_HIGHLIGHT_ID;
 import static com.redhat.qute.settings.capabilities.ServerCapabilitiesConstants.DOCUMENT_SYMBOL_ID;
+import static com.redhat.qute.settings.capabilities.ServerCapabilitiesConstants.TEXT_DOCUMENT_COMPLETION;
 import static com.redhat.qute.settings.capabilities.ServerCapabilitiesConstants.TEXT_DOCUMENT_DEFINITION;
 import static com.redhat.qute.settings.capabilities.ServerCapabilitiesConstants.TEXT_DOCUMENT_DOCUMENT_SYMBOL;
 import static com.redhat.qute.settings.capabilities.ServerCapabilitiesConstants.TEXT_DOCUMENT_HIGHLIGHT;
@@ -53,7 +56,9 @@ public class QuteCapabilityManager {
 		if (this.getClientCapabilities().isDocumentSymbolDynamicRegistrationSupported()) {
 			registerCapability(DOCUMENT_SYMBOL_ID, TEXT_DOCUMENT_DOCUMENT_SYMBOL);
 		}
-
+		if (this.getClientCapabilities().isCompletionDynamicRegistrationSupported()) {
+			registerCapability(COMPLETION_ID, TEXT_DOCUMENT_COMPLETION, DEFAULT_COMPLETION_OPTIONS);
+		}
 		/*
 		 * if (this.getClientCapabilities().isCodeActionDynamicRegistered()) {
 		 * registerCapability(CODE_ACTION_ID, TEXT_DOCUMENT_CODE_ACTION); } if

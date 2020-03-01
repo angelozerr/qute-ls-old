@@ -119,7 +119,7 @@ public class SimpleCharStream {
     }
 
     /**
-     * @Deprecated 
+     * @deprecated 
      * @see #getEndColumn
      */
     public int getColumn() {
@@ -127,7 +127,7 @@ public class SimpleCharStream {
     }
 
     /**
-     * @Deprecated
+     * @deprecated
      * @see #getEndLine
      */
     public int getLine() {

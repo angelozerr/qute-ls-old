@@ -5,6 +5,15 @@ package qute;
  * Describes the input token stream.
  */
 public class Token implements QUTEConstants,Node {
+    boolean virtual;
+    public void setVirtual(boolean virtual) {
+        this.virtual=virtual;
+    }
+
+    public boolean isDirty() {
+        return this.virtual;
+    }
+
     private String inputSource="";
     /**
      * An integer that describes the kind of this token.  This numbering
@@ -45,9 +54,6 @@ public class Token implements QUTEConstants,Node {
      */
     Token specialToken;
     private boolean unparsed;
-    /**
-     * No-argument constructor
-     */
     public Token() {
     }
 
@@ -82,6 +88,9 @@ public class Token implements QUTEConstants,Node {
     }
 
     public String getNormalizedText() {
+        if (virtual) {
+            return"Virtual Token";
+        }
         return image;
     }
 
@@ -177,6 +186,18 @@ public class Token implements QUTEConstants,Node {
 
     private Node parent;
     private java.util.Map<String,Object>attributes;
+    @Override public boolean hasChildNodes() {
+        return getChildCount()>0;
+    }
+
+    @Override public Node getFirstChild() {
+        return Nodes.getFirstChild(this);
+    }
+
+    @Override public Node getLastChild() {
+        return Nodes.getLastChild(this);
+    }
+
     public void setChild(int i,Node n) {
         throw new UnsupportedOperationException();
     }
@@ -243,6 +264,10 @@ public class Token implements QUTEConstants,Node {
     public java.util.Set<String>getAttributeNames() {
         if (attributes==null) return java.util.Collections.emptySet();
         return attributes.keySet();
+    }
+
+    @Override public Node findNodeAt(int line,int column) {
+        return Nodes.findNodeAt(this,line,column);
     }
 
 }

@@ -31,7 +31,7 @@ public class LexicalException extends RuntimeException {
     * Replaces unprintable characters by their escaped (or unicode escaped)
     * equivalents in the given string
     */
-    protected static final String addEscapes(String str) {
+    static public String addEscapes(String str) {
         StringBuilder retval=new StringBuilder();
         char ch;
         for(int i=0; 
@@ -114,9 +114,6 @@ public class LexicalException extends RuntimeException {
     /*
     * Constructors of various flavors follow.
     */
-    public LexicalException() {
-    }
-
     public LexicalException(String message,int reason) {
         super(message);
         errorCode=reason;

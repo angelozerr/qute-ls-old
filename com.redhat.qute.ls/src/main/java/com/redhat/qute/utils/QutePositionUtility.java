@@ -5,7 +5,6 @@ import org.eclipse.lsp4j.LocationLink;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 
-import com.redhat.qute.parser.TempNodes;
 import com.redhat.qute.parser.Template;
 
 import qute.Node;
@@ -23,6 +22,10 @@ public class QutePositionUtility {
 	}
 
 	public static Node findNodeAt(Template template, Position position) {
-		return TempNodes.findNodeAt(template.getRoot(), position.getLine() + 1, position.getCharacter() + 1);
+		Node root = template.getRoot();
+		if (root == null) {
+			return null;
+		}
+		return root.findNodeAt(position.getLine() + 1, position.getCharacter() + 1);
 	}
 }

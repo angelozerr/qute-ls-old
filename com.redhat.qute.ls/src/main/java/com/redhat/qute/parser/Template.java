@@ -2,6 +2,8 @@ package com.redhat.qute.parser;
 
 import java.util.List;
 
+import org.eclipse.lsp4j.Position;
+
 import qute.Node;
 
 public class Template {
@@ -9,7 +11,7 @@ public class Template {
 	private final String templateId;
 
 	private Node root;
-	
+
 	private List<Problem> problems;
 
 	public Template(String templateId) {
@@ -27,12 +29,13 @@ public class Template {
 	public List<Problem> getProblems() {
 		return problems;
 	}
-	
+
 	public void setRoot(Node root) {
 		this.root = root;
 	}
-	
+
 	public Node getRoot() {
 		return root;
 	}
+
 }
