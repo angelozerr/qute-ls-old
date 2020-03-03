@@ -11,6 +11,9 @@
 *******************************************************************************/
 package com.redhat.qute.services;
 
+import static com.redhat.qute.utils.QutePositionUtility.isEndSection;
+import static com.redhat.qute.utils.QutePositionUtility.isStartSection;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -27,11 +30,7 @@ import com.redhat.qute.ls.commons.BadLocationException;
 import com.redhat.qute.parser.Template;
 import com.redhat.qute.utils.QutePositionUtility;
 
-import qute.ENDIF;
-import qute.END_SECTION;
-import qute.IF;
 import qute.Node;
-import qute.START_SECTION;
 
 class QuteHighlighting {
 
@@ -57,11 +56,11 @@ class QuteHighlighting {
 			CancelChecker cancelChecker) throws BadLocationException {
 		Node originNode = null;
 		Node targetNode = null;
-		if (node instanceof START_SECTION || node instanceof IF) {
+		if (isStartSection(node)) {
 			originNode = node;
 			Node section = originNode.getParent();
 			targetNode = section.getChild(section.getChildCount() - 1);
-		} else if (node instanceof END_SECTION || node instanceof ENDIF) {
+		} else if (isEndSection(node)) {
 			originNode = node;
 			Node section = originNode.getParent();
 			targetNode = section.getChild(0);

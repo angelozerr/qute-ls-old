@@ -7,7 +7,15 @@ import org.eclipse.lsp4j.Range;
 
 import com.redhat.qute.parser.Template;
 
+import qute.EACH;
+import qute.ENDEACH;
+import qute.ENDFOR;
+import qute.ENDIF;
+import qute.END_SECTION;
+import qute.FOR;
+import qute.IF;
 import qute.Node;
+import qute.START_SECTION;
 
 public class QutePositionUtility {
 
@@ -28,4 +36,13 @@ public class QutePositionUtility {
 		}
 		return root.findNodeAt(position.getLine() + 1, position.getCharacter() + 1);
 	}
+	
+	public static boolean isEndSection(Node node) {
+		return node instanceof END_SECTION || node instanceof ENDIF|| node instanceof ENDFOR|| node instanceof ENDEACH;
+	}
+
+	public static boolean isStartSection(Node node) {
+		return node instanceof START_SECTION || node instanceof IF || node instanceof FOR || node instanceof EACH;
+	}
+
 }

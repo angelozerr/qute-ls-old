@@ -28,8 +28,8 @@ import qute.Comment;
 import qute.IF;
 import qute.Interpolation;
 import qute.Node;
-import qute.Section;
 import qute.Text;
+import qute.UserSection;
 
 /**
  * Qute symbol provider.
@@ -85,7 +85,7 @@ class QuteSymbolsProvider {
 		if (node instanceof Comment) {
 			return SymbolKind.Struct;
 		}
-		if (node instanceof Section) {
+		if (node instanceof UserSection) {
 			return SymbolKind.Method;
 		}
 		if (node instanceof IF) {

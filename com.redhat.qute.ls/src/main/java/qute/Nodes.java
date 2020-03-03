@@ -335,6 +335,12 @@ abstract public class Nodes {
     }
 
     private static boolean isIncluded(int beginLine,int beginColumn,int endLine,int endColumn,int line,int column) {
+        if (beginLine==line&&beginColumn==column) {
+            return true;
+        }
+        if (endLine==line&&endColumn==column) {
+            return true;
+        }
         return!isAfter(beginLine,beginColumn,line,column)&&isAfter(endLine,endColumn,line,column);
     }
 

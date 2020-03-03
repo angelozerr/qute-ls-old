@@ -2,9 +2,5 @@
 package qute;
 
 @SuppressWarnings("unused")
-public class NumberLiteral extends Literal {
-    public NumberLiteral(int kind,String image) {
-        super(kind,image);
-    }
-
+public class NumberLiteral extends BaseNode {
 }

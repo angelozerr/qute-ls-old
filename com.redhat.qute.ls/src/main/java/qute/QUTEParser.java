@@ -206,22 +206,36 @@ public class QUTEParser implements QUTEConstants {
     }
 
     Token current_token;
+    private Token jj_scanpos,jj_lastpos;
+    private int jj_la;
+    /** Whether we are looking ahead. */
+    private boolean jj_lookingAhead=false;
+    private boolean jj_semLA;
     private int jj_gen;
-    final private int[] jj_la1=new int[10];
+    final private int[] jj_la1=new int[39];
     static private int[] jj_la1_0;
     static private int[] jj_la1_1;
+    static private int[] jj_la1_2;
     static {
         jj_la1_init_0();
         jj_la1_init_1();
+        jj_la1_init_2();
     }
     private static void jj_la1_init_0() {
-        jj_la1_0=new int[]{0x6110,0x1000000,0x2000000,0xc00000,0x6110,0x8800000,0x80000000,0x4380000,0x4380000,0x4380000};
+        jj_la1_0=new int[]{0x30,0x30,0xc0,0xc0,0xe00,0xe00,0xff000,0xff000,0x100000,0x600000,0x1800000,0x1800000,0xe4600000,0x600000,0x4000000,0xa000000,0xe0000000,0x800000,0xe4600000,0xe4600002,0x2,0x0,0x0,0xc0000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xe4600000,0x0,0x0,0x0,0x0,0x0};
     }
 
     private static void jj_la1_init_1() {
-        jj_la1_1=new int[]{0x0,0x0,0x0,0x0,0x0,0x0,0x1,0x0,0x0,0x0};
+        jj_la1_1=new int[]{0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x2008f,0x0,0x0,0x20000,0x2008f,0x80,0x2008f,0x2008f,0x0,0xc,0x3,0x0,0x5000000,0x2ac00000,0x11000000,0x40000000,0x80000000,0x1000000,0x1000000,0x1000000,0x1000000,0x2008f,0x1000000,0x0,0x2ac00000,0x2ac00000,0x2ac00000};
     }
 
+    private static void jj_la1_init_2() {
+        jj_la1_2=new int[]{0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x2aa,0x0,0x0,0x0,0x1,0x4,0x10,0x40,0x0,0x100,0x6000,0x2aa,0x2aa,0x2aa};
+    }
+
+    final private JJCalls[] jj_2_rtns=new JJCalls[4];
+    private boolean rescan=false;
+    private int jj_gc=0;
     public QUTEParser(java.io.InputStream stream) {
         this(new java.io.InputStreamReader(stream));
     }
@@ -231,8 +245,11 @@ public class QUTEParser implements QUTEConstants {
         token_source=new QUTELexer(inputStream);
         current_token=new Token();
         for(int i=0; 
-        i<10; 
+        i<39; 
         i++) jj_la1[i]=-1; 
+        for(int i=0; 
+        i<jj_2_rtns.length; 
+        i++) jj_2_rtns[i]=new JJCalls(); 
     }
 
     /** Constructor with generated Token Manager. */
@@ -240,8 +257,11 @@ public class QUTEParser implements QUTEConstants {
         token_source=tm;
         current_token=new Token();
         for(int i=0; 
-        i<10; 
+        i<39; 
         i++) jj_la1[i]=-1; 
+        for(int i=0; 
+        i<jj_2_rtns.length; 
+        i++) jj_2_rtns[i]=new JJCalls(); 
     }
 
     private Token consumeToken(int kind) throws ParseException {
@@ -270,10 +290,53 @@ public class QUTEParser implements QUTEConstants {
             }
         }
         jj_gen++;
+        if (++jj_gc>100) {
+            jj_gc=0;
+            for(int i=0; 
+            i<jj_2_rtns.length; 
+            i++) {
+                JJCalls c=jj_2_rtns[i];
+                while (c!=null) {
+                    if (c.gen<jj_gen) c.first=null;
+                    c=c.next;
+                }
+            }
+        }
         if (buildTree&&tokensAreNodes) {
             pushNode(current_token);
         }
         return current_token;
+    }
+
+    @SuppressWarnings("serial")
+    static private final class LookaheadSuccess extends java.lang.Error {
+    }
+    final private LookaheadSuccess ls=new LookaheadSuccess();
+    private boolean jj_scan_token(int kind) {
+        if (jj_scanpos==jj_lastpos) {
+            jj_la--;
+            if (jj_scanpos.next==null) {
+                jj_lastpos=jj_scanpos=jj_scanpos.next=token_source.getNextToken();
+            }
+            else {
+                jj_lastpos=jj_scanpos=jj_scanpos.next;
+            }
+        }
+        else {
+            jj_scanpos=jj_scanpos.next;
+        }
+        if (rescan) {
+            int i=0;
+            Token tok=current_token;
+            while (tok!=null&&tok!=jj_scanpos) {
+                i++;
+                tok=tok.next;
+            }
+            if (tok!=null) jj_add_error_token(kind,i);
+        }
+        if (jj_scanpos.kind!=kind) return true;
+        if (jj_la==0&&jj_scanpos==jj_lastpos) throw ls;
+        return false;
     }
 
     /** Get the next Token. */
@@ -286,7 +349,8 @@ public class QUTEParser implements QUTEConstants {
 
     /** Get the specific Token. */
     final public Token getToken(int index) {
-        Token t=current_token;
+        Token t=jj_lookingAhead?jj_scanpos:
+        current_token;
         for(int i=0; 
         i<index; 
         i++) {
@@ -306,15 +370,50 @@ public class QUTEParser implements QUTEConstants {
     private java.util.ArrayList<int[]>jj_expentries=new java.util.ArrayList<int[]>();
     private int[] jj_expentry;
     private int jj_kind=-1;
+    private int[] jj_lasttokens=new int[100];
+    private int endPosition;
+    private void jj_add_error_token(int kind,int pos) {
+        if (pos>=100) return;
+        if (pos==endPosition+1) {
+            jj_lasttokens[endPosition++]=kind;
+        }
+        else if (endPosition!=0) {
+            jj_expentry=new int[endPosition];
+            for(int i=0; 
+            i<endPosition; 
+            i++) {
+                jj_expentry[i]=jj_lasttokens[i];
+            }
+            jj_entries_loop:
+            for(java.util.Iterator<int[]>it=jj_expentries.iterator(); 
+            it.hasNext(); 
+            ) {
+                int[] oldentry=(int[])(it.next());
+                if (oldentry.length==jj_expentry.length) {
+                    for(int i=0; 
+                    i<jj_expentry.length; 
+                    i++) {
+                        if (oldentry[i]!=jj_expentry[i]) {
+                            continue jj_entries_loop;
+                        }
+                    }
+                    jj_expentries.add(jj_expentry);
+                    break jj_entries_loop;
+                }
+            }
+            if (pos!=0) jj_lasttokens[(endPosition=pos)-1]=kind;
+        }
+    }
+
     public ParseException generateParseException() {
         jj_expentries.clear();
-        boolean[] la1tokens=new boolean[33];
+        boolean[] la1tokens=new boolean[79];
         if (jj_kind>=0) {
             la1tokens[jj_kind]=true;
             jj_kind=-1;
         }
         for(int i=0; 
-        i<10; 
+        i<39; 
         i++) {
             if (jj_la1[i]==jj_gen) {
                 for(int j=0; 
@@ -326,11 +425,14 @@ public class QUTEParser implements QUTEConstants {
                     if ((jj_la1_1[i]&(1<<j))!=0) {
                         la1tokens[32+j]=true;
                     }
+                    if ((jj_la1_2[i]&(1<<j))!=0) {
+                        la1tokens[64+j]=true;
+                    }
                 }
             }
         }
         for(int i=0; 
-        i<33; 
+        i<79; 
         i++) {
             if (la1tokens[i]) {
                 jj_expentry=new int[1];
@@ -338,6 +440,9 @@ public class QUTEParser implements QUTEConstants {
                 jj_expentries.add(jj_expentry);
             }
         }
+        endPosition=0;
+        rescanToken();
+        jj_add_error_token(0,0);
         int[][] exptokseq=new int[jj_expentries.size()][];
         for(int i=0; 
         i<jj_expentries.size(); 
@@ -355,9 +460,65 @@ public class QUTEParser implements QUTEConstants {
     final public void disable_tracing() {
     }
 
-    // QEL.javacc, line 49
+    private void rescanToken() {
+        rescan=true;
+        for(int i=0; 
+        i<4; 
+        i++) {
+            try {
+                JJCalls p=jj_2_rtns[i];
+                do {
+                    if (p.gen>jj_gen) {
+                        jj_la=p.arg;
+                        jj_lastpos=jj_scanpos=p.first;
+                        switch(i) {
+                            case 0:
+                            jj_3_1();
+                            break;
+                            case 1:
+                            jj_3_2();
+                            break;
+                            case 2:
+                            jj_3_3();
+                            break;
+                            case 3:
+                            jj_3_4();
+                            break;
+                        }
+                    }
+                    p=p.next;
+                }
+                while (p!=null);
+            }
+            catch(LookaheadSuccess ls) {
+            }
+        }
+        rescan=false;
+    }
+
+    private void jj_save(int index,int xla) {
+        JJCalls p=jj_2_rtns[index];
+        while (p.gen>jj_gen) {
+            if (p.next==null) {
+                p=p.next=new JJCalls();
+                break;
+            }
+            p=p.next;
+        }
+        p.gen=jj_gen+xla-jj_la;
+        p.first=current_token;
+        p.arg=xla;
+    }
+
+    static final class JJCalls {
+        int gen;
+        Token first;
+        int arg;
+        JJCalls next;
+    }
+    // QEL.javacc, line 130
     final public void Expression() throws ParseException {
-        // QEL.javacc, line 51
+        // QEL.javacc, line 132
         Expression node1=null;
         if (buildTree) {
             node1=new Expression();
@@ -369,32 +530,8 @@ public class QUTEParser implements QUTEConstants {
         }
         boolean hitException1=false;
         try {
-            switch(nextTokenKind()) {
-                case C_IDENTIFIER:
-                // QEL.javacc, line 51
-                // QEL.javacc, line 51
-                consumeToken(C_IDENTIFIER,false);
-                break;
-                case STRING_LITERAL:
-                // QEL.javacc, line 53
-                // QEL.javacc, line 53
-                consumeToken(STRING_LITERAL,false);
-                break;
-                case NUMBER:
-                // QEL.javacc, line 55
-                // QEL.javacc, line 55
-                consumeToken(NUMBER,false);
-                break;
-                case OPEN_PAREN:
-                // QEL.javacc, line 57
-                // QEL.javacc, line 57
-                Parenthesis();
-                break;
-                default:
-                jj_la1[0]=jj_gen;
-                consumeToken(-1);
-                throw new ParseException();
-            }
+            // QEL.javacc, line 132
+            OrExpression();
         }
         catch(Exception e1) {
             hitException1=false;
@@ -418,12 +555,12 @@ public class QUTEParser implements QUTEConstants {
         }
     }
 
-    // QEL.javacc, line 60
-    final public void Parenthesis() throws ParseException {
-        // QEL.javacc, line 62
-        Parenthesis node2=null;
+    // QEL.javacc, line 135
+    final public void OrExpression() throws ParseException {
+        // QEL.javacc, line 137
+        OrExpression node2=null;
         if (buildTree) {
-            node2=new Parenthesis();
+            node2=new OrExpression();
             Token jjtStartToken=getToken(1);
             node2.setBeginLine(jjtStartToken.beginLine);
             node2.setBeginColumn(jjtStartToken.beginColumn);
@@ -432,12 +569,38 @@ public class QUTEParser implements QUTEConstants {
         }
         boolean hitException2=false;
         try {
-            // QEL.javacc, line 62
-            consumeToken(OPEN_PAREN,false);
-            // QEL.javacc, line 63
-            Expression();
-            // QEL.javacc, line 64
-            consumeToken(CLOSE_PAREN,true);
+            // QEL.javacc, line 137
+            AndExpression();
+            // QEL.javacc, line 140
+            label_1:
+            while (true) {
+                int int1=nextTokenKind();
+                ;
+                if (!(int1==OR||int1==OR2)) {
+                    jj_la1[0]=jj_gen;
+                    break label_1;
+                }
+                // QEL.javacc, line 139
+                // QEL.javacc, line 139
+                switch(nextTokenKind()) {
+                    case OR:
+                    // QEL.javacc, line 139
+                    // QEL.javacc, line 139
+                    consumeToken(OR,false);
+                    break;
+                    case OR2:
+                    // QEL.javacc, line 139
+                    // QEL.javacc, line 139
+                    consumeToken(OR2,false);
+                    break;
+                    default:
+                    jj_la1[1]=jj_gen;
+                    consumeToken(-1);
+                    throw new ParseException();
+                }
+                // QEL.javacc, line 139
+                AndExpression();
+            }
         }
         catch(Exception e2) {
             hitException2=false;
@@ -461,12 +624,12 @@ public class QUTEParser implements QUTEConstants {
         }
     }
 
-    // QUTE.javacc, line 60
-    final public void Interpolation() throws ParseException {
-        // QUTE.javacc, line 62
-        Interpolation node3=null;
+    // QEL.javacc, line 143
+    final public void AndExpression() throws ParseException {
+        // QEL.javacc, line 145
+        AndExpression node3=null;
         if (buildTree) {
-            node3=new Interpolation();
+            node3=new AndExpression();
             Token jjtStartToken=getToken(1);
             node3.setBeginLine(jjtStartToken.beginLine);
             node3.setBeginColumn(jjtStartToken.beginColumn);
@@ -475,12 +638,38 @@ public class QUTEParser implements QUTEConstants {
         }
         boolean hitException3=false;
         try {
-            // QUTE.javacc, line 62
-            consumeToken(OPEN_CURLY,false);
-            // QUTE.javacc, line 62
-            Expression();
-            // QUTE.javacc, line 62
-            consumeToken(CLOSE_CURLY,false);
+            // QEL.javacc, line 145
+            EqualityExpression();
+            // QEL.javacc, line 148
+            label_2:
+            while (true) {
+                int int2=nextTokenKind();
+                ;
+                if (!(int2==AND||int2==AND2)) {
+                    jj_la1[2]=jj_gen;
+                    break label_2;
+                }
+                // QEL.javacc, line 147
+                // QEL.javacc, line 147
+                switch(nextTokenKind()) {
+                    case AND:
+                    // QEL.javacc, line 147
+                    // QEL.javacc, line 147
+                    consumeToken(AND,false);
+                    break;
+                    case AND2:
+                    // QEL.javacc, line 147
+                    // QEL.javacc, line 147
+                    consumeToken(AND2,false);
+                    break;
+                    default:
+                    jj_la1[3]=jj_gen;
+                    consumeToken(-1);
+                    throw new ParseException();
+                }
+                // QEL.javacc, line 147
+                EqualityExpression();
+            }
         }
         catch(Exception e3) {
             hitException3=false;
@@ -504,12 +693,12 @@ public class QUTEParser implements QUTEConstants {
         }
     }
 
-    // QUTE.javacc, line 65
-    final public void IfBlock() throws ParseException {
-        // QUTE.javacc, line 67
-        IfBlock node4=null;
+    // QEL.javacc, line 151
+    final public void EqualityExpression() throws ParseException {
+        // QEL.javacc, line 153
+        EqualityExpression node4=null;
         if (buildTree) {
-            node4=new IfBlock();
+            node4=new EqualityExpression();
             Token jjtStartToken=getToken(1);
             node4.setBeginLine(jjtStartToken.beginLine);
             node4.setBeginColumn(jjtStartToken.beginColumn);
@@ -518,54 +707,40 @@ public class QUTEParser implements QUTEConstants {
         }
         boolean hitException4=false;
         try {
-            // QUTE.javacc, line 67
-            consumeToken(IF,false);
-            // QUTE.javacc, line 68
-            Expression();
-            // QUTE.javacc, line 69
-            consumeToken(CLOSE_CURLY,false);
-            // QUTE.javacc, line 70
-            Block();
-            // QUTE.javacc, line 71
-            label_1:
-            while (true) {
-                int int1=nextTokenKind();
-                ;
-                if (!(int1==ELSEIF)) {
-                    jj_la1[1]=jj_gen;
-                    break label_1;
-                }
-                // QUTE.javacc, line 71
-                // QUTE.javacc, line 71
-                ElseIfBlock();
-            }
-            // QUTE.javacc, line 72
-            int int2=nextTokenKind();
+            // QEL.javacc, line 153
+            RelationalExpression();
+            // QEL.javacc, line 154
+            int int3=nextTokenKind();
             ;
-            if (int2==ELSE) {
-                // QUTE.javacc, line 72
-                // QUTE.javacc, line 72
-                ElseBlock();
+            if (int3==EQUALS||int3==EQUALS2||int3==EQUALS3) {
+                // QEL.javacc, line 155
+                // QEL.javacc, line 155
+                switch(nextTokenKind()) {
+                    case EQUALS:
+                    // QEL.javacc, line 155
+                    // QEL.javacc, line 155
+                    consumeToken(EQUALS,false);
+                    break;
+                    case EQUALS2:
+                    // QEL.javacc, line 155
+                    // QEL.javacc, line 155
+                    consumeToken(EQUALS2,false);
+                    break;
+                    case EQUALS3:
+                    // QEL.javacc, line 155
+                    // QEL.javacc, line 155
+                    consumeToken(EQUALS3,false);
+                    break;
+                    default:
+                    jj_la1[4]=jj_gen;
+                    consumeToken(-1);
+                    throw new ParseException();
+                }
+                // QEL.javacc, line 156
+                RelationalExpression();
             }
             else {
-                jj_la1[2]=jj_gen;
-            }
-            // QUTE.javacc, line 73
-            switch(nextTokenKind()) {
-                case ENDIF:
-                // QUTE.javacc, line 73
-                // QUTE.javacc, line 73
-                consumeToken(ENDIF,false);
-                break;
-                case ABBREVIATED_END:
-                // QUTE.javacc, line 73
-                // QUTE.javacc, line 73
-                consumeToken(ABBREVIATED_END,false);
-                break;
-                default:
-                jj_la1[3]=jj_gen;
-                consumeToken(-1);
-                throw new ParseException();
+                jj_la1[5]=jj_gen;
             }
         }
         catch(Exception e4) {
@@ -590,12 +765,12 @@ public class QUTEParser implements QUTEConstants {
         }
     }
 
-    // QUTE.javacc, line 76
-    final public void ElseIfBlock() throws ParseException {
-        // QUTE.javacc, line 78
-        ElseIfBlock node5=null;
+    // QEL.javacc, line 160
+    final public void RelationalExpression() throws ParseException {
+        // QEL.javacc, line 162
+        RelationalExpression node5=null;
         if (buildTree) {
-            node5=new ElseIfBlock();
+            node5=new RelationalExpression();
             Token jjtStartToken=getToken(1);
             node5.setBeginLine(jjtStartToken.beginLine);
             node5.setBeginColumn(jjtStartToken.beginColumn);
@@ -604,14 +779,66 @@ public class QUTEParser implements QUTEConstants {
         }
         boolean hitException5=false;
         try {
-            // QUTE.javacc, line 78
-            consumeToken(ELSEIF,false);
-            // QUTE.javacc, line 79
-            Expression();
-            // QUTE.javacc, line 80
-            consumeToken(CLOSE_CURLY,false);
-            // QUTE.javacc, line 81
-            Block();
+            // QEL.javacc, line 162
+            RangeExpression();
+            // QEL.javacc, line 163
+            int int4=nextTokenKind();
+            ;
+            if (int4==GT||int4==ALT_GT||int4==GE||int4==ALT_GE||int4==LT||int4==ALT_LT||int4==LE||int4==ALT_LE) {
+                // QEL.javacc, line 164
+                // QEL.javacc, line 164
+                switch(nextTokenKind()) {
+                    case GT:
+                    // QEL.javacc, line 164
+                    // QEL.javacc, line 164
+                    consumeToken(GT,false);
+                    break;
+                    case GE:
+                    // QEL.javacc, line 164
+                    // QEL.javacc, line 164
+                    consumeToken(GE,false);
+                    break;
+                    case LT:
+                    // QEL.javacc, line 164
+                    // QEL.javacc, line 164
+                    consumeToken(LT,false);
+                    break;
+                    case LE:
+                    // QEL.javacc, line 164
+                    // QEL.javacc, line 164
+                    consumeToken(LE,false);
+                    break;
+                    case ALT_GT:
+                    // QEL.javacc, line 164
+                    // QEL.javacc, line 164
+                    consumeToken(ALT_GT,false);
+                    break;
+                    case ALT_GE:
+                    // QEL.javacc, line 164
+                    // QEL.javacc, line 164
+                    consumeToken(ALT_GE,false);
+                    break;
+                    case ALT_LE:
+                    // QEL.javacc, line 164
+                    // QEL.javacc, line 164
+                    consumeToken(ALT_LE,false);
+                    break;
+                    case ALT_LT:
+                    // QEL.javacc, line 164
+                    // QEL.javacc, line 164
+                    consumeToken(ALT_LT,false);
+                    break;
+                    default:
+                    jj_la1[6]=jj_gen;
+                    consumeToken(-1);
+                    throw new ParseException();
+                }
+                // QEL.javacc, line 165
+                RangeExpression();
+            }
+            else {
+                jj_la1[7]=jj_gen;
+            }
         }
         catch(Exception e5) {
             hitException5=false;
@@ -635,12 +862,12 @@ public class QUTEParser implements QUTEConstants {
         }
     }
 
-    // QUTE.javacc, line 84
-    final public void ElseBlock() throws ParseException {
-        // QUTE.javacc, line 86
-        ElseBlock node6=null;
+    // QEL.javacc, line 169
+    final public void RangeExpression() throws ParseException {
+        // QEL.javacc, line 171
+        RangeExpression node6=null;
         if (buildTree) {
-            node6=new ElseBlock();
+            node6=new RangeExpression();
             Token jjtStartToken=getToken(1);
             node6.setBeginLine(jjtStartToken.beginLine);
             node6.setBeginColumn(jjtStartToken.beginColumn);
@@ -649,10 +876,25 @@ public class QUTEParser implements QUTEConstants {
         }
         boolean hitException6=false;
         try {
-            // QUTE.javacc, line 86
-            consumeToken(ELSE,false);
-            // QUTE.javacc, line 87
-            Block();
+            // QEL.javacc, line 171
+            AdditiveExpression();
+            // QEL.javacc, line 172
+            int int5=nextTokenKind();
+            ;
+            if (int5==DOT_DOT) {
+                // QEL.javacc, line 173
+                // QEL.javacc, line 173
+                consumeToken(DOT_DOT,false);
+                // QEL.javacc, line 174
+                if (jj_2_1(2147483647)) {
+                    // QEL.javacc, line 175
+                    // QEL.javacc, line 176
+                    AdditiveExpression();
+                }
+            }
+            else {
+                jj_la1[8]=jj_gen;
+            }
         }
         catch(Exception e6) {
             hitException6=false;
@@ -676,12 +918,12 @@ public class QUTEParser implements QUTEConstants {
         }
     }
 
-    // QUTE.javacc, line 90
-    final public void Section() throws ParseException {
-        // QUTE.javacc, line 92
-        Section node7=null;
+    // QEL.javacc, line 181
+    final public void AdditiveExpression() throws ParseException {
+        // QEL.javacc, line 183
+        AdditiveExpression node7=null;
         if (buildTree) {
-            node7=new Section();
+            node7=new AdditiveExpression();
             Token jjtStartToken=getToken(1);
             node7.setBeginLine(jjtStartToken.beginLine);
             node7.setBeginColumn(jjtStartToken.beginColumn);
@@ -690,55 +932,34 @@ public class QUTEParser implements QUTEConstants {
         }
         boolean hitException7=false;
         try {
-            // QUTE.javacc, line 92
-            consumeToken(START_SECTION,false);
-            // QUTE.javacc, line 92
-            int int3=nextTokenKind();
-            ;
-            if (int3==C_IDENTIFIER||int3==STRING_LITERAL||int3==NUMBER||int3==OPEN_PAREN) {
-                // QUTE.javacc, line 92
-                // QUTE.javacc, line 92
-                Expression();
-            }
-            else {
-                jj_la1[4]=jj_gen;
-            }
-            // QUTE.javacc, line 94
-            switch(nextTokenKind()) {
-                case CLOSE_EMPTY:
-                // QUTE.javacc, line 94
-                // QUTE.javacc, line 94
-                consumeToken(CLOSE_EMPTY,false);
-                break;
-                case CLOSE_CURLY:
-                // QUTE.javacc, line 96
-                // QUTE.javacc, line 97
-                // QUTE.javacc, line 97
-                consumeToken(CLOSE_CURLY,false);
-                // QUTE.javacc, line 98
-                Block();
-                // QUTE.javacc, line 100
+            // QEL.javacc, line 183
+            MultiplicativeExpression();
+            // QEL.javacc, line 188
+            label_3:
+            while (true) {
+                if (!(jj_2_2(2147483647))) {
+                    break label_3;
+                }
+                // QEL.javacc, line 185
+                // QEL.javacc, line 186
                 switch(nextTokenKind()) {
-                    case END_SECTION:
-                    // QUTE.javacc, line 100
-                    // QUTE.javacc, line 100
-                    consumeToken(END_SECTION,false);
+                    case PLUS:
+                    // QEL.javacc, line 186
+                    // QEL.javacc, line 186
+                    consumeToken(PLUS,false);
                     break;
-                    case ABBREVIATED_END:
-                    // QUTE.javacc, line 100
-                    // QUTE.javacc, line 100
-                    consumeToken(ABBREVIATED_END,false);
+                    case MINUS:
+                    // QEL.javacc, line 186
+                    // QEL.javacc, line 186
+                    consumeToken(MINUS,false);
                     break;
                     default:
-                    jj_la1[5]=jj_gen;
+                    jj_la1[9]=jj_gen;
                     consumeToken(-1);
                     throw new ParseException();
                 }
-                break;
-                default:
-                jj_la1[6]=jj_gen;
-                consumeToken(-1);
-                throw new ParseException();
+                // QEL.javacc, line 187
+                MultiplicativeExpression();
             }
         }
         catch(Exception e7) {
@@ -763,12 +984,12 @@ public class QUTEParser implements QUTEConstants {
         }
     }
 
-    // QUTE.javacc, line 106
-    final public void Block() throws ParseException {
-        // QUTE.javacc, line 108
-        Block node8=null;
+    // QEL.javacc, line 191
+    final public void MultiplicativeExpression() throws ParseException {
+        // QEL.javacc, line 193
+        MultiplicativeExpression node8=null;
         if (buildTree) {
-            node8=new Block();
+            node8=new MultiplicativeExpression();
             Token jjtStartToken=getToken(1);
             node8.setBeginLine(jjtStartToken.beginLine);
             node8.setBeginColumn(jjtStartToken.beginColumn);
@@ -777,42 +998,37 @@ public class QUTEParser implements QUTEConstants {
         }
         boolean hitException8=false;
         try {
-            // QUTE.javacc, line 116
-            label_2:
+            // QEL.javacc, line 193
+            UnaryExpression();
+            // QEL.javacc, line 197
+            label_4:
             while (true) {
-                // QUTE.javacc, line 109
+                int int6=nextTokenKind();
+                ;
+                if (!(int6==TIMES||int6==DIVIDE)) {
+                    jj_la1[10]=jj_gen;
+                    break label_4;
+                }
+                // QEL.javacc, line 195
+                // QEL.javacc, line 195
                 switch(nextTokenKind()) {
-                    case TEXT:
-                    // QUTE.javacc, line 109
-                    // QUTE.javacc, line 109
-                    consumeToken(TEXT,false);
+                    case TIMES:
+                    // QEL.javacc, line 195
+                    // QEL.javacc, line 195
+                    consumeToken(TIMES,false);
                     break;
-                    case OPEN_CURLY:
-                    // QUTE.javacc, line 111
-                    // QUTE.javacc, line 111
-                    Interpolation();
-                    break;
-                    case IF:
-                    // QUTE.javacc, line 113
-                    // QUTE.javacc, line 113
-                    IfBlock();
-                    break;
-                    case START_SECTION:
-                    // QUTE.javacc, line 115
-                    // QUTE.javacc, line 115
-                    Section();
+                    case DIVIDE:
+                    // QEL.javacc, line 195
+                    // QEL.javacc, line 195
+                    consumeToken(DIVIDE,false);
                     break;
                     default:
-                    jj_la1[7]=jj_gen;
+                    jj_la1[11]=jj_gen;
                     consumeToken(-1);
                     throw new ParseException();
                 }
-                int int4=nextTokenKind();
-                ;
-                if (!(int4==TEXT||int4==OPEN_CURLY||int4==IF||int4==START_SECTION)) {
-                    jj_la1[8]=jj_gen;
-                    break label_2;
-                }
+                // QEL.javacc, line 196
+                UnaryExpression();
             }
         }
         catch(Exception e8) {
@@ -837,12 +1053,47 @@ public class QUTEParser implements QUTEConstants {
         }
     }
 
-    // QUTE.javacc, line 120
-    final public void Root() throws ParseException {
-        // QUTE.javacc, line 122
-        Root node9=null;
+    // QEL.javacc, line 200
+    final public void UnaryExpression() throws ParseException {
+        // QEL.javacc, line 202
+        switch(nextTokenKind()) {
+            case PLUS:
+            case MINUS:
+            // QEL.javacc, line 202
+            // QEL.javacc, line 202
+            UnaryPlusMinusExpression();
+            break;
+            case EXCLAM:
+            // QEL.javacc, line 204
+            // QEL.javacc, line 204
+            NotExpression();
+            break;
+            case NULL:
+            case TRUE:
+            case FALSE:
+            case INTEGER:
+            case DECIMAL:
+            case STRING_LITERAL:
+            case RAW_STRING:
+            case C_IDENTIFIER:
+            case OPEN_PAREN:
+            // QEL.javacc, line 206
+            // QEL.javacc, line 206
+            DefaultToExpression();
+            break;
+            default:
+            jj_la1[12]=jj_gen;
+            consumeToken(-1);
+            throw new ParseException();
+        }
+    }
+
+    // QEL.javacc, line 209
+    final public void UnaryPlusMinusExpression() throws ParseException {
+        // QEL.javacc, line 211
+        UnaryPlusMinusExpression node9=null;
         if (buildTree) {
-            node9=new Root();
+            node9=new UnaryPlusMinusExpression();
             Token jjtStartToken=getToken(1);
             node9.setBeginLine(jjtStartToken.beginLine);
             node9.setBeginColumn(jjtStartToken.beginColumn);
@@ -851,19 +1102,25 @@ public class QUTEParser implements QUTEConstants {
         }
         boolean hitException9=false;
         try {
-            // QUTE.javacc, line 122
-            int int5=nextTokenKind();
-            ;
-            if (int5==TEXT||int5==OPEN_CURLY||int5==IF||int5==START_SECTION) {
-                // QUTE.javacc, line 122
-                // QUTE.javacc, line 122
-                Block();
+            // QEL.javacc, line 211
+            switch(nextTokenKind()) {
+                case PLUS:
+                // QEL.javacc, line 211
+                // QEL.javacc, line 211
+                consumeToken(PLUS,false);
+                break;
+                case MINUS:
+                // QEL.javacc, line 211
+                // QEL.javacc, line 211
+                consumeToken(MINUS,false);
+                break;
+                default:
+                jj_la1[13]=jj_gen;
+                consumeToken(-1);
+                throw new ParseException();
             }
-            else {
-                jj_la1[9]=jj_gen;
-            }
-            // QUTE.javacc, line 123
-            consumeToken(0,false);
+            // QEL.javacc, line 211
+            DefaultToExpression();
         }
         catch(Exception e9) {
             hitException9=false;
@@ -885,6 +1142,1959 @@ public class QUTEParser implements QUTEConstants {
                 }
             }
         }
+    }
+
+    // QEL.javacc, line 214
+    final public void NotExpression() throws ParseException {
+        // QEL.javacc, line 216
+        NotExpression node10=null;
+        if (buildTree) {
+            node10=new NotExpression();
+            Token jjtStartToken=getToken(1);
+            node10.setBeginLine(jjtStartToken.beginLine);
+            node10.setBeginColumn(jjtStartToken.beginColumn);
+            node10.setInputSource(this.getInputSource());
+            openNodeScope(node10);
+        }
+        boolean hitException10=false;
+        try {
+            // QEL.javacc, line 216
+            consumeToken(EXCLAM,false);
+            // QEL.javacc, line 217
+            DefaultToExpression();
+        }
+        catch(Exception e10) {
+            hitException10=false;
+            if (e10 instanceof ParseException) throw(ParseException) e10;
+            if (e10 instanceof RuntimeException) throw(RuntimeException) e10;
+            throw new RuntimeException(e10);
+        }
+        finally {
+            if (buildTree) {
+                if (!hitException10) {
+                    closeNodeScope(node10,nodeArity()>1);
+                    Token jjtEndToken=getToken(0);
+                    node10.setEndLine(jjtEndToken.endLine);
+                    node10.setEndColumn(jjtEndToken.endColumn);
+                }
+                else {
+                    clearNodeScope();
+                    mark=marks.remove(marks.size()-1);
+                }
+            }
+        }
+    }
+
+    // QEL.javacc, line 220
+    final public void DefaultToExpression() throws ParseException {
+        // QEL.javacc, line 222
+        DefaultToExpression node11=null;
+        if (buildTree) {
+            node11=new DefaultToExpression();
+            Token jjtStartToken=getToken(1);
+            node11.setBeginLine(jjtStartToken.beginLine);
+            node11.setBeginColumn(jjtStartToken.beginColumn);
+            node11.setInputSource(this.getInputSource());
+            openNodeScope(node11);
+        }
+        boolean hitException11=false;
+        try {
+            // QEL.javacc, line 222
+            PrimaryExpression();
+            // QEL.javacc, line 226
+            label_5:
+            while (true) {
+                if (!(jj_2_3(2147483647)&&(getToken(2).kind!=C_IDENTIFIER||getToken(3).kind!=SIMPLE_EQUALS))) {
+                    break label_5;
+                }
+                // QEL.javacc, line 224
+                // QEL.javacc, line 225
+                consumeToken(EXCLAM,false);
+                // QEL.javacc, line 225
+                PrimaryExpression();
+            }
+            // QEL.javacc, line 227
+            int int7=nextTokenKind();
+            ;
+            if (int7==EXCLAM) {
+                // QEL.javacc, line 228
+                // QEL.javacc, line 229
+                consumeToken(EXCLAM,false);
+            }
+            else {
+                jj_la1[14]=jj_gen;
+            }
+        }
+        catch(Exception e11) {
+            hitException11=false;
+            if (e11 instanceof ParseException) throw(ParseException) e11;
+            if (e11 instanceof RuntimeException) throw(RuntimeException) e11;
+            throw new RuntimeException(e11);
+        }
+        finally {
+            if (buildTree) {
+                if (!hitException11) {
+                    closeNodeScope(node11,nodeArity()>1);
+                    Token jjtEndToken=getToken(0);
+                    node11.setEndLine(jjtEndToken.endLine);
+                    node11.setEndColumn(jjtEndToken.endColumn);
+                }
+                else {
+                    clearNodeScope();
+                    mark=marks.remove(marks.size()-1);
+                }
+            }
+        }
+    }
+
+    // QEL.javacc, line 233
+    final public void PrimaryExpression() throws ParseException {
+        // QEL.javacc, line 235
+        PrimaryExpression node12=null;
+        if (buildTree) {
+            node12=new PrimaryExpression();
+            Token jjtStartToken=getToken(1);
+            node12.setBeginLine(jjtStartToken.beginLine);
+            node12.setBeginColumn(jjtStartToken.beginColumn);
+            node12.setInputSource(this.getInputSource());
+            openNodeScope(node12);
+        }
+        boolean hitException12=false;
+        try {
+            // QEL.javacc, line 235
+            BaseExpression();
+            // QEL.javacc, line 245
+            label_6:
+            while (true) {
+                if (!(jj_2_4(2147483647))) {
+                    break label_6;
+                }
+                // QEL.javacc, line 237
+                // QEL.javacc, line 239
+                switch(nextTokenKind()) {
+                    case DOT:
+                    // QEL.javacc, line 239
+                    // QEL.javacc, line 239
+                    DotKey();
+                    break;
+                    case OPEN_BRACKET:
+                    // QEL.javacc, line 241
+                    // QEL.javacc, line 241
+                    DynamicKey();
+                    break;
+                    case OPEN_PAREN:
+                    // QEL.javacc, line 243
+                    // QEL.javacc, line 243
+                    MethodInvoke();
+                    break;
+                    default:
+                    jj_la1[15]=jj_gen;
+                    consumeToken(-1);
+                    throw new ParseException();
+                }
+            }
+        }
+        catch(Exception e12) {
+            hitException12=false;
+            if (e12 instanceof ParseException) throw(ParseException) e12;
+            if (e12 instanceof RuntimeException) throw(RuntimeException) e12;
+            throw new RuntimeException(e12);
+        }
+        finally {
+            if (buildTree) {
+                if (!hitException12) {
+                    closeNodeScope(node12,nodeArity()>1);
+                    Token jjtEndToken=getToken(0);
+                    node12.setEndLine(jjtEndToken.endLine);
+                    node12.setEndColumn(jjtEndToken.endColumn);
+                }
+                else {
+                    clearNodeScope();
+                    mark=marks.remove(marks.size()-1);
+                }
+            }
+        }
+    }
+
+    // QEL.javacc, line 248
+    final public void BaseExpression() throws ParseException {
+        // QEL.javacc, line 250
+        BaseExpression node13=null;
+        if (buildTree) {
+            node13=new BaseExpression();
+            Token jjtStartToken=getToken(1);
+            node13.setBeginLine(jjtStartToken.beginLine);
+            node13.setBeginColumn(jjtStartToken.beginColumn);
+            node13.setInputSource(this.getInputSource());
+            openNodeScope(node13);
+        }
+        boolean hitException13=false;
+        try {
+            switch(nextTokenKind()) {
+                case C_IDENTIFIER:
+                // QEL.javacc, line 250
+                // QEL.javacc, line 250
+                consumeToken(C_IDENTIFIER,false);
+                break;
+                case INTEGER:
+                case DECIMAL:
+                // QEL.javacc, line 252
+                // QEL.javacc, line 252
+                NumberLiteral();
+                break;
+                case STRING_LITERAL:
+                case RAW_STRING:
+                // QEL.javacc, line 254
+                // QEL.javacc, line 254
+                StringLiteral();
+                break;
+                case TRUE:
+                case FALSE:
+                // QEL.javacc, line 256
+                // QEL.javacc, line 256
+                BooleanLiteral();
+                break;
+                case NULL:
+                // QEL.javacc, line 258
+                // QEL.javacc, line 258
+                NullLiteral();
+                break;
+                case OPEN_PAREN:
+                // QEL.javacc, line 260
+                // QEL.javacc, line 260
+                Parenthesis();
+                break;
+                default:
+                jj_la1[16]=jj_gen;
+                consumeToken(-1);
+                throw new ParseException();
+            }
+        }
+        catch(Exception e13) {
+            hitException13=false;
+            if (e13 instanceof ParseException) throw(ParseException) e13;
+            if (e13 instanceof RuntimeException) throw(RuntimeException) e13;
+            throw new RuntimeException(e13);
+        }
+        finally {
+            if (buildTree) {
+                if (!hitException13) {
+                    closeNodeScope(node13,nodeArity()>1);
+                    Token jjtEndToken=getToken(0);
+                    node13.setEndLine(jjtEndToken.endLine);
+                    node13.setEndColumn(jjtEndToken.endColumn);
+                }
+                else {
+                    clearNodeScope();
+                    mark=marks.remove(marks.size()-1);
+                }
+            }
+        }
+    }
+
+    // QEL.javacc, line 264
+    final public void DotKey() throws ParseException {
+        // QEL.javacc, line 266
+        // QEL.javacc, line 266
+        consumeToken(DOT,false);
+        // QEL.javacc, line 267
+        switch(nextTokenKind()) {
+            case C_IDENTIFIER:
+            // QEL.javacc, line 267
+            // QEL.javacc, line 267
+            consumeToken(C_IDENTIFIER,false);
+            break;
+            case TIMES:
+            // QEL.javacc, line 267
+            // QEL.javacc, line 267
+            consumeToken(TIMES,false);
+            break;
+            default:
+            jj_la1[17]=jj_gen;
+            consumeToken(-1);
+            throw new ParseException();
+        }
+    }
+
+    // QEL.javacc, line 270
+    final public void DynamicKey() throws ParseException {
+        // QEL.javacc, line 272
+        // QEL.javacc, line 272
+        consumeToken(OPEN_BRACKET,false);
+        // QEL.javacc, line 272
+        Expression();
+        // QEL.javacc, line 272
+        consumeToken(CLOSE_BRACKET,false);
+    }
+
+    // QEL.javacc, line 275
+    final public void MethodInvoke() throws ParseException {
+        // QEL.javacc, line 277
+        // QEL.javacc, line 277
+        consumeToken(OPEN_PAREN,false);
+        // QEL.javacc, line 277
+        int int8=nextTokenKind();
+        ;
+        if (int8==PLUS||int8==MINUS||int8==EXCLAM||int8==NULL||int8==TRUE||int8==FALSE||int8==INTEGER||int8==DECIMAL||int8==STRING_LITERAL||int8==RAW_STRING||int8==C_IDENTIFIER||int8==OPEN_PAREN) {
+            // QEL.javacc, line 277
+            // QEL.javacc, line 277
+            ArgsList();
+        }
+        else {
+            jj_la1[18]=jj_gen;
+        }
+        // QEL.javacc, line 277
+        consumeToken(CLOSE_PAREN,false);
+    }
+
+    // QEL.javacc, line 280
+    final public void ArgsList() throws ParseException {
+        // QEL.javacc, line 282
+        // QEL.javacc, line 283
+        // QEL.javacc, line 283
+        PositionalArgsList();
+    }
+
+    // QEL.javacc, line 287
+    final public void PositionalArgsList() throws ParseException {
+        // QEL.javacc, line 289
+        PositionalArgsList node14=null;
+        if (buildTree) {
+            node14=new PositionalArgsList();
+            Token jjtStartToken=getToken(1);
+            node14.setBeginLine(jjtStartToken.beginLine);
+            node14.setBeginColumn(jjtStartToken.beginColumn);
+            node14.setInputSource(this.getInputSource());
+            openNodeScope(node14);
+        }
+        boolean hitException14=false;
+        try {
+            // QEL.javacc, line 289
+            Expression();
+            // QEL.javacc, line 293
+            label_7:
+            while (true) {
+                int int9=nextTokenKind();
+                ;
+                if (!(int9==COMMA||int9==PLUS||int9==MINUS||int9==EXCLAM||int9==NULL||int9==TRUE||int9==FALSE||int9==INTEGER||int9==DECIMAL||int9==STRING_LITERAL||int9==RAW_STRING||int9==C_IDENTIFIER||int9==OPEN_PAREN)) {
+                    jj_la1[19]=jj_gen;
+                    break label_7;
+                }
+                // QEL.javacc, line 291
+                // QEL.javacc, line 291
+                int int10=nextTokenKind();
+                ;
+                if (int10==COMMA) {
+                    // QEL.javacc, line 291
+                    // QEL.javacc, line 291
+                    consumeToken(COMMA,false);
+                }
+                else {
+                    jj_la1[20]=jj_gen;
+                }
+                // QEL.javacc, line 292
+                Expression();
+            }
+        }
+        catch(Exception e14) {
+            hitException14=false;
+            if (e14 instanceof ParseException) throw(ParseException) e14;
+            if (e14 instanceof RuntimeException) throw(RuntimeException) e14;
+            throw new RuntimeException(e14);
+        }
+        finally {
+            if (buildTree) {
+                if (!hitException14) {
+                    closeNodeScope(node14,nodeArity()>1);
+                    Token jjtEndToken=getToken(0);
+                    node14.setEndLine(jjtEndToken.endLine);
+                    node14.setEndColumn(jjtEndToken.endColumn);
+                }
+                else {
+                    clearNodeScope();
+                    mark=marks.remove(marks.size()-1);
+                }
+            }
+        }
+    }
+
+    // QEL.javacc, line 296
+    final public void StringLiteral() throws ParseException {
+        // QEL.javacc, line 298
+        StringLiteral node15=null;
+        if (buildTree) {
+            node15=new StringLiteral();
+            Token jjtStartToken=getToken(1);
+            node15.setBeginLine(jjtStartToken.beginLine);
+            node15.setBeginColumn(jjtStartToken.beginColumn);
+            node15.setInputSource(this.getInputSource());
+            openNodeScope(node15);
+        }
+        boolean hitException15=false;
+        try {
+            switch(nextTokenKind()) {
+                case STRING_LITERAL:
+                // QEL.javacc, line 298
+                // QEL.javacc, line 298
+                consumeToken(STRING_LITERAL,false);
+                break;
+                case RAW_STRING:
+                // QEL.javacc, line 298
+                // QEL.javacc, line 298
+                consumeToken(RAW_STRING,false);
+                break;
+                default:
+                jj_la1[21]=jj_gen;
+                consumeToken(-1);
+                throw new ParseException();
+            }
+        }
+        catch(Exception e15) {
+            hitException15=false;
+            if (e15 instanceof ParseException) throw(ParseException) e15;
+            if (e15 instanceof RuntimeException) throw(RuntimeException) e15;
+            throw new RuntimeException(e15);
+        }
+        finally {
+            if (buildTree) {
+                if (!hitException15) {
+                    closeNodeScope(node15,nodeArity()>1);
+                    Token jjtEndToken=getToken(0);
+                    node15.setEndLine(jjtEndToken.endLine);
+                    node15.setEndColumn(jjtEndToken.endColumn);
+                }
+                else {
+                    clearNodeScope();
+                    mark=marks.remove(marks.size()-1);
+                }
+            }
+        }
+    }
+
+    // QEL.javacc, line 301
+    final public void Parenthesis() throws ParseException {
+        // QEL.javacc, line 303
+        Parenthesis node16=null;
+        if (buildTree) {
+            node16=new Parenthesis();
+            Token jjtStartToken=getToken(1);
+            node16.setBeginLine(jjtStartToken.beginLine);
+            node16.setBeginColumn(jjtStartToken.beginColumn);
+            node16.setInputSource(this.getInputSource());
+            openNodeScope(node16);
+        }
+        boolean hitException16=false;
+        try {
+            // QEL.javacc, line 303
+            consumeToken(OPEN_PAREN,false);
+            // QEL.javacc, line 304
+            Expression();
+            // QEL.javacc, line 305
+            consumeToken(CLOSE_PAREN,true);
+        }
+        catch(Exception e16) {
+            hitException16=false;
+            if (e16 instanceof ParseException) throw(ParseException) e16;
+            if (e16 instanceof RuntimeException) throw(RuntimeException) e16;
+            throw new RuntimeException(e16);
+        }
+        finally {
+            if (buildTree) {
+                if (!hitException16) {
+                    closeNodeScope(node16,nodeArity()>1);
+                    Token jjtEndToken=getToken(0);
+                    node16.setEndLine(jjtEndToken.endLine);
+                    node16.setEndColumn(jjtEndToken.endColumn);
+                }
+                else {
+                    clearNodeScope();
+                    mark=marks.remove(marks.size()-1);
+                }
+            }
+        }
+    }
+
+    // QEL.javacc, line 308
+    final public void NumberLiteral() throws ParseException {
+        // QEL.javacc, line 310
+        NumberLiteral node17=null;
+        if (buildTree) {
+            node17=new NumberLiteral();
+            Token jjtStartToken=getToken(1);
+            node17.setBeginLine(jjtStartToken.beginLine);
+            node17.setBeginColumn(jjtStartToken.beginColumn);
+            node17.setInputSource(this.getInputSource());
+            openNodeScope(node17);
+        }
+        boolean hitException17=false;
+        try {
+            switch(nextTokenKind()) {
+                case INTEGER:
+                // QEL.javacc, line 310
+                // QEL.javacc, line 310
+                consumeToken(INTEGER,false);
+                break;
+                case DECIMAL:
+                // QEL.javacc, line 310
+                // QEL.javacc, line 310
+                consumeToken(DECIMAL,false);
+                break;
+                default:
+                jj_la1[22]=jj_gen;
+                consumeToken(-1);
+                throw new ParseException();
+            }
+        }
+        catch(Exception e17) {
+            hitException17=false;
+            if (e17 instanceof ParseException) throw(ParseException) e17;
+            if (e17 instanceof RuntimeException) throw(RuntimeException) e17;
+            throw new RuntimeException(e17);
+        }
+        finally {
+            if (buildTree) {
+                if (!hitException17) {
+                    closeNodeScope(node17,nodeArity()>1);
+                    Token jjtEndToken=getToken(0);
+                    node17.setEndLine(jjtEndToken.endLine);
+                    node17.setEndColumn(jjtEndToken.endColumn);
+                }
+                else {
+                    clearNodeScope();
+                    mark=marks.remove(marks.size()-1);
+                }
+            }
+        }
+    }
+
+    // QEL.javacc, line 313
+    final public void BooleanLiteral() throws ParseException {
+        // QEL.javacc, line 315
+        BooleanLiteral node18=null;
+        if (buildTree) {
+            node18=new BooleanLiteral();
+            Token jjtStartToken=getToken(1);
+            node18.setBeginLine(jjtStartToken.beginLine);
+            node18.setBeginColumn(jjtStartToken.beginColumn);
+            node18.setInputSource(this.getInputSource());
+            openNodeScope(node18);
+        }
+        boolean hitException18=false;
+        try {
+            switch(nextTokenKind()) {
+                case TRUE:
+                // QEL.javacc, line 315
+                // QEL.javacc, line 315
+                consumeToken(TRUE,false);
+                break;
+                case FALSE:
+                // QEL.javacc, line 315
+                // QEL.javacc, line 315
+                consumeToken(FALSE,false);
+                break;
+                default:
+                jj_la1[23]=jj_gen;
+                consumeToken(-1);
+                throw new ParseException();
+            }
+        }
+        catch(Exception e18) {
+            hitException18=false;
+            if (e18 instanceof ParseException) throw(ParseException) e18;
+            if (e18 instanceof RuntimeException) throw(RuntimeException) e18;
+            throw new RuntimeException(e18);
+        }
+        finally {
+            if (buildTree) {
+                if (!hitException18) {
+                    closeNodeScope(node18,nodeArity()>1);
+                    Token jjtEndToken=getToken(0);
+                    node18.setEndLine(jjtEndToken.endLine);
+                    node18.setEndColumn(jjtEndToken.endColumn);
+                }
+                else {
+                    clearNodeScope();
+                    mark=marks.remove(marks.size()-1);
+                }
+            }
+        }
+    }
+
+    // QEL.javacc, line 318
+    final public void NullLiteral() throws ParseException {
+        // QEL.javacc, line 320
+        NullLiteral node19=null;
+        if (buildTree) {
+            node19=new NullLiteral();
+            Token jjtStartToken=getToken(1);
+            node19.setBeginLine(jjtStartToken.beginLine);
+            node19.setBeginColumn(jjtStartToken.beginColumn);
+            node19.setInputSource(this.getInputSource());
+            openNodeScope(node19);
+        }
+        boolean hitException19=false;
+        try {
+            // QEL.javacc, line 320
+            consumeToken(NULL,false);
+        }
+        catch(Exception e19) {
+            hitException19=false;
+            if (e19 instanceof ParseException) throw(ParseException) e19;
+            if (e19 instanceof RuntimeException) throw(RuntimeException) e19;
+            throw new RuntimeException(e19);
+        }
+        finally {
+            if (buildTree) {
+                if (!hitException19) {
+                    closeNodeScope(node19,nodeArity()>1);
+                    Token jjtEndToken=getToken(0);
+                    node19.setEndLine(jjtEndToken.endLine);
+                    node19.setEndColumn(jjtEndToken.endColumn);
+                }
+                else {
+                    clearNodeScope();
+                    mark=marks.remove(marks.size()-1);
+                }
+            }
+        }
+    }
+
+    // QUTE.javacc, line 85
+    final public void ParameterDeclaration() throws ParseException {
+        // QUTE.javacc, line 87
+        ParameterDeclaration node20=null;
+        if (buildTree) {
+            node20=new ParameterDeclaration();
+            Token jjtStartToken=getToken(1);
+            node20.setBeginLine(jjtStartToken.beginLine);
+            node20.setBeginColumn(jjtStartToken.beginColumn);
+            node20.setInputSource(this.getInputSource());
+            openNodeScope(node20);
+        }
+        boolean hitException20=false;
+        try {
+            // QUTE.javacc, line 87
+            consumeToken(START_PARAMETER_DECL,false);
+            // QUTE.javacc, line 88
+            Expression();
+            // QUTE.javacc, line 89
+            consumeToken(CLOSE_CURLY,false);
+        }
+        catch(Exception e20) {
+            hitException20=false;
+            if (e20 instanceof ParseException) throw(ParseException) e20;
+            if (e20 instanceof RuntimeException) throw(RuntimeException) e20;
+            throw new RuntimeException(e20);
+        }
+        finally {
+            if (buildTree) {
+                if (!hitException20) {
+                    closeNodeScope(node20,nodeArity()>1);
+                    Token jjtEndToken=getToken(0);
+                    node20.setEndLine(jjtEndToken.endLine);
+                    node20.setEndColumn(jjtEndToken.endColumn);
+                }
+                else {
+                    clearNodeScope();
+                    mark=marks.remove(marks.size()-1);
+                }
+            }
+        }
+    }
+
+    // QUTE.javacc, line 92
+    final public void Interpolation() throws ParseException {
+        // QUTE.javacc, line 94
+        Interpolation node21=null;
+        if (buildTree) {
+            node21=new Interpolation();
+            Token jjtStartToken=getToken(1);
+            node21.setBeginLine(jjtStartToken.beginLine);
+            node21.setBeginColumn(jjtStartToken.beginColumn);
+            node21.setInputSource(this.getInputSource());
+            openNodeScope(node21);
+        }
+        boolean hitException21=false;
+        try {
+            // QUTE.javacc, line 94
+            consumeToken(OPEN_CURLY,false);
+            // QUTE.javacc, line 94
+            Expression();
+            // QUTE.javacc, line 94
+            consumeToken(CLOSE_CURLY,false);
+        }
+        catch(Exception e21) {
+            hitException21=false;
+            if (e21 instanceof ParseException) throw(ParseException) e21;
+            if (e21 instanceof RuntimeException) throw(RuntimeException) e21;
+            throw new RuntimeException(e21);
+        }
+        finally {
+            if (buildTree) {
+                if (!hitException21) {
+                    closeNodeScope(node21,nodeArity()>1);
+                    Token jjtEndToken=getToken(0);
+                    node21.setEndLine(jjtEndToken.endLine);
+                    node21.setEndColumn(jjtEndToken.endColumn);
+                }
+                else {
+                    clearNodeScope();
+                    mark=marks.remove(marks.size()-1);
+                }
+            }
+        }
+    }
+
+    // QUTE.javacc, line 97
+    final public void EachSection() throws ParseException {
+        // QUTE.javacc, line 99
+        EachSection node22=null;
+        if (buildTree) {
+            node22=new EachSection();
+            Token jjtStartToken=getToken(1);
+            node22.setBeginLine(jjtStartToken.beginLine);
+            node22.setBeginColumn(jjtStartToken.beginColumn);
+            node22.setInputSource(this.getInputSource());
+            openNodeScope(node22);
+        }
+        boolean hitException22=false;
+        try {
+            // QUTE.javacc, line 99
+            consumeToken(EACH,false);
+            // QUTE.javacc, line 100
+            Expression();
+            // QUTE.javacc, line 101
+            consumeToken(CLOSE_CURLY,false);
+            // QUTE.javacc, line 102
+            Block();
+            // QUTE.javacc, line 103
+            switch(nextTokenKind()) {
+                case ABBREVIATED_END:
+                // QUTE.javacc, line 103
+                // QUTE.javacc, line 103
+                consumeToken(ABBREVIATED_END,false);
+                break;
+                case ENDEACH:
+                // QUTE.javacc, line 103
+                // QUTE.javacc, line 103
+                consumeToken(ENDEACH,false);
+                break;
+                default:
+                jj_la1[24]=jj_gen;
+                consumeToken(-1);
+                throw new ParseException();
+            }
+        }
+        catch(Exception e22) {
+            hitException22=false;
+            if (e22 instanceof ParseException) throw(ParseException) e22;
+            if (e22 instanceof RuntimeException) throw(RuntimeException) e22;
+            throw new RuntimeException(e22);
+        }
+        finally {
+            if (buildTree) {
+                if (!hitException22) {
+                    closeNodeScope(node22,nodeArity()>1);
+                    Token jjtEndToken=getToken(0);
+                    node22.setEndLine(jjtEndToken.endLine);
+                    node22.setEndColumn(jjtEndToken.endColumn);
+                }
+                else {
+                    clearNodeScope();
+                    mark=marks.remove(marks.size()-1);
+                }
+            }
+        }
+    }
+
+    // QUTE.javacc, line 106
+    final public void ForSection() throws ParseException {
+        // QUTE.javacc, line 108
+        ForSection node23=null;
+        if (buildTree) {
+            node23=new ForSection();
+            Token jjtStartToken=getToken(1);
+            node23.setBeginLine(jjtStartToken.beginLine);
+            node23.setBeginColumn(jjtStartToken.beginColumn);
+            node23.setInputSource(this.getInputSource());
+            openNodeScope(node23);
+        }
+        boolean hitException23=false;
+        try {
+            // QUTE.javacc, line 108
+            consumeToken(FOR,false);
+            // QUTE.javacc, line 109
+            consumeToken(C_IDENTIFIER,false);
+            // QUTE.javacc, line 110
+            consumeToken(IN,false);
+            // QUTE.javacc, line 111
+            Expression();
+            // QUTE.javacc, line 112
+            consumeToken(CLOSE_CURLY,false);
+            // QUTE.javacc, line 113
+            int int11=nextTokenKind();
+            ;
+            if (int11==TEXT||int11==OPEN_CURLY||int11==EACH||int11==FOR||int11==IF||int11==QUTE_INCLUDE||int11==INSERT||int11==WITH||int11==START_SECTION||int11==START_PARAMETER_DECL) {
+                // QUTE.javacc, line 113
+                // QUTE.javacc, line 113
+                Block();
+            }
+            else {
+                jj_la1[25]=jj_gen;
+            }
+            // QUTE.javacc, line 114
+            switch(nextTokenKind()) {
+                case ABBREVIATED_END:
+                // QUTE.javacc, line 114
+                // QUTE.javacc, line 114
+                consumeToken(ABBREVIATED_END,false);
+                break;
+                case ENDFOR:
+                // QUTE.javacc, line 114
+                // QUTE.javacc, line 114
+                consumeToken(ENDFOR,false);
+                break;
+                default:
+                jj_la1[26]=jj_gen;
+                consumeToken(-1);
+                throw new ParseException();
+            }
+        }
+        catch(Exception e23) {
+            hitException23=false;
+            if (e23 instanceof ParseException) throw(ParseException) e23;
+            if (e23 instanceof RuntimeException) throw(RuntimeException) e23;
+            throw new RuntimeException(e23);
+        }
+        finally {
+            if (buildTree) {
+                if (!hitException23) {
+                    closeNodeScope(node23,nodeArity()>1);
+                    Token jjtEndToken=getToken(0);
+                    node23.setEndLine(jjtEndToken.endLine);
+                    node23.setEndColumn(jjtEndToken.endColumn);
+                }
+                else {
+                    clearNodeScope();
+                    mark=marks.remove(marks.size()-1);
+                }
+            }
+        }
+    }
+
+    // QUTE.javacc, line 117
+    final public void IfSection() throws ParseException {
+        // QUTE.javacc, line 119
+        IfSection node24=null;
+        if (buildTree) {
+            node24=new IfSection();
+            Token jjtStartToken=getToken(1);
+            node24.setBeginLine(jjtStartToken.beginLine);
+            node24.setBeginColumn(jjtStartToken.beginColumn);
+            node24.setInputSource(this.getInputSource());
+            openNodeScope(node24);
+        }
+        boolean hitException24=false;
+        try {
+            // QUTE.javacc, line 119
+            consumeToken(IF,false);
+            // QUTE.javacc, line 120
+            Expression();
+            // QUTE.javacc, line 121
+            consumeToken(CLOSE_CURLY,false);
+            // QUTE.javacc, line 122
+            Block();
+            // QUTE.javacc, line 123
+            label_8:
+            while (true) {
+                int int12=nextTokenKind();
+                ;
+                if (!(int12==ELSEIF)) {
+                    jj_la1[27]=jj_gen;
+                    break label_8;
+                }
+                // QUTE.javacc, line 123
+                // QUTE.javacc, line 123
+                ElseIfSection();
+            }
+            // QUTE.javacc, line 124
+            int int13=nextTokenKind();
+            ;
+            if (int13==ELSE) {
+                // QUTE.javacc, line 124
+                // QUTE.javacc, line 124
+                ElseBlock();
+            }
+            else {
+                jj_la1[28]=jj_gen;
+            }
+            // QUTE.javacc, line 125
+            switch(nextTokenKind()) {
+                case ABBREVIATED_END:
+                // QUTE.javacc, line 125
+                // QUTE.javacc, line 125
+                consumeToken(ABBREVIATED_END,false);
+                break;
+                case ENDIF:
+                // QUTE.javacc, line 125
+                // QUTE.javacc, line 125
+                consumeToken(ENDIF,false);
+                break;
+                default:
+                jj_la1[29]=jj_gen;
+                consumeToken(-1);
+                throw new ParseException();
+            }
+        }
+        catch(Exception e24) {
+            hitException24=false;
+            if (e24 instanceof ParseException) throw(ParseException) e24;
+            if (e24 instanceof RuntimeException) throw(RuntimeException) e24;
+            throw new RuntimeException(e24);
+        }
+        finally {
+            if (buildTree) {
+                if (!hitException24) {
+                    closeNodeScope(node24,nodeArity()>1);
+                    Token jjtEndToken=getToken(0);
+                    node24.setEndLine(jjtEndToken.endLine);
+                    node24.setEndColumn(jjtEndToken.endColumn);
+                }
+                else {
+                    clearNodeScope();
+                    mark=marks.remove(marks.size()-1);
+                }
+            }
+        }
+    }
+
+    // QUTE.javacc, line 128
+    final public void ElseIfSection() throws ParseException {
+        // QUTE.javacc, line 130
+        ElseIfSection node25=null;
+        if (buildTree) {
+            node25=new ElseIfSection();
+            Token jjtStartToken=getToken(1);
+            node25.setBeginLine(jjtStartToken.beginLine);
+            node25.setBeginColumn(jjtStartToken.beginColumn);
+            node25.setInputSource(this.getInputSource());
+            openNodeScope(node25);
+        }
+        boolean hitException25=false;
+        try {
+            // QUTE.javacc, line 130
+            consumeToken(ELSEIF,false);
+            // QUTE.javacc, line 131
+            Expression();
+            // QUTE.javacc, line 132
+            consumeToken(CLOSE_CURLY,false);
+            // QUTE.javacc, line 133
+            Block();
+        }
+        catch(Exception e25) {
+            hitException25=false;
+            if (e25 instanceof ParseException) throw(ParseException) e25;
+            if (e25 instanceof RuntimeException) throw(RuntimeException) e25;
+            throw new RuntimeException(e25);
+        }
+        finally {
+            if (buildTree) {
+                if (!hitException25) {
+                    closeNodeScope(node25,nodeArity()>1);
+                    Token jjtEndToken=getToken(0);
+                    node25.setEndLine(jjtEndToken.endLine);
+                    node25.setEndColumn(jjtEndToken.endColumn);
+                }
+                else {
+                    clearNodeScope();
+                    mark=marks.remove(marks.size()-1);
+                }
+            }
+        }
+    }
+
+    // QUTE.javacc, line 136
+    final public void ElseBlock() throws ParseException {
+        // QUTE.javacc, line 138
+        ElseBlock node26=null;
+        if (buildTree) {
+            node26=new ElseBlock();
+            Token jjtStartToken=getToken(1);
+            node26.setBeginLine(jjtStartToken.beginLine);
+            node26.setBeginColumn(jjtStartToken.beginColumn);
+            node26.setInputSource(this.getInputSource());
+            openNodeScope(node26);
+        }
+        boolean hitException26=false;
+        try {
+            // QUTE.javacc, line 138
+            consumeToken(ELSE,false);
+            // QUTE.javacc, line 139
+            Block();
+        }
+        catch(Exception e26) {
+            hitException26=false;
+            if (e26 instanceof ParseException) throw(ParseException) e26;
+            if (e26 instanceof RuntimeException) throw(RuntimeException) e26;
+            throw new RuntimeException(e26);
+        }
+        finally {
+            if (buildTree) {
+                if (!hitException26) {
+                    closeNodeScope(node26,nodeArity()>1);
+                    Token jjtEndToken=getToken(0);
+                    node26.setEndLine(jjtEndToken.endLine);
+                    node26.setEndColumn(jjtEndToken.endColumn);
+                }
+                else {
+                    clearNodeScope();
+                    mark=marks.remove(marks.size()-1);
+                }
+            }
+        }
+    }
+
+    // QUTE.javacc, line 142
+    final public void IncludeSection() throws ParseException {
+        // QUTE.javacc, line 144
+        IncludeSection node27=null;
+        if (buildTree) {
+            node27=new IncludeSection();
+            Token jjtStartToken=getToken(1);
+            node27.setBeginLine(jjtStartToken.beginLine);
+            node27.setBeginColumn(jjtStartToken.beginColumn);
+            node27.setInputSource(this.getInputSource());
+            openNodeScope(node27);
+        }
+        boolean hitException27=false;
+        try {
+            // QUTE.javacc, line 144
+            consumeToken(QUTE_INCLUDE,false);
+            // QUTE.javacc, line 145
+            Expression();
+            // QUTE.javacc, line 146
+            consumeToken(CLOSE_CURLY,false);
+            // QUTE.javacc, line 147
+            Block();
+            // QUTE.javacc, line 148
+            switch(nextTokenKind()) {
+                case ABBREVIATED_END:
+                // QUTE.javacc, line 148
+                // QUTE.javacc, line 148
+                consumeToken(ABBREVIATED_END,false);
+                break;
+                case ENDINCLUDE:
+                // QUTE.javacc, line 148
+                // QUTE.javacc, line 148
+                consumeToken(ENDINCLUDE,false);
+                break;
+                default:
+                jj_la1[30]=jj_gen;
+                consumeToken(-1);
+                throw new ParseException();
+            }
+        }
+        catch(Exception e27) {
+            hitException27=false;
+            if (e27 instanceof ParseException) throw(ParseException) e27;
+            if (e27 instanceof RuntimeException) throw(RuntimeException) e27;
+            throw new RuntimeException(e27);
+        }
+        finally {
+            if (buildTree) {
+                if (!hitException27) {
+                    closeNodeScope(node27,nodeArity()>1);
+                    Token jjtEndToken=getToken(0);
+                    node27.setEndLine(jjtEndToken.endLine);
+                    node27.setEndColumn(jjtEndToken.endColumn);
+                }
+                else {
+                    clearNodeScope();
+                    mark=marks.remove(marks.size()-1);
+                }
+            }
+        }
+    }
+
+    // QUTE.javacc, line 151
+    final public void InsertSection() throws ParseException {
+        // QUTE.javacc, line 153
+        InsertSection node28=null;
+        if (buildTree) {
+            node28=new InsertSection();
+            Token jjtStartToken=getToken(1);
+            node28.setBeginLine(jjtStartToken.beginLine);
+            node28.setBeginColumn(jjtStartToken.beginColumn);
+            node28.setInputSource(this.getInputSource());
+            openNodeScope(node28);
+        }
+        boolean hitException28=false;
+        try {
+            // QUTE.javacc, line 153
+            consumeToken(INSERT,false);
+            // QUTE.javacc, line 154
+            Expression();
+            // QUTE.javacc, line 155
+            consumeToken(CLOSE_CURLY,false);
+            // QUTE.javacc, line 156
+            Block();
+            // QUTE.javacc, line 157
+            switch(nextTokenKind()) {
+                case ABBREVIATED_END:
+                // QUTE.javacc, line 157
+                // QUTE.javacc, line 157
+                consumeToken(ABBREVIATED_END,false);
+                break;
+                case ENDINSERT:
+                // QUTE.javacc, line 157
+                // QUTE.javacc, line 157
+                consumeToken(ENDINSERT,false);
+                break;
+                default:
+                jj_la1[31]=jj_gen;
+                consumeToken(-1);
+                throw new ParseException();
+            }
+        }
+        catch(Exception e28) {
+            hitException28=false;
+            if (e28 instanceof ParseException) throw(ParseException) e28;
+            if (e28 instanceof RuntimeException) throw(RuntimeException) e28;
+            throw new RuntimeException(e28);
+        }
+        finally {
+            if (buildTree) {
+                if (!hitException28) {
+                    closeNodeScope(node28,nodeArity()>1);
+                    Token jjtEndToken=getToken(0);
+                    node28.setEndLine(jjtEndToken.endLine);
+                    node28.setEndColumn(jjtEndToken.endColumn);
+                }
+                else {
+                    clearNodeScope();
+                    mark=marks.remove(marks.size()-1);
+                }
+            }
+        }
+    }
+
+    // QUTE.javacc, line 160
+    final public void WithSection() throws ParseException {
+        // QUTE.javacc, line 162
+        WithSection node29=null;
+        if (buildTree) {
+            node29=new WithSection();
+            Token jjtStartToken=getToken(1);
+            node29.setBeginLine(jjtStartToken.beginLine);
+            node29.setBeginColumn(jjtStartToken.beginColumn);
+            node29.setInputSource(this.getInputSource());
+            openNodeScope(node29);
+        }
+        boolean hitException29=false;
+        try {
+            // QUTE.javacc, line 162
+            consumeToken(WITH,false);
+            // QUTE.javacc, line 163
+            Expression();
+            // QUTE.javacc, line 164
+            consumeToken(CLOSE_CURLY,false);
+            // QUTE.javacc, line 165
+            Block();
+            // QUTE.javacc, line 166
+            switch(nextTokenKind()) {
+                case ABBREVIATED_END:
+                // QUTE.javacc, line 166
+                // QUTE.javacc, line 166
+                consumeToken(ABBREVIATED_END,false);
+                break;
+                case ENDWITH:
+                // QUTE.javacc, line 166
+                // QUTE.javacc, line 166
+                consumeToken(ENDWITH,false);
+                break;
+                default:
+                jj_la1[32]=jj_gen;
+                consumeToken(-1);
+                throw new ParseException();
+            }
+        }
+        catch(Exception e29) {
+            hitException29=false;
+            if (e29 instanceof ParseException) throw(ParseException) e29;
+            if (e29 instanceof RuntimeException) throw(RuntimeException) e29;
+            throw new RuntimeException(e29);
+        }
+        finally {
+            if (buildTree) {
+                if (!hitException29) {
+                    closeNodeScope(node29,nodeArity()>1);
+                    Token jjtEndToken=getToken(0);
+                    node29.setEndLine(jjtEndToken.endLine);
+                    node29.setEndColumn(jjtEndToken.endColumn);
+                }
+                else {
+                    clearNodeScope();
+                    mark=marks.remove(marks.size()-1);
+                }
+            }
+        }
+    }
+
+    // QUTE.javacc, line 169
+    final public void UserSection() throws ParseException {
+        // QUTE.javacc, line 171
+        UserSection node30=null;
+        if (buildTree) {
+            node30=new UserSection();
+            Token jjtStartToken=getToken(1);
+            node30.setBeginLine(jjtStartToken.beginLine);
+            node30.setBeginColumn(jjtStartToken.beginColumn);
+            node30.setInputSource(this.getInputSource());
+            openNodeScope(node30);
+        }
+        boolean hitException30=false;
+        try {
+            // QUTE.javacc, line 171
+            consumeToken(START_SECTION,false);
+            // QUTE.javacc, line 171
+            int int14=nextTokenKind();
+            ;
+            if (int14==PLUS||int14==MINUS||int14==EXCLAM||int14==NULL||int14==TRUE||int14==FALSE||int14==INTEGER||int14==DECIMAL||int14==STRING_LITERAL||int14==RAW_STRING||int14==C_IDENTIFIER||int14==OPEN_PAREN) {
+                // QUTE.javacc, line 171
+                // QUTE.javacc, line 171
+                Expression();
+            }
+            else {
+                jj_la1[33]=jj_gen;
+            }
+            // QUTE.javacc, line 173
+            switch(nextTokenKind()) {
+                case CLOSE_EMPTY:
+                // QUTE.javacc, line 173
+                // QUTE.javacc, line 173
+                consumeToken(CLOSE_EMPTY,false);
+                break;
+                case CLOSE_CURLY:
+                // QUTE.javacc, line 175
+                // QUTE.javacc, line 176
+                // QUTE.javacc, line 176
+                consumeToken(CLOSE_CURLY,false);
+                // QUTE.javacc, line 177
+                Block();
+                // QUTE.javacc, line 179
+                switch(nextTokenKind()) {
+                    case END_SECTION:
+                    // QUTE.javacc, line 179
+                    // QUTE.javacc, line 179
+                    consumeToken(END_SECTION,false);
+                    break;
+                    case ABBREVIATED_END:
+                    // QUTE.javacc, line 179
+                    // QUTE.javacc, line 179
+                    consumeToken(ABBREVIATED_END,false);
+                    break;
+                    default:
+                    jj_la1[34]=jj_gen;
+                    consumeToken(-1);
+                    throw new ParseException();
+                }
+                break;
+                default:
+                jj_la1[35]=jj_gen;
+                consumeToken(-1);
+                throw new ParseException();
+            }
+        }
+        catch(Exception e30) {
+            hitException30=false;
+            if (e30 instanceof ParseException) throw(ParseException) e30;
+            if (e30 instanceof RuntimeException) throw(RuntimeException) e30;
+            throw new RuntimeException(e30);
+        }
+        finally {
+            if (buildTree) {
+                if (!hitException30) {
+                    closeNodeScope(node30,nodeArity()>1);
+                    Token jjtEndToken=getToken(0);
+                    node30.setEndLine(jjtEndToken.endLine);
+                    node30.setEndColumn(jjtEndToken.endColumn);
+                }
+                else {
+                    clearNodeScope();
+                    mark=marks.remove(marks.size()-1);
+                }
+            }
+        }
+    }
+
+    // QUTE.javacc, line 185
+    final public void Block() throws ParseException {
+        // QUTE.javacc, line 187
+        Block node31=null;
+        if (buildTree) {
+            node31=new Block();
+            Token jjtStartToken=getToken(1);
+            node31.setBeginLine(jjtStartToken.beginLine);
+            node31.setBeginColumn(jjtStartToken.beginColumn);
+            node31.setInputSource(this.getInputSource());
+            openNodeScope(node31);
+        }
+        boolean hitException31=false;
+        try {
+            // QUTE.javacc, line 207
+            label_9:
+            while (true) {
+                // QUTE.javacc, line 188
+                switch(nextTokenKind()) {
+                    case TEXT:
+                    // QUTE.javacc, line 188
+                    // QUTE.javacc, line 188
+                    consumeToken(TEXT,false);
+                    break;
+                    case START_PARAMETER_DECL:
+                    // QUTE.javacc, line 190
+                    // QUTE.javacc, line 190
+                    ParameterDeclaration();
+                    break;
+                    case OPEN_CURLY:
+                    // QUTE.javacc, line 192
+                    // QUTE.javacc, line 192
+                    Interpolation();
+                    break;
+                    case EACH:
+                    // QUTE.javacc, line 194
+                    // QUTE.javacc, line 194
+                    EachSection();
+                    break;
+                    case FOR:
+                    // QUTE.javacc, line 196
+                    // QUTE.javacc, line 196
+                    ForSection();
+                    break;
+                    case IF:
+                    // QUTE.javacc, line 198
+                    // QUTE.javacc, line 198
+                    IfSection();
+                    break;
+                    case QUTE_INCLUDE:
+                    // QUTE.javacc, line 200
+                    // QUTE.javacc, line 200
+                    IncludeSection();
+                    break;
+                    case INSERT:
+                    // QUTE.javacc, line 202
+                    // QUTE.javacc, line 202
+                    InsertSection();
+                    break;
+                    case WITH:
+                    // QUTE.javacc, line 204
+                    // QUTE.javacc, line 204
+                    WithSection();
+                    break;
+                    case START_SECTION:
+                    // QUTE.javacc, line 206
+                    // QUTE.javacc, line 206
+                    UserSection();
+                    break;
+                    default:
+                    jj_la1[36]=jj_gen;
+                    consumeToken(-1);
+                    throw new ParseException();
+                }
+                int int15=nextTokenKind();
+                ;
+                if (!(int15==TEXT||int15==OPEN_CURLY||int15==EACH||int15==FOR||int15==IF||int15==QUTE_INCLUDE||int15==INSERT||int15==WITH||int15==START_SECTION||int15==START_PARAMETER_DECL)) {
+                    jj_la1[37]=jj_gen;
+                    break label_9;
+                }
+            }
+        }
+        catch(Exception e31) {
+            hitException31=false;
+            if (e31 instanceof ParseException) throw(ParseException) e31;
+            if (e31 instanceof RuntimeException) throw(RuntimeException) e31;
+            throw new RuntimeException(e31);
+        }
+        finally {
+            if (buildTree) {
+                if (!hitException31) {
+                    closeNodeScope(node31,nodeArity()>1);
+                    Token jjtEndToken=getToken(0);
+                    node31.setEndLine(jjtEndToken.endLine);
+                    node31.setEndColumn(jjtEndToken.endColumn);
+                }
+                else {
+                    clearNodeScope();
+                    mark=marks.remove(marks.size()-1);
+                }
+            }
+        }
+    }
+
+    // QUTE.javacc, line 211
+    final public void Root() throws ParseException {
+        // QUTE.javacc, line 213
+        Root node32=null;
+        if (buildTree) {
+            node32=new Root();
+            Token jjtStartToken=getToken(1);
+            node32.setBeginLine(jjtStartToken.beginLine);
+            node32.setBeginColumn(jjtStartToken.beginColumn);
+            node32.setInputSource(this.getInputSource());
+            openNodeScope(node32);
+        }
+        boolean hitException32=false;
+        try {
+            // QUTE.javacc, line 213
+            int int16=nextTokenKind();
+            ;
+            if (int16==TEXT||int16==OPEN_CURLY||int16==EACH||int16==FOR||int16==IF||int16==QUTE_INCLUDE||int16==INSERT||int16==WITH||int16==START_SECTION||int16==START_PARAMETER_DECL) {
+                // QUTE.javacc, line 213
+                // QUTE.javacc, line 213
+                Block();
+            }
+            else {
+                jj_la1[38]=jj_gen;
+            }
+            // QUTE.javacc, line 214
+            consumeToken(0,false);
+        }
+        catch(Exception e32) {
+            hitException32=false;
+            if (e32 instanceof ParseException) throw(ParseException) e32;
+            if (e32 instanceof RuntimeException) throw(RuntimeException) e32;
+            throw new RuntimeException(e32);
+        }
+        finally {
+            if (buildTree) {
+                if (!hitException32) {
+                    closeNodeScope(node32,nodeArity()>1);
+                    Token jjtEndToken=getToken(0);
+                    node32.setEndLine(jjtEndToken.endLine);
+                    node32.setEndColumn(jjtEndToken.endColumn);
+                }
+                else {
+                    clearNodeScope();
+                    mark=marks.remove(marks.size()-1);
+                }
+            }
+        }
+    }
+
+    private boolean jj_2_1(int xla) {
+        jj_la=xla;
+        jj_lastpos=jj_scanpos=current_token;
+        try {
+            return!jj_3_1();
+        }
+        catch(LookaheadSuccess ls) {
+            return true;
+        }
+        finally {
+            jj_save(0,xla);
+        }
+    }
+
+    private boolean jj_2_2(int xla) {
+        jj_la=xla;
+        jj_lastpos=jj_scanpos=current_token;
+        try {
+            return!jj_3_2();
+        }
+        catch(LookaheadSuccess ls) {
+            return true;
+        }
+        finally {
+            jj_save(1,xla);
+        }
+    }
+
+    private boolean jj_2_3(int xla) {
+        jj_la=xla;
+        jj_lastpos=jj_scanpos=current_token;
+        try {
+            return!jj_3_3();
+        }
+        catch(LookaheadSuccess ls) {
+            return true;
+        }
+        finally {
+            jj_save(2,xla);
+        }
+    }
+
+    private boolean jj_2_4(int xla) {
+        jj_la=xla;
+        jj_lastpos=jj_scanpos=current_token;
+        try {
+            return!jj_3_4();
+        }
+        catch(LookaheadSuccess ls) {
+            return true;
+        }
+        finally {
+            jj_save(3,xla);
+        }
+    }
+
+    private boolean jj_3_1() {
+        if (jj_3R_10()) return true;
+        return false;
+    }
+
+    private boolean jj_3_2() {
+        Token token17=jj_scanpos;
+        ;
+        if (jj_scan_token(21)) {
+            jj_scanpos=token17;
+            if (jj_scan_token(22)) return true;
+        }
+        return false;
+    }
+
+    private boolean jj_3_3() {
+        if (jj_scan_token(EXCLAM)) return true;
+        if (jj_3R_11()) return true;
+        return false;
+    }
+
+    private boolean jj_3_4() {
+        Token token18=jj_scanpos;
+        ;
+        if (jj_scan_token(25)) {
+            jj_scanpos=token18;
+            if (jj_scan_token(27)) {
+                jj_scanpos=token18;
+                if (jj_scan_token(49)) return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean jj_3R_10() {
+        if (jj_3R_12()) return true;
+        while (true) {
+            Token token19=jj_scanpos;
+            ;
+            if (jj_3R_13()) {
+                jj_scanpos=token19;
+                break;
+            }
+        }
+        return false;
+    }
+
+    private boolean jj_3R_11() {
+        Token token20=jj_scanpos;
+        ;
+        if (jj_scan_token(39)) {
+            jj_scanpos=token20;
+            if (jj_3R_14()) {
+                jj_scanpos=token20;
+                if (jj_3R_15()) {
+                    jj_scanpos=token20;
+                    if (jj_3R_16()) {
+                        jj_scanpos=token20;
+                        if (jj_scan_token(29)) {
+                            jj_scanpos=token20;
+                            if (jj_3R_17()) return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean jj_3R_12() {
+        if (jj_3R_18()) return true;
+        while (true) {
+            Token token21=jj_scanpos;
+            ;
+            if (jj_3R_19()) {
+                jj_scanpos=token21;
+                break;
+            }
+        }
+        return false;
+    }
+
+    private boolean jj_3R_13() {
+        Token token22=jj_scanpos;
+        ;
+        if (jj_scan_token(21)) {
+            jj_scanpos=token22;
+            if (jj_scan_token(22)) return true;
+        }
+        if (jj_3R_12()) return true;
+        return false;
+    }
+
+    private boolean jj_3R_14() {
+        if (jj_3R_20()) return true;
+        return false;
+    }
+
+    private boolean jj_3R_15() {
+        if (jj_3R_21()) return true;
+        return false;
+    }
+
+    private boolean jj_3R_16() {
+        if (jj_3R_22()) return true;
+        return false;
+    }
+
+    private boolean jj_3R_17() {
+        if (jj_3R_23()) return true;
+        return false;
+    }
+
+    private boolean jj_3R_18() {
+        Token token23=jj_scanpos;
+        ;
+        if (jj_3R_24()) {
+            jj_scanpos=token23;
+            if (jj_3R_25()) {
+                jj_scanpos=token23;
+                if (jj_3R_26()) return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean jj_3R_19() {
+        Token token24=jj_scanpos;
+        ;
+        if (jj_scan_token(23)) {
+            jj_scanpos=token24;
+            if (jj_scan_token(24)) return true;
+        }
+        if (jj_3R_18()) return true;
+        return false;
+    }
+
+    private boolean jj_3R_20() {
+        Token token25=jj_scanpos;
+        ;
+        if (jj_scan_token(32)) {
+            jj_scanpos=token25;
+            if (jj_scan_token(33)) return true;
+        }
+        return false;
+    }
+
+    private boolean jj_3R_21() {
+        Token token26=jj_scanpos;
+        ;
+        if (jj_scan_token(34)) {
+            jj_scanpos=token26;
+            if (jj_scan_token(35)) return true;
+        }
+        return false;
+    }
+
+    private boolean jj_3R_22() {
+        Token token27=jj_scanpos;
+        ;
+        if (jj_scan_token(30)) {
+            jj_scanpos=token27;
+            if (jj_scan_token(31)) return true;
+        }
+        return false;
+    }
+
+    private boolean jj_3R_23() {
+        if (jj_scan_token(OPEN_PAREN)) return true;
+        if (jj_3R_27()) return true;
+        if (jj_scan_token(CLOSE_PAREN)) return true;
+        return false;
+    }
+
+    private boolean jj_3R_24() {
+        if (jj_3R_28()) return true;
+        return false;
+    }
+
+    private boolean jj_3R_25() {
+        if (jj_3R_29()) return true;
+        return false;
+    }
+
+    private boolean jj_3R_26() {
+        if (jj_3R_30()) return true;
+        return false;
+    }
+
+    private boolean jj_3R_27() {
+        if (jj_3R_31()) return true;
+        return false;
+    }
+
+    private boolean jj_3R_28() {
+        Token token28=jj_scanpos;
+        ;
+        if (jj_scan_token(21)) {
+            jj_scanpos=token28;
+            if (jj_scan_token(22)) return true;
+        }
+        if (jj_3R_30()) return true;
+        return false;
+    }
+
+    private boolean jj_3R_29() {
+        if (jj_scan_token(EXCLAM)) return true;
+        if (jj_3R_30()) return true;
+        return false;
+    }
+
+    private boolean jj_3R_30() {
+        if (jj_3R_32()) return true;
+        while (true) {
+            Token token29=jj_scanpos;
+            ;
+            if (jj_3R_33()) {
+                jj_scanpos=token29;
+                break;
+            }
+        }
+        Token token30=jj_scanpos;
+        ;
+        if (jj_scan_token(26)) jj_scanpos=token30;
+        return false;
+    }
+
+    private boolean jj_3R_31() {
+        if (jj_3R_34()) return true;
+        while (true) {
+            Token token31=jj_scanpos;
+            ;
+            if (jj_3R_35()) {
+                jj_scanpos=token31;
+                break;
+            }
+        }
+        return false;
+    }
+
+    private boolean jj_3R_32() {
+        if (jj_3R_11()) return true;
+        while (true) {
+            Token token32=jj_scanpos;
+            ;
+            if (jj_3R_36()) {
+                jj_scanpos=token32;
+                break;
+            }
+        }
+        return false;
+    }
+
+    private boolean jj_3R_33() {
+        if (jj_scan_token(EXCLAM)) return true;
+        if (jj_3R_32()) return true;
+        return false;
+    }
+
+    private boolean jj_3R_34() {
+        if (jj_3R_37()) return true;
+        while (true) {
+            Token token33=jj_scanpos;
+            ;
+            if (jj_3R_38()) {
+                jj_scanpos=token33;
+                break;
+            }
+        }
+        return false;
+    }
+
+    private boolean jj_3R_35() {
+        Token token34=jj_scanpos;
+        ;
+        if (jj_scan_token(4)) {
+            jj_scanpos=token34;
+            if (jj_scan_token(5)) return true;
+        }
+        if (jj_3R_34()) return true;
+        return false;
+    }
+
+    private boolean jj_3R_36() {
+        Token token35=jj_scanpos;
+        ;
+        if (jj_3R_39()) {
+            jj_scanpos=token35;
+            if (jj_3R_40()) {
+                jj_scanpos=token35;
+                if (jj_3R_41()) return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean jj_3R_37() {
+        if (jj_3R_42()) return true;
+        Token token36=jj_scanpos;
+        ;
+        if (jj_3R_43()) jj_scanpos=token36;
+        return false;
+    }
+
+    private boolean jj_3R_38() {
+        Token token37=jj_scanpos;
+        ;
+        if (jj_scan_token(6)) {
+            jj_scanpos=token37;
+            if (jj_scan_token(7)) return true;
+        }
+        if (jj_3R_37()) return true;
+        return false;
+    }
+
+    private boolean jj_3R_39() {
+        if (jj_3R_44()) return true;
+        return false;
+    }
+
+    private boolean jj_3R_40() {
+        if (jj_3R_45()) return true;
+        return false;
+    }
+
+    private boolean jj_3R_41() {
+        if (jj_3R_46()) return true;
+        return false;
+    }
+
+    private boolean jj_3R_42() {
+        if (jj_3R_47()) return true;
+        Token token38=jj_scanpos;
+        ;
+        if (jj_3R_48()) jj_scanpos=token38;
+        return false;
+    }
+
+    private boolean jj_3R_43() {
+        Token token39=jj_scanpos;
+        ;
+        if (jj_scan_token(9)) {
+            jj_scanpos=token39;
+            if (jj_scan_token(10)) {
+                jj_scanpos=token39;
+                if (jj_scan_token(11)) return true;
+            }
+        }
+        if (jj_3R_42()) return true;
+        return false;
+    }
+
+    private boolean jj_3R_44() {
+        if (jj_scan_token(DOT)) return true;
+        Token token40=jj_scanpos;
+        ;
+        if (jj_scan_token(39)) {
+            jj_scanpos=token40;
+            if (jj_scan_token(23)) return true;
+        }
+        return false;
+    }
+
+    private boolean jj_3R_45() {
+        if (jj_scan_token(OPEN_BRACKET)) return true;
+        if (jj_3R_27()) return true;
+        if (jj_scan_token(CLOSE_BRACKET)) return true;
+        return false;
+    }
+
+    private boolean jj_3R_46() {
+        if (jj_scan_token(OPEN_PAREN)) return true;
+        Token token41=jj_scanpos;
+        ;
+        if (jj_3R_49()) jj_scanpos=token41;
+        if (jj_scan_token(CLOSE_PAREN)) return true;
+        return false;
+    }
+
+    private boolean jj_3R_47() {
+        if (jj_3R_10()) return true;
+        Token token42=jj_scanpos;
+        ;
+        if (jj_3R_50()) jj_scanpos=token42;
+        return false;
+    }
+
+    private boolean jj_3R_48() {
+        Token token43=jj_scanpos;
+        ;
+        if (jj_scan_token(12)) {
+            jj_scanpos=token43;
+            if (jj_scan_token(14)) {
+                jj_scanpos=token43;
+                if (jj_scan_token(16)) {
+                    jj_scanpos=token43;
+                    if (jj_scan_token(18)) {
+                        jj_scanpos=token43;
+                        if (jj_scan_token(13)) {
+                            jj_scanpos=token43;
+                            if (jj_scan_token(15)) {
+                                jj_scanpos=token43;
+                                if (jj_scan_token(19)) {
+                                    jj_scanpos=token43;
+                                    if (jj_scan_token(17)) return true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (jj_3R_47()) return true;
+        return false;
+    }
+
+    private boolean jj_3R_49() {
+        if (jj_3R_51()) return true;
+        return false;
+    }
+
+    private boolean jj_3R_50() {
+        if (jj_scan_token(DOT_DOT)) return true;
+        Token token44=jj_scanpos;
+        ;
+        if (jj_3R_52()) jj_scanpos=token44;
+        return false;
+    }
+
+    private boolean jj_3R_51() {
+        if (jj_3R_53()) return true;
+        return false;
+    }
+
+    private boolean jj_3R_52() {
+        if (jj_3R_10()) return true;
+        return false;
+    }
+
+    private boolean jj_3R_53() {
+        if (jj_3R_27()) return true;
+        while (true) {
+            Token token45=jj_scanpos;
+            ;
+            if (jj_3R_54()) {
+                jj_scanpos=token45;
+                break;
+            }
+        }
+        return false;
+    }
+
+    private boolean jj_3R_54() {
+        Token token46=jj_scanpos;
+        ;
+        if (jj_scan_token(1)) jj_scanpos=token46;
+        if (jj_3R_27()) return true;
+        return false;
     }
 
 }

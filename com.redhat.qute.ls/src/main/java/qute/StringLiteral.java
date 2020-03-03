@@ -2,9 +2,5 @@
 package qute;
 
 @SuppressWarnings("unused")
-public class StringLiteral extends Literal {
-    public StringLiteral(int kind,String image) {
-        super(kind,image);
-    }
-
+public class StringLiteral extends BaseNode {
 }

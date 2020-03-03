@@ -91,7 +91,7 @@ class QuteCompletions {
 		if (node != null) {
 
 		}
-		return list;
+		return  list;
 	}
 
 	private void fillCompletionSnippets(Node node, Position position, CompletionList list) {

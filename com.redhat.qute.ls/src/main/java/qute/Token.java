@@ -104,12 +104,80 @@ public class Token implements QUTEConstants,Node {
 
     public static Token newToken(int ofKind,String image) {
         switch(ofKind) {
+            case COMMA:
+            return new COMMA(ofKind,image);
+            case IN:
+            return new IN(ofKind,image);
+            case AS:
+            return new AS(ofKind,image);
+            case OR:
+            return new OR(ofKind,image);
+            case OR2:
+            return new OR2(ofKind,image);
+            case AND:
+            return new AND(ofKind,image);
+            case AND2:
+            return new AND2(ofKind,image);
+            case SIMPLE_EQUALS:
+            return new SIMPLE_EQUALS(ofKind,image);
+            case EQUALS:
+            return new EQUALS(ofKind,image);
+            case EQUALS2:
+            return new EQUALS2(ofKind,image);
+            case EQUALS3:
+            return new EQUALS3(ofKind,image);
+            case GT:
+            return new GT(ofKind,image);
+            case ALT_GT:
+            return new ALT_GT(ofKind,image);
+            case GE:
+            return new GE(ofKind,image);
+            case ALT_GE:
+            return new ALT_GE(ofKind,image);
+            case LT:
+            return new LT(ofKind,image);
+            case ALT_LT:
+            return new ALT_LT(ofKind,image);
+            case LE:
+            return new LE(ofKind,image);
+            case ALT_LE:
+            return new ALT_LE(ofKind,image);
+            case DOT_DOT:
+            return new DOT_DOT(ofKind,image);
+            case PLUS:
+            return new PLUS(ofKind,image);
+            case MINUS:
+            return new MINUS(ofKind,image);
+            case TIMES:
+            return new TIMES(ofKind,image);
+            case DIVIDE:
+            return new DIVIDE(ofKind,image);
+            case DOT:
+            return new DOT(ofKind,image);
+            case EXCLAM:
+            return new EXCLAM(ofKind,image);
+            case OPEN_BRACKET:
+            return new OPEN_BRACKET(ofKind,image);
+            case CLOSE_BRACKET:
+            return new CLOSE_BRACKET(ofKind,image);
+            case NULL:
+            return new NULL(ofKind,image);
+            case TRUE:
+            return new TRUE(ofKind,image);
+            case FALSE:
+            return new FALSE(ofKind,image);
+            case INTEGER:
+            return new INTEGER(ofKind,image);
+            case DECIMAL:
+            return new DECIMAL(ofKind,image);
+            case STRING_LITERAL:
+            return new STRING_LITERAL(ofKind,image);
+            case RAW_STRING:
+            return new RAW_STRING(ofKind,image);
             case C_IDENTIFIER:
             return new C_IDENTIFIER(ofKind,image);
-            case STRING_LITERAL:
-            return new StringLiteral(ofKind,image);
             case NUMBER:
-            return new NumberLiteral(ofKind,image);
+            return new NumberLiteral2(ofKind,image);
             case OPEN_PAREN:
             return new Delimiter(ofKind,image);
             case CLOSE_PAREN:
@@ -118,20 +186,42 @@ public class Token implements QUTEConstants,Node {
             return new Text(ofKind,image);
             case OPEN_CURLY:
             return new OPEN_CURLY(ofKind,image);
-            case IF:
-            return new IF(ofKind,image);
-            case ENDIF:
-            return new ENDIF(ofKind,image);
             case ABBREVIATED_END:
             return new ABBREVIATED_END(ofKind,image);
+            case EACH:
+            return new EACH(ofKind,image);
+            case ENDEACH:
+            return new ENDEACH(ofKind,image);
+            case FOR:
+            return new FOR(ofKind,image);
+            case ENDFOR:
+            return new ENDFOR(ofKind,image);
+            case IF:
+            return new IF(ofKind,image);
             case ELSEIF:
             return new ELSEIF(ofKind,image);
             case ELSE:
             return new ELSE(ofKind,image);
+            case ENDIF:
+            return new ENDIF(ofKind,image);
+            case QUTE_INCLUDE:
+            return new QUTE_INCLUDE(ofKind,image);
+            case ENDINCLUDE:
+            return new ENDINCLUDE(ofKind,image);
+            case INSERT:
+            return new INSERT(ofKind,image);
+            case ENDINSERT:
+            return new ENDINSERT(ofKind,image);
+            case WITH:
+            return new WITH(ofKind,image);
+            case ENDWITH:
+            return new ENDWITH(ofKind,image);
             case START_SECTION:
             return new START_SECTION(ofKind,image);
             case END_SECTION:
             return new END_SECTION(ofKind,image);
+            case START_PARAMETER_DECL:
+            return new START_PARAMETER_DECL(ofKind,image);
             case OPEN_COMMENT:
             return new OPEN_COMMENT(ofKind,image);
             case CLOSE_COMMENT:
