@@ -12,7 +12,7 @@ Today the Qute parser is not tolerant (when you write error in the template, the
 
 Here a demo with vscode which shows errors and outline (symbols) which shows the Qute AST:
 
-![Qute Demo in vscode](demos/QuteJavaCC21Demo.gif) 
+![Qute Demo in vscode](demos/QuteLSDemo.gif) 
 
 Here a screenshot with Eclipse IDE:
 

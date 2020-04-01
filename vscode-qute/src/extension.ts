@@ -113,7 +113,10 @@ function connectToQuteLS(context: ExtensionContext) {
   return requirements.resolveRequirements().then(requirements => {
     const clientOptions: LanguageClientOptions = {
       documentSelector: [
-        { scheme: 'file', language: 'qute-properties' }
+        { scheme: 'file', language: 'qute-html' },
+        { scheme: 'file', language: 'qute-json' },
+        { scheme: 'file', language: 'qute-yaml' },
+        { scheme: 'file', language: 'qute-text' }
       ],
       // wrap with key 'settings' so it can be handled same a DidChangeConfiguration
       initializationOptions: {
