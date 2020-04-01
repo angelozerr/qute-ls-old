@@ -1,0 +1,215 @@
+/* 
+ * See Qute specification at https://quarkus.io/guides/qute-reference
+*/
+options {
+   DEFAULT_LEXICAL_STATE=QUTE_TEXT;
+   SPECIAL_TOKENS_ARE_NODES;
+   PARSER_PACKAGE="qute";
+   FAULT_TOLERANT=true;
+}
+
+INCLUDE("QEL.javacc")
+
+TOKEN : 
+{
+   <#NO_OPEN_CURLY: ~["{"]>
+   |
+   <#ESCAPED_OPEN_CURLY: "\\{">
+   |
+   <#WS: ([" ", "\n", "\r", "\t"])+>
+   |
+   <TEXT : (<NO_OPEN_CURLY>|<ESCAPED_OPEN_CURLY>)+> #Text
+   |
+   <OPEN_CURLY : "{"> : QUTE_EXPRESSION
+   |
+   <ABBREVIATED_END : "{/}">
+   |
+   <EACH : "{#each" <WS>> : QUTE_EXPRESSION
+   |
+   <ENDEACH : "{/each}" >
+   |
+   <FOR : "{#for" <WS>> : QUTE_EXPRESSION
+   |
+   <ENDFOR : "{/for}" >
+   |
+   <IF : "{#if" <WS>> : QUTE_EXPRESSION
+   |
+   <ELSEIF : "{#else"<WS>"if" <WS>> : QUTE_EXPRESSION
+   |
+   <ELSE : "{#else" (<WS>)? "}">
+   |
+   <ENDIF : "{/if}" > 
+   |
+   <QUTE_INCLUDE : "{#include" <WS>> : QUTE_EXPRESSION
+   |
+   <ENDINCLUDE :  "{/include}" >
+   |
+   <INSERT : "{#insert" <WS>> : QUTE_EXPRESSION
+   |
+   <ENDINSERT :  "{/insert}" >
+   |
+   <WITH : "{#with" <WS>> : QUTE_EXPRESSION
+   |
+   <ENDWITH :  "{/with}" >     
+   |
+   <START_SECTION : "{#" (<ASCII_LETTER>)+> : QUTE_EXPRESSION
+   |
+   <END_SECTION : "{/" (<ASCII_LETTER>)+ (<WS>)? "}">
+   |
+   <START_PARAMETER_DECL : "{@" <C_IDENTIFIER> (<DOT>|<C_IDENTIFIER>)+ > : QUTE_EXPRESSION
+ }
+
+MORE :
+{
+   <OPEN_COMMENT : "{!"> : IN_COMMENT
+}
+
+<IN_COMMENT> MORE :
+{
+   <~[]>
+}
+
+<IN_COMMENT> SPECIAL_TOKEN : 
+{
+   <CLOSE_COMMENT: "!}"> #Comment : QUTE_TEXT
+}
+
+
+<QUTE_EXPRESSION> TOKEN :
+{
+   <CLOSE_CURLY : "}"> : QUTE_TEXT
+   |
+   <CLOSE_EMPTY : "/}"> : QUTE_TEXT
+}
+
+void ParameterDeclaration() : {}
+{
+   <START_PARAMETER_DECL>
+   <C_IDENTIFIER>
+   <CLOSE_CURLY>   
+}
+
+void Interpolation() ! : {}
+{
+   <OPEN_CURLY>Expression()<CLOSE_CURLY>
+}
+
+void EachSection() : {}
+{
+   <EACH>
+   Expression()
+   <CLOSE_CURLY>
+   Block()
+   (<ENDEACH>|<ABBREVIATED_END>)!
+}
+
+void ForSection() : {}
+{
+   <FOR>
+   <C_IDENTIFIER>
+   <IN>
+   Expression()
+   <CLOSE_CURLY>
+   [Block()]
+   (<ENDFOR>|<ABBREVIATED_END>)!
+}
+
+void IfSection() : {}
+{
+   <IF>
+   Expression()
+   <CLOSE_CURLY>
+   Block()
+   (ElseIfSection())*
+   [ElseBlock()]
+   (<ENDIF>|<ABBREVIATED_END>)!
+}
+
+void ElseIfSection() : {}
+{
+   <ELSEIF>
+   Expression()
+   <CLOSE_CURLY>!
+   Block()
+}
+
+void ElseBlock() : {}
+{
+   <ELSE> 
+   Block()
+}
+
+void IncludeSection() : {}
+{
+   <QUTE_INCLUDE>
+   Expression()
+   <CLOSE_CURLY>
+   Block()
+   (<ENDINCLUDE>|<ABBREVIATED_END>)!
+}
+
+void InsertSection() : {}
+{
+   <INSERT>
+   Expression()
+   <CLOSE_CURLY>
+   Block()
+   (<ENDINSERT>|<ABBREVIATED_END>)!
+}
+
+void WithSection() : {}
+{
+   <WITH>
+   Expression()
+   <CLOSE_CURLY>
+   Block()
+   (<ENDWITH>|<ABBREVIATED_END>)!
+}
+
+void UserSection() : {}
+{
+   <START_SECTION>[Expression()]
+   (
+       <CLOSE_EMPTY>!
+       |
+       (
+          <CLOSE_CURLY>
+          Block()
+          // This does not check for a mismatch between the start and end tag.
+          (<END_SECTION>|<ABBREVIATED_END>)!
+       )
+   )
+}
+
+
+void Block() : {}
+{
+   (
+      <TEXT>
+      |
+      ParameterDeclaration()
+      |
+      Interpolation()
+      |
+      EachSection()
+      |
+      ForSection()
+      |
+      IfSection()
+      |
+      IncludeSection()
+      |
+      InsertSection()
+      |
+      WithSection()
+      |
+      UserSection()
+   )+
+}
+
+
+void Root()! :{}
+{
+   [Block()]
+   <EOF>
+}

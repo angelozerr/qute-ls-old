@@ -95,7 +95,7 @@ class QuteSymbolsProvider {
 	}
 
 	private String nodeToName(Node node) {
-		return node.getClass().getSimpleName();
+		return node.getClass().getSimpleName() + ( node.isDirty() ? " (dirty)" : "");
 	}
 
 	private static Range getSymbolRange(Node node) {

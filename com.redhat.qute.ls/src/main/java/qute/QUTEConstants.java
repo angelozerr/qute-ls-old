@@ -5,6 +5,8 @@ package qute;
  * Token literal values and constants.
  */
 public interface QUTEConstants {
+    int INVALID=-1;
+    // Used for Lexically invalid input
     int EOF=0;
     // End of file
     int COMMA=1;

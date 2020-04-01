@@ -9,36 +9,9 @@ import java.lang.reflect.*;
  * fairly easy for someone to write their own Node implementation. 
  */
 abstract public class Nodes {
-    static public<T extends Node>T firstChildOfType(Node node,Class<T>clazz) {
-        for(int i=0; 
-        i<node.getChildCount(); 
-        i++) {
-            Node child=node.getChild(i);
-            if (clazz.isInstance(child)) {
-                return clazz.cast(child);
-            }
-        }
-        return null;
-    }
-
-    static public<T extends Node>List<T>childrenOfType(Node node,Class<T>clazz) {
-        List<T>result=new ArrayList<T>();
-        for(int i=0; 
-        i<node.getChildCount(); 
-        i++) {
-            Node child=node.getChild(i);
-            if (clazz.isInstance(child)) {
-                result.add(clazz.cast(child));
-            }
-        }
-        return result;
-    }
-
     static public List<Token>getTokens(Node node) {
         List<Token>result=new ArrayList<Token>();
-        for(int i=0; 
-        i<node.getChildCount(); 
-        i++) {
+        for (int i=0; i<node.getChildCount(); i++) {
             Node child=node.getChild(i);
             if (child instanceof Token) {
                 result.add((Token) child);
@@ -52,7 +25,7 @@ abstract public class Nodes {
 
     static public List<Token>getRealTokens(Node n) {
         List<Token>result=new ArrayList<Token>();
-        for(Token token : getTokens(n)) {
+        for (Token token : getTokens(n)) {
             if (!token.isUnparsed()) {
                 result.add(token);
             }
@@ -123,7 +96,7 @@ abstract public class Nodes {
     static public void expandSpecialTokens(Node n,boolean recursive) {
         List<Token>expandedList=getAllTokens(n,true,false);
         n.clearChildren();
-        for(Node child : expandedList) {
+        for (Node child : expandedList) {
             n.addChild(child);
             if (recursive&&child.getChildCount()>0) {
                 expandSpecialTokens(child,true);
@@ -139,9 +112,7 @@ abstract public class Nodes {
      */
     static public List<Token>getAllTokens(Node n,boolean includeCommentTokens,boolean recursive) {
         List<Token>result=new ArrayList<Token>();
-        for(Iterator<Node>it=iterator(n); 
-        it.hasNext(); 
-        ) {
+        for (Iterator<Node>it=iterator(n); it.hasNext(); ) {
             Node child=it.next();
             if (child instanceof Token) {
                 Token token=(Token) child;
@@ -187,171 +158,10 @@ abstract public class Nodes {
         if (output.length()>0) {
             System.out.println(prefix+output);
         }
-        for(Iterator<Node>it=iterator(n); 
-        it.hasNext(); 
-        ) {
+        for (Iterator<Node>it=iterator(n); it.hasNext(); ) {
             Node child=it.next();
             dump(child,prefix+"  ");
         }
-    }
-
-    static public<T extends Node>T getFirstAncestorOfType(Node n,Class<T>clazz) {
-        Node parent=n;
-        while (parent!=null) {
-            parent=parent.getParent();
-            if (clazz.isInstance(parent)) {
-                return clazz.cast(parent);
-            }
-        }
-        return null;
-    }
-
-    /**
-     * An abstract base class for classes that
-     * implement the visitor pattern.
-     */
-    abstract static public class Visitor {
-        private Map<Class<?extends Node>,Method>handlers=new HashMap<Class<?extends Node>,Method>();
-        public void visit(Node node) {
-            try {
-                Class<?extends Node>clazz=node.getClass();
-                Method visitMethod=handlers.get(clazz);
-                if (visitMethod==null) {
-                    if (!handlers.containsKey(clazz)) {
-                        visitMethod=this.getClass().getMethod("visit",clazz);
-                        handlers.put(clazz,visitMethod);
-                    }
-                    else {
-                        fallback(node);
-                    }
-                }
-                visitMethod.invoke(this,node);
-            }
-            catch(InvocationTargetException ite) {
-                Throwable cause=ite.getCause();
-                if (cause instanceof RuntimeException) {
-                    throw(RuntimeException) cause;
-                }
-                throw new RuntimeException(ite);
-            }
-            catch(NoSuchMethodException nsme) {
-                handlers.put(node.getClass(),null);
-                fallback(node);
-            }
-            catch(IllegalAccessException e) {
-                throw new RuntimeException(e.getMessage());
-            }
-        }
-
-        public void recurse(Node node) {
-            for(int i=0; 
-            i<node.getChildCount(); 
-            i++) {
-                visit(node.getChild(i));
-            }
-        }
-
-        /**
-         * This method is invoked if a handler has no visit method
-         * defined for a given Node type. In the base implementation
-         * this simply recurses into the node's children.
-         */
-        protected void fallback(Node node) {
-            recurse(node);
-        }
-
-    }
-    /**
-     * Returns the first child of the given node. If there is no such node, this
-     * returns <code>null</code>.
-     * 
-     * @return the first child of the given node. If there is no such node, this
-     *         returns <code>null</code>.
-     */
-    public static Node getFirstChild(Node node) {
-        if (node==null) {
-            return null;
-        }
-        return node.hasChildNodes()?node.getChild(0):
-        null;
-    }
-
-    /**
-     * Returns the last child of the given node. If there is no such node, this
-     * returns <code>null</code>.
-     * 
-     * @return the last child of the given node. If there is no such node, this
-     *         returns <code>null</code>.
-     */
-    public static Node getLastChild(Node node) {
-        if (node==null) {
-            return null;
-        }
-        int count=node.getChildCount();
-        return count>0?node.getChild(count-1):
-        null;
-    }
-
-    /**
-     * Returns the node at the given position (line,column) and null otherwise.
-     * 
-     * @param node   the node.
-     * @param line   the line position
-     * @param column the column position
-     * 
-     * @return the node at the given position (line,column) and null otherwise.
-     */
-    public static Node findNodeAt(Node node,int line,int column) {
-        if (!isIncluded(node,line,column)) {
-            return null;
-        }
-        for(int i=0; 
-        i<node.getChildCount(); 
-        i++) {
-            Node child=node.getChild(i);
-            Node match=findNodeAt(child,line,column);
-            if (match!=null) {
-                return match;
-            }
-        }
-        return node;
-    }
-
-    /**
-     * Returns true if the given position (line,column) is included in the given
-     * node and false otherwise.
-     * 
-     * @param node   the node
-     * @param line   the line position
-     * @param column the column position
-     * @return true if the given position (line,column) is included in the given
-     *         node and false otherwise.
-     */
-    public static boolean isIncluded(Node node,int line,int column) {
-        if (node==null) {
-            return false;
-        }
-        return isIncluded(node.getBeginLine(),node.getBeginColumn(),node.getEndLine(),node.getEndColumn(),line,column);
-    }
-
-    private static boolean isIncluded(int beginLine,int beginColumn,int endLine,int endColumn,int line,int column) {
-        if (beginLine==line&&beginColumn==column) {
-            return true;
-        }
-        if (endLine==line&&endColumn==column) {
-            return true;
-        }
-        return!isAfter(beginLine,beginColumn,line,column)&&isAfter(endLine,endColumn,line,column);
-    }
-
-    private static boolean isAfter(int line1,int column1,int line2,int column2) {
-        if (line1>line2) {
-            return true;
-        }
-        if (line1==line2) {
-            return column1>=column2;
-        }
-        return false;
     }
 
 }

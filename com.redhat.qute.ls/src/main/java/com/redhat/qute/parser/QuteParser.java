@@ -25,6 +25,7 @@ public class QuteParser {
 		}
 		Template template = new Template(templateId);
 		QUTEParser parser = new QUTEParser(new StringReader(content));
+		parser.setParserTolerant(true);
 		// parser.setBuildTree(true);
 		try {
 			parser.Root();
@@ -42,7 +43,7 @@ public class QuteParser {
 			}
 			template.setRoot(root);
 		} catch (ParseException e) {
-			template.setProblems(Arrays.asList(new Problem(e.currentToken, e.getMessage())));
+			//template.setProblems(Arrays.asList(new Problem(e., e.getMessage())));
 		}
 		return template;
 	}
