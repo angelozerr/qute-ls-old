@@ -1,8 +1,5 @@
 package com.redhat.qute.parser;
 
-import java.io.StringReader;
-import java.util.Arrays;
-
 import org.eclipse.lsp4j.jsonrpc.CancelChecker;
 
 import qute.Node;
@@ -24,7 +21,7 @@ public class QuteParser {
 			cancelChecker = DEFAULT_CANCEL_CHECKER;
 		}
 		Template template = new Template(templateId);
-		QUTEParser parser = new QUTEParser(new StringReader(content));
+		QUTEParser parser = new QUTEParser(templateId, content);
 		parser.setParserTolerant(true);
 		// parser.setBuildTree(true);
 		try {
@@ -34,13 +31,13 @@ public class QuteParser {
 			// which encloses the all Root which causes some trouble with findNodeAt
 			// we remove it
 			Node root = parser.rootNode(); //.getChild(0);
-			int count = root.getChildCount();
-			if (count > 1) {
-				Node n = root.getChild(count - 1);
-				if (n instanceof Token) {
-					root.removeChild(n);
-				}
-			}
+//			int count = root.getChildCount();
+//			if (count > 1) {
+//				Node n = root.getChild(count - 1);
+//				if (n instanceof Token) {
+//					root.removeChild(n);
+//				}
+//			}
 			template.setRoot(root);
 		} catch (ParseException e) {
 			//template.setProblems(Arrays.asList(new Problem(e., e.getMessage())));

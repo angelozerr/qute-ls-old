@@ -34,6 +34,14 @@ public class QUTEParser implements QUTEConstants {
     private boolean buildTree=true;
     private boolean tokensAreNodes=true;
     private boolean specialTokensAreNodes=true;
+    public void setSpecialTokensAreNodes(boolean specialTokensAreNodes) {
+        this.specialTokensAreNodes=specialTokensAreNodes;
+    }
+
+    public void setTokensAreNodes(boolean tokensAreNodes) {
+        this.tokensAreNodes=tokensAreNodes;
+    }
+
     NodeScope currentNodeScope=new NodeScope();
     /** 
 	 * Returns the root node of the AST.  It only makes sense to call
@@ -114,7 +122,7 @@ public class QUTEParser implements QUTEConstants {
                 }
                 while (specialToken!=null&&specialToken!=token) {
                     n.addChild(specialToken);
-                    specialToken=specialToken.next;
+                    specialToken=specialToken.getNext();
                 }
             }
             n.addChild(child);
@@ -149,7 +157,7 @@ public class QUTEParser implements QUTEConstants {
                     }
                     while (specialToken!=null&&specialToken!=token) {
                         n.addChild(specialToken);
-                        specialToken=specialToken.next;
+                        specialToken=specialToken.getNext();
                     }
                 }
                 n.addChild(child);
@@ -282,7 +290,8 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException1: "+parseException1.getMessage());
                     Expression1.setParseException(parseException1);
                     if (Expression1forced) {
-                        attemptRecovery(Expression1,DOT_DOT,TIMES,EXCLAM,CLOSE_BRACKET,NULL,TRUE,FALSE,INTEGER,DECIMAL,STRING_LITERAL,RAW_STRING,C_IDENTIFIER,CLOSE_PAREN);
+                        //		                attemptRecovery(Expression1, DOT_DOT, TIMES, EXCLAM, CLOSE_BRACKET, NULL, TRUE, FALSE, INTEGER, DECIMAL, STRING_LITERAL, RAW_STRING, C_IDENTIFIER, CLOSE_PAREN);
+                        insertVirtualToken(DOT_DOT);
                         closeNodeScope(Expression1,true);
                     }
                     else {
@@ -357,7 +366,8 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException2: "+parseException2.getMessage());
                     OrExpression2.setParseException(parseException2);
                     if (OrExpression2forced) {
-                        attemptRecovery(OrExpression2,DOT_DOT,TIMES,EXCLAM,CLOSE_BRACKET,NULL,TRUE,FALSE,INTEGER,DECIMAL,STRING_LITERAL,RAW_STRING,C_IDENTIFIER,CLOSE_PAREN);
+                        //		                attemptRecovery(OrExpression2, DOT_DOT, TIMES, EXCLAM, CLOSE_BRACKET, NULL, TRUE, FALSE, INTEGER, DECIMAL, STRING_LITERAL, RAW_STRING, C_IDENTIFIER, CLOSE_PAREN);
+                        insertVirtualToken(DOT_DOT);
                         closeNodeScope(OrExpression2,true);
                     }
                     else {
@@ -432,7 +442,8 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException3: "+parseException3.getMessage());
                     AndExpression3.setParseException(parseException3);
                     if (AndExpression3forced) {
-                        attemptRecovery(AndExpression3,DOT_DOT,TIMES,EXCLAM,CLOSE_BRACKET,NULL,TRUE,FALSE,INTEGER,DECIMAL,STRING_LITERAL,RAW_STRING,C_IDENTIFIER,CLOSE_PAREN);
+                        //		                attemptRecovery(AndExpression3, DOT_DOT, TIMES, EXCLAM, CLOSE_BRACKET, NULL, TRUE, FALSE, INTEGER, DECIMAL, STRING_LITERAL, RAW_STRING, C_IDENTIFIER, CLOSE_PAREN);
+                        insertVirtualToken(DOT_DOT);
                         closeNodeScope(AndExpression3,true);
                     }
                     else {
@@ -508,7 +519,8 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException4: "+parseException4.getMessage());
                     EqualityExpression4.setParseException(parseException4);
                     if (EqualityExpression4forced) {
-                        attemptRecovery(EqualityExpression4,DOT_DOT,TIMES,EXCLAM,CLOSE_BRACKET,NULL,TRUE,FALSE,INTEGER,DECIMAL,STRING_LITERAL,RAW_STRING,C_IDENTIFIER,CLOSE_PAREN);
+                        //		                attemptRecovery(EqualityExpression4, DOT_DOT, TIMES, EXCLAM, CLOSE_BRACKET, NULL, TRUE, FALSE, INTEGER, DECIMAL, STRING_LITERAL, RAW_STRING, C_IDENTIFIER, CLOSE_PAREN);
+                        insertVirtualToken(DOT_DOT);
                         closeNodeScope(EqualityExpression4,true);
                     }
                     else {
@@ -609,7 +621,8 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException5: "+parseException5.getMessage());
                     RelationalExpression5.setParseException(parseException5);
                     if (RelationalExpression5forced) {
-                        attemptRecovery(RelationalExpression5,DOT_DOT,TIMES,EXCLAM,CLOSE_BRACKET,NULL,TRUE,FALSE,INTEGER,DECIMAL,STRING_LITERAL,RAW_STRING,C_IDENTIFIER,CLOSE_PAREN);
+                        //		                attemptRecovery(RelationalExpression5, DOT_DOT, TIMES, EXCLAM, CLOSE_BRACKET, NULL, TRUE, FALSE, INTEGER, DECIMAL, STRING_LITERAL, RAW_STRING, C_IDENTIFIER, CLOSE_PAREN);
+                        insertVirtualToken(DOT_DOT);
                         closeNodeScope(RelationalExpression5,true);
                     }
                     else {
@@ -647,7 +660,7 @@ public class QUTEParser implements QUTEConstants {
                 // Code for expansion specified on line 173 of QEL.javacc
                 consumeToken(DOT_DOT,false);
                 // Code for expansion specified on line 174 of QEL.javacc
-                if (phase2_1(INFINITY)) {
+                if (phase2_6_QEL_javacc_line_175(INFINITY)) {
                     // Code for expansion specified on line 175 of QEL.javacc
                     // Code for AdditiveExpression specified on line 176 of QEL.javacc
                     AdditiveExpression();
@@ -670,7 +683,8 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException6: "+parseException6.getMessage());
                     RangeExpression6.setParseException(parseException6);
                     if (RangeExpression6forced) {
-                        attemptRecovery(RangeExpression6,DOT_DOT,TIMES,EXCLAM,CLOSE_BRACKET,NULL,TRUE,FALSE,INTEGER,DECIMAL,STRING_LITERAL,RAW_STRING,C_IDENTIFIER,CLOSE_PAREN);
+                        //		                attemptRecovery(RangeExpression6, DOT_DOT, TIMES, EXCLAM, CLOSE_BRACKET, NULL, TRUE, FALSE, INTEGER, DECIMAL, STRING_LITERAL, RAW_STRING, C_IDENTIFIER, CLOSE_PAREN);
+                        insertVirtualToken(DOT_DOT);
                         closeNodeScope(RangeExpression6,true);
                     }
                     else {
@@ -702,10 +716,10 @@ public class QUTEParser implements QUTEConstants {
             // Code for MultiplicativeExpression specified on line 183 of QEL.javacc
             MultiplicativeExpression();
             // Code for expansion specified on line 188 of QEL.javacc
-            label_3:
+            label_8:
             while (true) {
-                if (!(phase2_2(INFINITY))) {
-                    break label_3;
+                if (!(phase2_8_QEL_javacc_line_185(INFINITY))) {
+                    break label_8;
                 }
                 // Code for expansion specified on line 185 of QEL.javacc
                 // Code for expansion specified on line 186 of QEL.javacc
@@ -744,7 +758,8 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException7: "+parseException7.getMessage());
                     AdditiveExpression7.setParseException(parseException7);
                     if (AdditiveExpression7forced) {
-                        attemptRecovery(AdditiveExpression7,TIMES,EXCLAM,CLOSE_BRACKET,NULL,TRUE,FALSE,INTEGER,DECIMAL,STRING_LITERAL,RAW_STRING,C_IDENTIFIER,CLOSE_PAREN);
+                        //		                attemptRecovery(AdditiveExpression7, TIMES, EXCLAM, CLOSE_BRACKET, NULL, TRUE, FALSE, INTEGER, DECIMAL, STRING_LITERAL, RAW_STRING, C_IDENTIFIER, CLOSE_PAREN);
+                        insertVirtualToken(TIMES);
                         closeNodeScope(AdditiveExpression7,true);
                     }
                     else {
@@ -776,11 +791,11 @@ public class QUTEParser implements QUTEConstants {
             // Code for UnaryExpression specified on line 193 of QEL.javacc
             UnaryExpression();
             // Code for expansion specified on line 197 of QEL.javacc
-            label_4:
+            label_10:
             while (true) {
                 int int6=nextTokenKind();
                 if (!(int6==TIMES||int6==DIVIDE)) {
-                    break label_4;
+                    break label_10;
                 }
                 // Code for expansion specified on line 195 of QEL.javacc
                 // Code for expansion specified on line 195 of QEL.javacc
@@ -819,7 +834,8 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException8: "+parseException8.getMessage());
                     MultiplicativeExpression8.setParseException(parseException8);
                     if (MultiplicativeExpression8forced) {
-                        attemptRecovery(MultiplicativeExpression8,TIMES,EXCLAM,CLOSE_BRACKET,NULL,TRUE,FALSE,INTEGER,DECIMAL,STRING_LITERAL,RAW_STRING,C_IDENTIFIER,CLOSE_PAREN);
+                        //		                attemptRecovery(MultiplicativeExpression8, TIMES, EXCLAM, CLOSE_BRACKET, NULL, TRUE, FALSE, INTEGER, DECIMAL, STRING_LITERAL, RAW_STRING, C_IDENTIFIER, CLOSE_PAREN);
+                        insertVirtualToken(TIMES);
                         closeNodeScope(MultiplicativeExpression8,true);
                     }
                     else {
@@ -919,7 +935,8 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException9: "+parseException9.getMessage());
                     UnaryPlusMinusExpression9.setParseException(parseException9);
                     if (UnaryPlusMinusExpression9forced) {
-                        attemptRecovery(UnaryPlusMinusExpression9,TIMES,EXCLAM,CLOSE_BRACKET,NULL,TRUE,FALSE,INTEGER,DECIMAL,STRING_LITERAL,RAW_STRING,C_IDENTIFIER,CLOSE_PAREN);
+                        //		                attemptRecovery(UnaryPlusMinusExpression9, TIMES, EXCLAM, CLOSE_BRACKET, NULL, TRUE, FALSE, INTEGER, DECIMAL, STRING_LITERAL, RAW_STRING, C_IDENTIFIER, CLOSE_PAREN);
+                        insertVirtualToken(TIMES);
                         closeNodeScope(UnaryPlusMinusExpression9,true);
                     }
                     else {
@@ -969,7 +986,8 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException10: "+parseException10.getMessage());
                     NotExpression10.setParseException(parseException10);
                     if (NotExpression10forced) {
-                        attemptRecovery(NotExpression10,TIMES,EXCLAM,CLOSE_BRACKET,NULL,TRUE,FALSE,INTEGER,DECIMAL,STRING_LITERAL,RAW_STRING,C_IDENTIFIER,CLOSE_PAREN);
+                        //		                attemptRecovery(NotExpression10, TIMES, EXCLAM, CLOSE_BRACKET, NULL, TRUE, FALSE, INTEGER, DECIMAL, STRING_LITERAL, RAW_STRING, C_IDENTIFIER, CLOSE_PAREN);
+                        insertVirtualToken(TIMES);
                         closeNodeScope(NotExpression10,true);
                     }
                     else {
@@ -1001,10 +1019,10 @@ public class QUTEParser implements QUTEConstants {
             // Code for PrimaryExpression specified on line 222 of QEL.javacc
             PrimaryExpression();
             // Code for expansion specified on line 226 of QEL.javacc
-            label_5:
+            label_11:
             while (true) {
-                if (!(phase2_3(INFINITY)&&(getToken(2).kind!=C_IDENTIFIER||getToken(3).kind!=SIMPLE_EQUALS))) {
-                    break label_5;
+                if (!(phase2_11_QEL_javacc_line_224(INFINITY)&&(getToken(2).kind!=C_IDENTIFIER||getToken(3).kind!=SIMPLE_EQUALS))) {
+                    break label_11;
                 }
                 // Code for expansion specified on line 224 of QEL.javacc
                 // Code for expansion specified on line 225 of QEL.javacc
@@ -1036,7 +1054,8 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException11: "+parseException11.getMessage());
                     DefaultToExpression11.setParseException(parseException11);
                     if (DefaultToExpression11forced) {
-                        attemptRecovery(DefaultToExpression11,TIMES,EXCLAM,CLOSE_BRACKET,NULL,TRUE,FALSE,INTEGER,DECIMAL,STRING_LITERAL,RAW_STRING,C_IDENTIFIER,CLOSE_PAREN);
+                        //		                attemptRecovery(DefaultToExpression11, TIMES, EXCLAM, CLOSE_BRACKET, NULL, TRUE, FALSE, INTEGER, DECIMAL, STRING_LITERAL, RAW_STRING, C_IDENTIFIER, CLOSE_PAREN);
+                        insertVirtualToken(TIMES);
                         closeNodeScope(DefaultToExpression11,true);
                     }
                     else {
@@ -1068,10 +1087,10 @@ public class QUTEParser implements QUTEConstants {
             // Code for BaseExpression specified on line 235 of QEL.javacc
             BaseExpression();
             // Code for expansion specified on line 245 of QEL.javacc
-            label_6:
+            label_14:
             while (true) {
-                if (!(phase2_4(INFINITY))) {
-                    break label_6;
+                if (!(phase2_14_QEL_javacc_line_237(INFINITY))) {
+                    break label_14;
                 }
                 // Code for expansion specified on line 237 of QEL.javacc
                 // Code for expansion specified on line 239 of QEL.javacc
@@ -1113,7 +1132,8 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException12: "+parseException12.getMessage());
                     PrimaryExpression12.setParseException(parseException12);
                     if (PrimaryExpression12forced) {
-                        attemptRecovery(PrimaryExpression12,TIMES,CLOSE_BRACKET,NULL,TRUE,FALSE,INTEGER,DECIMAL,STRING_LITERAL,RAW_STRING,C_IDENTIFIER,CLOSE_PAREN);
+                        //		                attemptRecovery(PrimaryExpression12, TIMES, CLOSE_BRACKET, NULL, TRUE, FALSE, INTEGER, DECIMAL, STRING_LITERAL, RAW_STRING, C_IDENTIFIER, CLOSE_PAREN);
+                        insertVirtualToken(TIMES);
                         closeNodeScope(PrimaryExpression12,true);
                     }
                     else {
@@ -1197,7 +1217,8 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException13: "+parseException13.getMessage());
                     BaseExpression13.setParseException(parseException13);
                     if (BaseExpression13forced) {
-                        attemptRecovery(BaseExpression13,NULL,TRUE,FALSE,INTEGER,DECIMAL,STRING_LITERAL,RAW_STRING,C_IDENTIFIER,CLOSE_PAREN);
+                        //		                attemptRecovery(BaseExpression13, NULL, TRUE, FALSE, INTEGER, DECIMAL, STRING_LITERAL, RAW_STRING, C_IDENTIFIER, CLOSE_PAREN);
+                        insertVirtualToken(NULL);
                         closeNodeScope(BaseExpression13,true);
                     }
                     else {
@@ -1295,11 +1316,11 @@ public class QUTEParser implements QUTEConstants {
             // Code for Expression specified on line 289 of QEL.javacc
             Expression();
             // Code for expansion specified on line 293 of QEL.javacc
-            label_7:
+            label_17:
             while (true) {
                 int int9=nextTokenKind();
                 if (!(int9==COMMA||int9==PLUS||int9==MINUS||int9==EXCLAM||int9==NULL||int9==TRUE||int9==FALSE||int9==INTEGER||int9==DECIMAL||int9==STRING_LITERAL||int9==RAW_STRING||int9==C_IDENTIFIER||int9==OPEN_PAREN)) {
-                    break label_7;
+                    break label_17;
                 }
                 // Code for expansion specified on line 291 of QEL.javacc
                 // Code for expansion specified on line 291 of QEL.javacc
@@ -1329,7 +1350,8 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException14: "+parseException14.getMessage());
                     PositionalArgsList14.setParseException(parseException14);
                     if (PositionalArgsList14forced) {
-                        attemptRecovery(PositionalArgsList14,DOT_DOT,TIMES,EXCLAM,CLOSE_BRACKET,NULL,TRUE,FALSE,INTEGER,DECIMAL,STRING_LITERAL,RAW_STRING,C_IDENTIFIER,CLOSE_PAREN);
+                        //		                attemptRecovery(PositionalArgsList14, DOT_DOT, TIMES, EXCLAM, CLOSE_BRACKET, NULL, TRUE, FALSE, INTEGER, DECIMAL, STRING_LITERAL, RAW_STRING, C_IDENTIFIER, CLOSE_PAREN);
+                        insertVirtualToken(DOT_DOT);
                         closeNodeScope(PositionalArgsList14,true);
                     }
                     else {
@@ -1390,7 +1412,8 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException15: "+parseException15.getMessage());
                     StringLiteral15.setParseException(parseException15);
                     if (StringLiteral15forced) {
-                        attemptRecovery(StringLiteral15,STRING_LITERAL,RAW_STRING);
+                        //		                attemptRecovery(StringLiteral15, STRING_LITERAL, RAW_STRING);
+                        insertVirtualToken(STRING_LITERAL);
                         closeNodeScope(StringLiteral15,true);
                     }
                     else {
@@ -1442,7 +1465,8 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException16: "+parseException16.getMessage());
                     Parenthesis16.setParseException(parseException16);
                     if (Parenthesis16forced) {
-                        attemptRecovery(Parenthesis16,CLOSE_PAREN);
+                        //		                attemptRecovery(Parenthesis16, CLOSE_PAREN);
+                        insertVirtualToken(CLOSE_PAREN);
                         closeNodeScope(Parenthesis16,true);
                     }
                     else {
@@ -1503,7 +1527,8 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException17: "+parseException17.getMessage());
                     NumberLiteral17.setParseException(parseException17);
                     if (NumberLiteral17forced) {
-                        attemptRecovery(NumberLiteral17,INTEGER,DECIMAL);
+                        //		                attemptRecovery(NumberLiteral17, INTEGER, DECIMAL);
+                        insertVirtualToken(INTEGER);
                         closeNodeScope(NumberLiteral17,true);
                     }
                     else {
@@ -1564,7 +1589,8 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException18: "+parseException18.getMessage());
                     BooleanLiteral18.setParseException(parseException18);
                     if (BooleanLiteral18forced) {
-                        attemptRecovery(BooleanLiteral18,TRUE,FALSE);
+                        //		                attemptRecovery(BooleanLiteral18, TRUE, FALSE);
+                        insertVirtualToken(TRUE);
                         closeNodeScope(BooleanLiteral18,true);
                     }
                     else {
@@ -1612,7 +1638,8 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException19: "+parseException19.getMessage());
                     NullLiteral19.setParseException(parseException19);
                     if (NullLiteral19forced) {
-                        attemptRecovery(NullLiteral19,NULL);
+                        //		                attemptRecovery(NullLiteral19, NULL);
+                        insertVirtualToken(NULL);
                         closeNodeScope(NullLiteral19,true);
                     }
                     else {
@@ -1664,7 +1691,8 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException20: "+parseException20.getMessage());
                     ParameterDeclaration20.setParseException(parseException20);
                     if (ParameterDeclaration20forced) {
-                        attemptRecovery(ParameterDeclaration20,CLOSE_CURLY);
+                        //		                attemptRecovery(ParameterDeclaration20, CLOSE_CURLY);
+                        insertVirtualToken(CLOSE_CURLY);
                         closeNodeScope(ParameterDeclaration20,true);
                     }
                     else {
@@ -1716,7 +1744,8 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException21: "+parseException21.getMessage());
                     Interpolation21.setParseException(parseException21);
                     if (Interpolation21forced) {
-                        attemptRecovery(Interpolation21,CLOSE_CURLY);
+                        //		                attemptRecovery(Interpolation21, CLOSE_CURLY);
+                        insertVirtualToken(CLOSE_CURLY);
                         closeNodeScope(Interpolation21,true);
                     }
                     else {
@@ -1786,7 +1815,8 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException22: "+parseException22.getMessage());
                     EachSection22.setParseException(parseException22);
                     if (EachSection22forced) {
-                        attemptRecovery(EachSection22,ABBREVIATED_END,ENDEACH);
+                        //		                attemptRecovery(EachSection22, ABBREVIATED_END, ENDEACH);
+                        insertVirtualToken(ABBREVIATED_END);
                         closeNodeScope(EachSection22,true);
                     }
                     else {
@@ -1865,7 +1895,8 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException23: "+parseException23.getMessage());
                     ForSection23.setParseException(parseException23);
                     if (ForSection23forced) {
-                        attemptRecovery(ForSection23,ABBREVIATED_END,ENDFOR);
+                        //		                attemptRecovery(ForSection23, ABBREVIATED_END, ENDFOR);
+                        insertVirtualToken(ABBREVIATED_END);
                         closeNodeScope(ForSection23,true);
                     }
                     else {
@@ -1903,11 +1934,11 @@ public class QUTEParser implements QUTEConstants {
             // Code for Block specified on line 122 of QUTE.javacc
             Block();
             // Code for expansion specified on line 123 of QUTE.javacc
-            label_8:
+            label_20:
             while (true) {
                 int int12=nextTokenKind();
                 if (!(int12==ELSEIF)) {
-                    break label_8;
+                    break label_20;
                 }
                 // Code for expansion specified on line 123 of QUTE.javacc
                 // Code for ElseIfSection specified on line 123 of QUTE.javacc
@@ -1953,7 +1984,8 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException24: "+parseException24.getMessage());
                     IfSection24.setParseException(parseException24);
                     if (IfSection24forced) {
-                        attemptRecovery(IfSection24,ABBREVIATED_END,ENDIF);
+                        //		                attemptRecovery(IfSection24, ABBREVIATED_END, ENDIF);
+                        insertVirtualToken(ABBREVIATED_END);
                         closeNodeScope(IfSection24,true);
                     }
                     else {
@@ -2007,7 +2039,8 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException25: "+parseException25.getMessage());
                     ElseIfSection25.setParseException(parseException25);
                     if (ElseIfSection25forced) {
-                        attemptRecovery(ElseIfSection25,TEXT,ABBREVIATED_END,ENDEACH,ENDFOR,ENDIF,ENDINCLUDE,ENDINSERT,ENDWITH,END_SECTION,CLOSE_CURLY,CLOSE_EMPTY);
+                        //		                attemptRecovery(ElseIfSection25, TEXT, ABBREVIATED_END, ENDEACH, ENDFOR, ENDIF, ENDINCLUDE, ENDINSERT, ENDWITH, END_SECTION, CLOSE_CURLY, CLOSE_EMPTY);
+                        insertVirtualToken(TEXT);
                         closeNodeScope(ElseIfSection25,true);
                     }
                     else {
@@ -2057,7 +2090,8 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException26: "+parseException26.getMessage());
                     ElseBlock26.setParseException(parseException26);
                     if (ElseBlock26forced) {
-                        attemptRecovery(ElseBlock26,TEXT,ABBREVIATED_END,ENDEACH,ENDFOR,ENDIF,ENDINCLUDE,ENDINSERT,ENDWITH,END_SECTION,CLOSE_CURLY,CLOSE_EMPTY);
+                        //		                attemptRecovery(ElseBlock26, TEXT, ABBREVIATED_END, ENDEACH, ENDFOR, ENDIF, ENDINCLUDE, ENDINSERT, ENDWITH, END_SECTION, CLOSE_CURLY, CLOSE_EMPTY);
+                        insertVirtualToken(TEXT);
                         closeNodeScope(ElseBlock26,true);
                     }
                     else {
@@ -2127,7 +2161,8 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException27: "+parseException27.getMessage());
                     IncludeSection27.setParseException(parseException27);
                     if (IncludeSection27forced) {
-                        attemptRecovery(IncludeSection27,ABBREVIATED_END,ENDINCLUDE);
+                        //		                attemptRecovery(IncludeSection27, ABBREVIATED_END, ENDINCLUDE);
+                        insertVirtualToken(ABBREVIATED_END);
                         closeNodeScope(IncludeSection27,true);
                     }
                     else {
@@ -2197,7 +2232,8 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException28: "+parseException28.getMessage());
                     InsertSection28.setParseException(parseException28);
                     if (InsertSection28forced) {
-                        attemptRecovery(InsertSection28,ABBREVIATED_END,ENDINSERT);
+                        //		                attemptRecovery(InsertSection28, ABBREVIATED_END, ENDINSERT);
+                        insertVirtualToken(ABBREVIATED_END);
                         closeNodeScope(InsertSection28,true);
                     }
                     else {
@@ -2267,7 +2303,8 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException29: "+parseException29.getMessage());
                     WithSection29.setParseException(parseException29);
                     if (WithSection29forced) {
-                        attemptRecovery(WithSection29,ABBREVIATED_END,ENDWITH);
+                        //		                attemptRecovery(WithSection29, ABBREVIATED_END, ENDWITH);
+                        insertVirtualToken(ABBREVIATED_END);
                         closeNodeScope(WithSection29,true);
                     }
                     else {
@@ -2357,7 +2394,8 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException30: "+parseException30.getMessage());
                     UserSection30.setParseException(parseException30);
                     if (UserSection30forced) {
-                        attemptRecovery(UserSection30,ABBREVIATED_END,END_SECTION,CLOSE_EMPTY);
+                        //		                attemptRecovery(UserSection30, ABBREVIATED_END, END_SECTION, CLOSE_EMPTY);
+                        insertVirtualToken(ABBREVIATED_END);
                         closeNodeScope(UserSection30,true);
                     }
                     else {
@@ -2387,7 +2425,7 @@ public class QUTEParser implements QUTEConstants {
         ParseException parseException31=null;
         try {
             // Code for expansion specified on line 207 of QUTE.javacc
-            label_9:
+            label_23:
             while (true) {
                 // Code for expansion specified on line 188 of QUTE.javacc
                 switch(nextTokenKind()) {
@@ -2447,7 +2485,7 @@ public class QUTEParser implements QUTEConstants {
                 }
                 int int15=nextTokenKind();
                 if (!(int15==TEXT||int15==OPEN_CURLY||int15==EACH||int15==FOR||int15==IF||int15==QUTE_INCLUDE||int15==INSERT||int15==WITH||int15==START_SECTION||int15==START_PARAMETER_DECL)) {
-                    break label_9;
+                    break label_23;
                 }
             }
             if (trace_enabled) LOGGER.info("Exiting normally from Block");
@@ -2467,7 +2505,8 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException31: "+parseException31.getMessage());
                     Block31.setParseException(parseException31);
                     if (Block31forced) {
-                        attemptRecovery(Block31,TEXT,ABBREVIATED_END,ENDEACH,ENDFOR,ENDIF,ENDINCLUDE,ENDINSERT,ENDWITH,END_SECTION,CLOSE_CURLY,CLOSE_EMPTY);
+                        //		                attemptRecovery(Block31, TEXT, ABBREVIATED_END, ENDEACH, ENDFOR, ENDIF, ENDINCLUDE, ENDINSERT, ENDWITH, END_SECTION, CLOSE_CURLY, CLOSE_EMPTY);
+                        insertVirtualToken(TEXT);
                         closeNodeScope(Block31,true);
                     }
                     else {
@@ -2522,7 +2561,8 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException32: "+parseException32.getMessage());
                     Root32.setParseException(parseException32);
                     if (Root32forced) {
-                        attemptRecovery(Root32,0);
+                        //		                attemptRecovery(Root32, 0);
+                        insertVirtualToken(0);
                         closeNodeScope(Root32,true);
                     }
                     else {
@@ -2538,44 +2578,44 @@ public class QUTEParser implements QUTEConstants {
     //====================================
     // Start of methods for Phase 2 Lookaheads
     //====================================
-    private boolean phase2_1(int maxLookahead) {
+    private boolean phase2_6_QEL_javacc_line_175(int maxLookahead) {
         jj_la=maxLookahead;
         jj_lastpos=jj_scanpos=current_token;
         try {
-            return!phase3_1();
+            return!phase3_6_QEL_javacc_line_175();
         }
         catch(LookaheadSuccess ls) {
             return true;
         }
     }
 
-    private boolean phase2_2(int maxLookahead) {
+    private boolean phase2_8_QEL_javacc_line_185(int maxLookahead) {
         jj_la=maxLookahead;
         jj_lastpos=jj_scanpos=current_token;
         try {
-            return!phase3_2();
+            return!phase3_8_QEL_javacc_line_185();
         }
         catch(LookaheadSuccess ls) {
             return true;
         }
     }
 
-    private boolean phase2_3(int maxLookahead) {
+    private boolean phase2_11_QEL_javacc_line_224(int maxLookahead) {
         jj_la=maxLookahead;
         jj_lastpos=jj_scanpos=current_token;
         try {
-            return!phase3_3();
+            return!phase3_11_QEL_javacc_line_224();
         }
         catch(LookaheadSuccess ls) {
             return true;
         }
     }
 
-    private boolean phase2_4(int maxLookahead) {
+    private boolean phase2_14_QEL_javacc_line_237(int maxLookahead) {
         jj_la=maxLookahead;
         jj_lastpos=jj_scanpos=current_token;
         try {
-            return!phase3_4();
+            return!phase3_14_QEL_javacc_line_237();
         }
         catch(LookaheadSuccess ls) {
             return true;
@@ -2585,43 +2625,43 @@ public class QUTEParser implements QUTEConstants {
     //====================================
     // Start of methods for Phase 3 Lookaheads
     //====================================
-    private boolean phase3_1() {
-        if (phase3R_95()) return true;
+    private boolean phase3_6_QEL_javacc_line_175() {
+        if (phase3R_173()) return true;
         return false;
     }
 
-    private boolean phase3_2() {
+    private boolean phase3_8_QEL_javacc_line_185() {
         Token token17=jj_scanpos;
-        if (jj_scan_token(21)) {
+        if (phase3R_26()) {
             jj_scanpos=token17;
-            if (jj_scan_token(22)) return true;
+            if (phase3R_27()) return true;
         }
         return false;
     }
 
-    private boolean phase3_3() {
+    private boolean phase3_11_QEL_javacc_line_224() {
         if (jj_scan_token(EXCLAM)) return true;
-        if (phase3R_40()) return true;
+        if (phase3R_76()) return true;
         return false;
     }
 
-    private boolean phase3_4() {
+    private boolean phase3_14_QEL_javacc_line_237() {
         Token token18=jj_scanpos;
-        if (jj_scan_token(25)) {
+        if (phase3R_29()) {
             jj_scanpos=token18;
-            if (jj_scan_token(27)) {
+            if (phase3R_30()) {
                 jj_scanpos=token18;
-                if (jj_scan_token(49)) return true;
+                if (phase3R_31()) return true;
             }
         }
         return false;
     }
 
-    private boolean phase3R_95() {
-        if (phase3R_20()) return true;
+    private boolean phase3R_173() {
+        if (phase3R_44()) return true;
         while (true) {
             Token token19=jj_scanpos;
-            if (phase3R_13()) {
+            if (phase3R_33()) {
                 jj_scanpos=token19;
                 break;
             }
@@ -2629,19 +2669,29 @@ public class QUTEParser implements QUTEConstants {
         return false;
     }
 
-    private boolean phase3R_40() {
+    private boolean phase3R_26() {
+        if (jj_scan_token(PLUS)) return true;
+        return false;
+    }
+
+    private boolean phase3R_27() {
+        if (jj_scan_token(MINUS)) return true;
+        return false;
+    }
+
+    private boolean phase3R_76() {
         Token token20=jj_scanpos;
-        if (jj_scan_token(39)) {
+        if (phase3R_84()) {
             jj_scanpos=token20;
-            if (phase3R_46()) {
+            if (phase3R_85()) {
                 jj_scanpos=token20;
-                if (phase3R_47()) {
+                if (phase3R_86()) {
                     jj_scanpos=token20;
-                    if (phase3R_48()) {
+                    if (phase3R_87()) {
                         jj_scanpos=token20;
-                        if (jj_scan_token(29)) {
+                        if (phase3R_88()) {
                             jj_scanpos=token20;
-                            if (phase3R_49()) return true;
+                            if (phase3R_89()) return true;
                         }
                     }
                 }
@@ -2650,11 +2700,26 @@ public class QUTEParser implements QUTEConstants {
         return false;
     }
 
-    private boolean phase3R_20() {
-        if (phase3R_28()) return true;
+    private boolean phase3R_29() {
+        if (jj_scan_token(DOT)) return true;
+        return false;
+    }
+
+    private boolean phase3R_30() {
+        if (jj_scan_token(OPEN_BRACKET)) return true;
+        return false;
+    }
+
+    private boolean phase3R_31() {
+        if (jj_scan_token(OPEN_PAREN)) return true;
+        return false;
+    }
+
+    private boolean phase3R_44() {
+        if (phase3R_55()) return true;
         while (true) {
             Token token21=jj_scanpos;
-            if (phase3R_19()) {
+            if (phase3R_41()) {
                 jj_scanpos=token21;
                 break;
             }
@@ -2662,147 +2727,212 @@ public class QUTEParser implements QUTEConstants {
         return false;
     }
 
-    private boolean phase3R_13() {
+    private boolean phase3R_33() {
         Token token22=jj_scanpos;
-        if (jj_scan_token(21)) {
+        if (phase3R_42()) {
             jj_scanpos=token22;
-            if (jj_scan_token(22)) return true;
+            if (phase3R_43()) return true;
         }
-        if (phase3R_20()) return true;
+        if (phase3R_44()) return true;
         return false;
     }
 
-    private boolean phase3R_46() {
-        if (phase3R_56()) return true;
+    private boolean phase3R_84() {
+        if (jj_scan_token(C_IDENTIFIER)) return true;
         return false;
     }
 
-    private boolean phase3R_47() {
-        if (phase3R_57()) return true;
+    private boolean phase3R_85() {
+        if (phase3R_98()) return true;
         return false;
     }
 
-    private boolean phase3R_48() {
-        if (phase3R_58()) return true;
+    private boolean phase3R_86() {
+        if (phase3R_99()) return true;
         return false;
     }
 
-    private boolean phase3R_49() {
-        if (phase3R_59()) return true;
+    private boolean phase3R_87() {
+        if (phase3R_100()) return true;
         return false;
     }
 
-    private boolean phase3R_28() {
+    private boolean phase3R_88() {
+        if (phase3R_101()) return true;
+        return false;
+    }
+
+    private boolean phase3R_89() {
+        if (phase3R_102()) return true;
+        return false;
+    }
+
+    private boolean phase3R_55() {
         Token token23=jj_scanpos;
-        if (phase3R_25()) {
+        if (phase3R_50()) {
             jj_scanpos=token23;
-            if (phase3R_26()) {
+            if (phase3R_51()) {
                 jj_scanpos=token23;
-                if (phase3R_27()) return true;
+                if (phase3R_52()) return true;
             }
         }
         return false;
     }
 
-    private boolean phase3R_19() {
+    private boolean phase3R_41() {
         Token token24=jj_scanpos;
-        if (jj_scan_token(23)) {
+        if (phase3R_53()) {
             jj_scanpos=token24;
-            if (jj_scan_token(24)) return true;
+            if (phase3R_54()) return true;
         }
-        if (phase3R_28()) return true;
+        if (phase3R_55()) return true;
         return false;
     }
 
-    private boolean phase3R_56() {
+    private boolean phase3R_42() {
+        if (jj_scan_token(PLUS)) return true;
+        return false;
+    }
+
+    private boolean phase3R_43() {
+        if (jj_scan_token(MINUS)) return true;
+        return false;
+    }
+
+    private boolean phase3R_98() {
         Token token25=jj_scanpos;
-        if (jj_scan_token(32)) {
+        if (phase3R_112()) {
             jj_scanpos=token25;
-            if (jj_scan_token(33)) return true;
+            if (phase3R_113()) return true;
         }
         return false;
     }
 
-    private boolean phase3R_57() {
+    private boolean phase3R_99() {
         Token token26=jj_scanpos;
-        if (jj_scan_token(34)) {
+        if (phase3R_114()) {
             jj_scanpos=token26;
-            if (jj_scan_token(35)) return true;
+            if (phase3R_115()) return true;
         }
         return false;
     }
 
-    private boolean phase3R_58() {
+    private boolean phase3R_100() {
         Token token27=jj_scanpos;
-        if (jj_scan_token(30)) {
+        if (phase3R_116()) {
             jj_scanpos=token27;
-            if (jj_scan_token(31)) return true;
+            if (phase3R_117()) return true;
         }
         return false;
     }
 
-    private boolean phase3R_59() {
+    private boolean phase3R_101() {
+        if (jj_scan_token(NULL)) return true;
+        return false;
+    }
+
+    private boolean phase3R_102() {
         if (jj_scan_token(OPEN_PAREN)) return true;
-        if (phase3R_87()) return true;
+        if (phase3R_154()) return true;
         if (jj_scan_token(CLOSE_PAREN)) return true;
         return false;
     }
 
-    private boolean phase3R_25() {
-        if (phase3R_30()) return true;
+    private boolean phase3R_50() {
+        if (phase3R_63()) return true;
         return false;
     }
 
-    private boolean phase3R_26() {
-        if (phase3R_31()) return true;
+    private boolean phase3R_51() {
+        if (phase3R_64()) return true;
         return false;
     }
 
-    private boolean phase3R_27() {
-        if (phase3R_35()) return true;
+    private boolean phase3R_52() {
+        if (phase3R_70()) return true;
         return false;
     }
 
-    private boolean phase3R_87() {
-        if (phase3R_72()) return true;
+    private boolean phase3R_53() {
+        if (jj_scan_token(TIMES)) return true;
         return false;
     }
 
-    private boolean phase3R_30() {
+    private boolean phase3R_54() {
+        if (jj_scan_token(DIVIDE)) return true;
+        return false;
+    }
+
+    private boolean phase3R_112() {
+        if (jj_scan_token(INTEGER)) return true;
+        return false;
+    }
+
+    private boolean phase3R_113() {
+        if (jj_scan_token(DECIMAL)) return true;
+        return false;
+    }
+
+    private boolean phase3R_114() {
+        if (jj_scan_token(STRING_LITERAL)) return true;
+        return false;
+    }
+
+    private boolean phase3R_115() {
+        if (jj_scan_token(RAW_STRING)) return true;
+        return false;
+    }
+
+    private boolean phase3R_116() {
+        if (jj_scan_token(TRUE)) return true;
+        return false;
+    }
+
+    private boolean phase3R_117() {
+        if (jj_scan_token(FALSE)) return true;
+        return false;
+    }
+
+    private boolean phase3R_154() {
+        if (phase3R_134()) return true;
+        return false;
+    }
+
+    private boolean phase3R_63() {
         Token token28=jj_scanpos;
-        if (jj_scan_token(21)) {
+        if (phase3R_67()) {
             jj_scanpos=token28;
-            if (jj_scan_token(22)) return true;
+            if (phase3R_68()) return true;
         }
-        if (phase3R_35()) return true;
+        if (phase3R_70()) return true;
         return false;
     }
 
-    private boolean phase3R_31() {
+    private boolean phase3R_64() {
         if (jj_scan_token(EXCLAM)) return true;
-        if (phase3R_35()) return true;
+        if (phase3R_70()) return true;
         return false;
     }
 
-    private boolean phase3R_35() {
-        if (phase3R_42()) return true;
+    private boolean phase3R_70() {
+        if (phase3R_78()) return true;
         while (true) {
             Token token29=jj_scanpos;
-            if (phase3R_37()) {
+            if (phase3R_72()) {
                 jj_scanpos=token29;
                 break;
             }
         }
         Token token30=jj_scanpos;
-        if (jj_scan_token(26)) jj_scanpos=token30;
+        if (phase3R_73()) jj_scanpos=token30;
         return false;
     }
 
-    private boolean phase3R_72() {
-        if (phase3R_81()) return true;
+    private boolean phase3R_134() {
+        if (phase3R_145()) return true;
         while (true) {
             Token token31=jj_scanpos;
-            if (phase3R_76()) {
+            if (phase3R_138()) {
                 jj_scanpos=token31;
                 break;
             }
@@ -2810,11 +2940,21 @@ public class QUTEParser implements QUTEConstants {
         return false;
     }
 
-    private boolean phase3R_42() {
-        if (phase3R_40()) return true;
+    private boolean phase3R_67() {
+        if (jj_scan_token(PLUS)) return true;
+        return false;
+    }
+
+    private boolean phase3R_68() {
+        if (jj_scan_token(MINUS)) return true;
+        return false;
+    }
+
+    private boolean phase3R_78() {
+        if (phase3R_76()) return true;
         while (true) {
             Token token32=jj_scanpos;
-            if (phase3R_41()) {
+            if (phase3R_77()) {
                 jj_scanpos=token32;
                 break;
             }
@@ -2822,17 +2962,22 @@ public class QUTEParser implements QUTEConstants {
         return false;
     }
 
-    private boolean phase3R_37() {
+    private boolean phase3R_72() {
         if (jj_scan_token(EXCLAM)) return true;
-        if (phase3R_42()) return true;
+        if (phase3R_78()) return true;
         return false;
     }
 
-    private boolean phase3R_81() {
-        if (phase3R_86()) return true;
+    private boolean phase3R_73() {
+        if (jj_scan_token(EXCLAM)) return true;
+        return false;
+    }
+
+    private boolean phase3R_145() {
+        if (phase3R_152()) return true;
         while (true) {
             Token token33=jj_scanpos;
-            if (phase3R_80()) {
+            if (phase3R_142()) {
                 jj_scanpos=token33;
                 break;
             }
@@ -2840,129 +2985,149 @@ public class QUTEParser implements QUTEConstants {
         return false;
     }
 
-    private boolean phase3R_76() {
+    private boolean phase3R_138() {
         Token token34=jj_scanpos;
-        if (jj_scan_token(4)) {
+        if (phase3R_143()) {
             jj_scanpos=token34;
-            if (jj_scan_token(5)) return true;
+            if (phase3R_144()) return true;
         }
-        if (phase3R_81()) return true;
+        if (phase3R_145()) return true;
         return false;
     }
 
-    private boolean phase3R_41() {
+    private boolean phase3R_77() {
         Token token35=jj_scanpos;
-        if (phase3R_50()) {
+        if (phase3R_90()) {
             jj_scanpos=token35;
-            if (phase3R_51()) {
+            if (phase3R_91()) {
                 jj_scanpos=token35;
-                if (phase3R_52()) return true;
+                if (phase3R_92()) return true;
             }
         }
         return false;
     }
 
-    private boolean phase3R_86() {
-        if (phase3R_90()) return true;
+    private boolean phase3R_152() {
+        if (phase3R_160()) return true;
         Token token36=jj_scanpos;
-        if (phase3R_85()) jj_scanpos=token36;
+        if (phase3R_149()) jj_scanpos=token36;
         return false;
     }
 
-    private boolean phase3R_80() {
+    private boolean phase3R_142() {
         Token token37=jj_scanpos;
-        if (jj_scan_token(6)) {
+        if (phase3R_150()) {
             jj_scanpos=token37;
-            if (jj_scan_token(7)) return true;
+            if (phase3R_151()) return true;
         }
-        if (phase3R_86()) return true;
+        if (phase3R_152()) return true;
         return false;
     }
 
-    private boolean phase3R_50() {
-        if (phase3R_60()) return true;
+    private boolean phase3R_143() {
+        if (jj_scan_token(OR)) return true;
         return false;
     }
 
-    private boolean phase3R_51() {
-        if (phase3R_61()) return true;
-        return false;
-    }
-
-    private boolean phase3R_52() {
-        if (phase3R_62()) return true;
+    private boolean phase3R_144() {
+        if (jj_scan_token(OR2)) return true;
         return false;
     }
 
     private boolean phase3R_90() {
-        if (phase3R_93()) return true;
-        Token token38=jj_scanpos;
-        if (phase3R_89()) jj_scanpos=token38;
+        if (phase3R_103()) return true;
         return false;
     }
 
-    private boolean phase3R_85() {
+    private boolean phase3R_91() {
+        if (phase3R_104()) return true;
+        return false;
+    }
+
+    private boolean phase3R_92() {
+        if (phase3R_105()) return true;
+        return false;
+    }
+
+    private boolean phase3R_160() {
+        if (phase3R_171()) return true;
+        Token token38=jj_scanpos;
+        if (phase3R_156()) jj_scanpos=token38;
+        return false;
+    }
+
+    private boolean phase3R_149() {
         Token token39=jj_scanpos;
-        if (jj_scan_token(9)) {
+        if (phase3R_157()) {
             jj_scanpos=token39;
-            if (jj_scan_token(10)) {
+            if (phase3R_158()) {
                 jj_scanpos=token39;
-                if (jj_scan_token(11)) return true;
+                if (phase3R_159()) return true;
             }
         }
-        if (phase3R_90()) return true;
+        if (phase3R_160()) return true;
         return false;
     }
 
-    private boolean phase3R_60() {
+    private boolean phase3R_150() {
+        if (jj_scan_token(AND)) return true;
+        return false;
+    }
+
+    private boolean phase3R_151() {
+        if (jj_scan_token(AND2)) return true;
+        return false;
+    }
+
+    private boolean phase3R_103() {
         if (jj_scan_token(DOT)) return true;
         Token token40=jj_scanpos;
-        if (jj_scan_token(39)) {
+        if (phase3R_119()) {
             jj_scanpos=token40;
-            if (jj_scan_token(23)) return true;
+            if (phase3R_120()) return true;
         }
         return false;
     }
 
-    private boolean phase3R_61() {
+    private boolean phase3R_104() {
         if (jj_scan_token(OPEN_BRACKET)) return true;
-        if (phase3R_87()) return true;
+        if (phase3R_154()) return true;
         if (jj_scan_token(CLOSE_BRACKET)) return true;
         return false;
     }
 
-    private boolean phase3R_62() {
+    private boolean phase3R_105() {
         if (jj_scan_token(OPEN_PAREN)) return true;
         Token token41=jj_scanpos;
-        if (phase3R_68()) jj_scanpos=token41;
+        if (phase3R_122()) jj_scanpos=token41;
         if (jj_scan_token(CLOSE_PAREN)) return true;
         return false;
     }
 
-    private boolean phase3R_93() {
-        if (phase3R_95()) return true;
+    private boolean phase3R_171() {
+        if (phase3R_173()) return true;
         Token token42=jj_scanpos;
-        if (phase3R_92()) jj_scanpos=token42;
+        if (phase3R_162()) jj_scanpos=token42;
         return false;
     }
 
-    private boolean phase3R_89() {
+    private boolean phase3R_156() {
         Token token43=jj_scanpos;
-        if (jj_scan_token(12)) {
+        if (phase3R_163()) {
             jj_scanpos=token43;
-            if (jj_scan_token(14)) {
+            if (phase3R_164()) {
                 jj_scanpos=token43;
-                if (jj_scan_token(16)) {
+                if (phase3R_165()) {
                     jj_scanpos=token43;
-                    if (jj_scan_token(18)) {
+                    if (phase3R_166()) {
                         jj_scanpos=token43;
-                        if (jj_scan_token(13)) {
+                        if (phase3R_167()) {
                             jj_scanpos=token43;
-                            if (jj_scan_token(15)) {
+                            if (phase3R_168()) {
                                 jj_scanpos=token43;
-                                if (jj_scan_token(19)) {
+                                if (phase3R_169()) {
                                     jj_scanpos=token43;
-                                    if (jj_scan_token(17)) return true;
+                                    if (phase3R_170()) return true;
                                 }
                             }
                         }
@@ -2970,37 +3135,102 @@ public class QUTEParser implements QUTEConstants {
                 }
             }
         }
-        if (phase3R_93()) return true;
+        if (phase3R_171()) return true;
         return false;
     }
 
-    private boolean phase3R_68() {
-        if (phase3R_73()) return true;
+    private boolean phase3R_157() {
+        if (jj_scan_token(EQUALS)) return true;
         return false;
     }
 
-    private boolean phase3R_92() {
+    private boolean phase3R_158() {
+        if (jj_scan_token(EQUALS2)) return true;
+        return false;
+    }
+
+    private boolean phase3R_159() {
+        if (jj_scan_token(EQUALS3)) return true;
+        return false;
+    }
+
+    private boolean phase3R_119() {
+        if (jj_scan_token(C_IDENTIFIER)) return true;
+        return false;
+    }
+
+    private boolean phase3R_120() {
+        if (jj_scan_token(TIMES)) return true;
+        return false;
+    }
+
+    private boolean phase3R_122() {
+        if (phase3R_135()) return true;
+        return false;
+    }
+
+    private boolean phase3R_162() {
         if (jj_scan_token(DOT_DOT)) return true;
         Token token44=jj_scanpos;
-        if (phase3R_94()) jj_scanpos=token44;
+        if (phase3R_172()) jj_scanpos=token44;
         return false;
     }
 
-    private boolean phase3R_73() {
-        if (phase3R_77()) return true;
+    private boolean phase3R_163() {
+        if (jj_scan_token(GT)) return true;
         return false;
     }
 
-    private boolean phase3R_94() {
-        if (phase3R_95()) return true;
+    private boolean phase3R_164() {
+        if (jj_scan_token(GE)) return true;
         return false;
     }
 
-    private boolean phase3R_77() {
-        if (phase3R_87()) return true;
+    private boolean phase3R_165() {
+        if (jj_scan_token(LT)) return true;
+        return false;
+    }
+
+    private boolean phase3R_166() {
+        if (jj_scan_token(LE)) return true;
+        return false;
+    }
+
+    private boolean phase3R_167() {
+        if (jj_scan_token(ALT_GT)) return true;
+        return false;
+    }
+
+    private boolean phase3R_168() {
+        if (jj_scan_token(ALT_GE)) return true;
+        return false;
+    }
+
+    private boolean phase3R_169() {
+        if (jj_scan_token(ALT_LE)) return true;
+        return false;
+    }
+
+    private boolean phase3R_170() {
+        if (jj_scan_token(ALT_LT)) return true;
+        return false;
+    }
+
+    private boolean phase3R_135() {
+        if (phase3R_139()) return true;
+        return false;
+    }
+
+    private boolean phase3R_172() {
+        if (phase3R_173()) return true;
+        return false;
+    }
+
+    private boolean phase3R_139() {
+        if (phase3R_154()) return true;
         while (true) {
             Token token45=jj_scanpos;
-            if (phase3R_83()) {
+            if (phase3R_147()) {
                 jj_scanpos=token45;
                 break;
             }
@@ -3008,10 +3238,15 @@ public class QUTEParser implements QUTEConstants {
         return false;
     }
 
-    private boolean phase3R_83() {
+    private boolean phase3R_147() {
         Token token46=jj_scanpos;
-        if (jj_scan_token(1)) jj_scanpos=token46;
-        if (phase3R_87()) return true;
+        if (phase3R_153()) jj_scanpos=token46;
+        if (phase3R_154()) return true;
+        return false;
+    }
+
+    private boolean phase3R_153() {
+        if (jj_scan_token(COMMA)) return true;
         return false;
     }
 
@@ -3019,6 +3254,10 @@ public class QUTEParser implements QUTEConstants {
     private Token jj_scanpos,jj_lastpos;
     private int jj_la;
     private boolean semanticLookahead;
+    public QUTEParser(String inputSource,CharSequence chars) {
+        token_source=new QUTELexer(inputSource,chars);
+    }
+
     public QUTEParser(java.io.InputStream stream) {
         this(new InputStreamReader(stream));
     }
@@ -3028,10 +3267,25 @@ public class QUTEParser implements QUTEConstants {
         current_token=new Token();
     }
 
-    /** Constructor with generated Token Manager. */
+    /** Constructor with user supplied Lexer. */
     public QUTEParser(QUTELexer lexer) {
         token_source=lexer;
         current_token=new Token();
+    }
+
+    private void insertVirtualToken(int tokenType) {
+        Token virtualToken=Token.newToken(tokenType,"VIRTUAL "+tokenImage[tokenType]);
+        virtualToken.setUnparsed(true);
+        int line=current_token.getEndLine();
+        int column=current_token.getEndColumn();
+        virtualToken.setBeginLine(line);
+        virtualToken.setEndLine(line);
+        virtualToken.setBeginColumn(column);
+        virtualToken.setEndColumn(column);
+        token_source.doLexicalStateSwitch(tokenType);
+        if (tokensAreNodes&&buildTree) {
+            currentNodeScope.add(virtualToken);
+        }
     }
 
     /**
@@ -3081,7 +3335,7 @@ public class QUTEParser implements QUTEConstants {
 
     private Token consumeToken(int expectedType,boolean forced) throws ParseException {
         Token oldToken=current_token;
-        current_token=current_token.next;
+        current_token=current_token.getNext();
         if (current_token==null) {
             current_token=token_source.getNextToken();
         }
@@ -3110,7 +3364,7 @@ public class QUTEParser implements QUTEConstants {
             virtualToken.setBeginColumn(oldToken.getEndColumn());
             virtualToken.setEndLine(current_token.getBeginLine());
             virtualToken.setEndColumn(current_token.getBeginColumn());
-            virtualToken.next=current_token;
+            virtualToken.setNext(current_token);
             current_token=virtualToken;
         }
         else {
@@ -3135,15 +3389,18 @@ public class QUTEParser implements QUTEConstants {
     private boolean jj_scan_token(int kind) {
         if (jj_scanpos==jj_lastpos) {
             jj_la--;
-            if (jj_scanpos.next==null) {
-                jj_lastpos=jj_scanpos=jj_scanpos.next=token_source.getNextToken();
+            if (jj_scanpos.getNext()==null) {
+                Token nextToken=token_source.getNextToken();
+                jj_scanpos.setNext(nextToken);
+                jj_scanpos=nextToken;
+                jj_lastpos=nextToken;
             }
             else {
-                jj_lastpos=jj_scanpos=jj_scanpos.next;
+                jj_lastpos=jj_scanpos=jj_scanpos.getNext();
             }
         }
         else {
-            jj_scanpos=jj_scanpos.next;
+            jj_scanpos=jj_scanpos.getNext();
         }
         if (jj_scanpos.kind!=kind) return true;
         if (jj_la==0&&jj_scanpos==jj_lastpos) throw LOOKAHEAD_SUCCESS;
@@ -3151,8 +3408,12 @@ public class QUTEParser implements QUTEConstants {
     }
 
     final public Token getNextToken() {
-        if (current_token.next!=null) current_token=current_token.next;
-        else current_token=current_token.next=token_source.getNextToken();
+        if (current_token.getNext()!=null) current_token=current_token.getNext();
+        else {
+            Token nextToken=token_source.getNextToken();
+            current_token.setNext(nextToken);
+            current_token=nextToken;
+        }
         return current_token;
     }
 
@@ -3160,17 +3421,22 @@ public class QUTEParser implements QUTEConstants {
     final public Token getToken(int index) {
         Token t=current_token;
         for (int i=0; i<index; i++) {
-            if (t.next!=null) t=t.next;
-            else t=t.next=token_source.getNextToken();
+            if (t.getNext()!=null) t=t.getNext();
+            else {
+                Token nextToken=token_source.getNextToken();
+                t.setNext(nextToken);
+                t=nextToken;
+            }
         }
         return t;
     }
 
     private int nextTokenKind() {
-        if (current_token.next==null) {
-            current_token.next=token_source.getNextToken();
+        if (current_token.getNext()==null) {
+            Token nextToken=token_source.getNextToken();
+            current_token.setNext(nextToken);
         }
-        return current_token.next.kind;
+        return current_token.getNext().kind;
     }
 
     private List<Token>getTokensToEOL(int...desiredTokenTypes) {
@@ -3179,12 +3445,12 @@ public class QUTEParser implements QUTEConstants {
         Token tok=current_token;
         do {
             Token prevToken=tok;
-            if (tok.next!=null) {
-                tok=tok.next;
+            if (tok.getNext()!=null) {
+                tok=tok.getNext();
             }
             else {
                 tok=token_source.getNextToken();
-                prevToken.next=tok;
+                prevToken.setNext(tok);
             }
             result.add(tok);
         }

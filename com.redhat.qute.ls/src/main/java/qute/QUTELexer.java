@@ -4,9 +4,15 @@ package qute;
 import java.io.Reader;
 import java.io.IOException;
 import java.util.logging.Logger;
+import java.util.*;
 @SuppressWarnings("unused")
 public class QUTELexer implements QUTEConstants {
     private static final Logger LOGGER=Logger.getLogger("QUTEParser");
+    private InvalidToken invalidToken;
+    void addToken(Token token) {
+        input_stream.addToken(token);
+    }
+
     int[] jjemptyLineNo=new int[3];
     int[] jjemptyColNo=new int[3];
     boolean[] jjbeenHere=new boolean[3];
@@ -43,7 +49,7 @@ public class QUTELexer implements QUTEConstants {
     // Bit vector for TOKEN
     static final long[] jjtoToken={0xffc7088fffffffffL,0x63ffL,};
     // Bit vector for SKIP
-    static final long[] jjtoSkip={0x1000000000L,0x1000L,};
+    static final long[] jjtoSkip={0x0L,0x1000L,};
     // Bit vector for SPECIAL
     static final long[] jjtoSpecial={0x0L,0x1000L,};
     // Bit vector for MORE
@@ -58,13 +64,22 @@ public class QUTELexer implements QUTEConstants {
         input_stream.backup(amount);
     }
 
-    public QUTELexer(Reader reader) {
-        this(reader,0,1,1);
+    public QUTELexer(String inputSource,CharSequence chars) {
+        this(inputSource,chars,LexicalState.values()[0],1,1);
     }
 
-    public QUTELexer(Reader reader,int lexState,int line,int column) {
+    public QUTELexer(String inputSource,CharSequence chars,LexicalState lexState,int line,int column) {
+        input_stream=new FileLineMap(inputSource,chars,line,column);
+        switchTo(lexState);
+    }
+
+    public QUTELexer(Reader reader) {
+        this(reader,LexicalState.values()[0],1,1);
+    }
+
+    public QUTELexer(Reader reader,LexicalState lexState,int line,int column) {
         input_stream=new FileLineMap(reader,line,column);
-        SwitchTo(lexState);
+        switchTo(lexState);
     }
 
     // Method to reinitialize the jjrounds array.
@@ -90,19 +105,16 @@ public class QUTELexer implements QUTEConstants {
     }
 
     public Token getNextToken() {
-        Token tok=nextToken();
-        if (!(tok instanceof InvalidToken)) {
-            return tok;
-        }
-        InvalidToken invalidToken=(InvalidToken) tok;
-        StringBuilder invalidChars=new StringBuilder();
+        Token tok=null;
         do {
-            invalidChars.append(tok.image);
             tok=nextToken();
         }
         while (tok instanceof InvalidToken);
-        invalidToken.image=invalidChars.toString();
-        tok.invalidToken=invalidToken;
+        if (invalidToken!=null) {
+            input_stream.addToken(invalidToken);
+            invalidToken=null;
+        }
+        input_stream.addToken(tok);
         return tok;
     }
 
@@ -119,8 +131,9 @@ public class QUTELexer implements QUTEConstants {
                 if (trace_enabled) LOGGER.info("Returning the <EOF> token.");
                 jjmatchedKind=0;
                 Token eof=jjFillToken();
-                tokenLexicalActions(eof);
+                tokenLexicalActions();
                 eof.specialToken=specialToken;
+                input_stream.addToken(eof);
                 return eof;
             }
             image.setLength(0);
@@ -155,11 +168,12 @@ public class QUTELexer implements QUTEConstants {
                     if ((jjtoToken[jjmatchedKind>>6]&(1L<<(jjmatchedKind&077)))!=0L) {
                         matchedToken=jjFillToken();
                         matchedToken.specialToken=specialToken;
-                        tokenLexicalActions(matchedToken);
+                        tokenLexicalActions();
                         jjmatchedKind=matchedToken.kind;
                         if (newLexicalStates[jjmatchedKind]!=null) {
                             switchTo(newLexicalStates[jjmatchedKind]);
                         }
+                        input_stream.addToken(matchedToken);
                         return matchedToken;
                     }
                     else if ((jjtoSkip[jjmatchedKind>>6]&(1L<<(jjmatchedKind&077)))!=0L) {
@@ -171,17 +185,19 @@ public class QUTELexer implements QUTEConstants {
                             }
                             else {
                                 matchedToken.specialToken=specialToken;
-                                specialToken=(specialToken.next=matchedToken);
+                                specialToken.setNext(matchedToken);
+                                specialToken=matchedToken;
+                                input_stream.addToken(specialToken);
                             }
-                            tokenLexicalActions(matchedToken);
+                            tokenLexicalActions();
                         }
-                        else tokenLexicalActions(null);
+                        else tokenLexicalActions();
                         if (newLexicalStates[jjmatchedKind]!=null) {
                             this.lexicalState=newLexicalStates[jjmatchedKind];
                         }
                         continue EOFLoop;
                     }
-                    matchedCharsLength+=jjmatchedPos+1;
+                    tokenLexicalActions();
                     doLexicalStateSwitch(jjmatchedKind);
                     curPos=0;
                     jjmatchedKind=0x7FFFFFFF;
@@ -195,23 +211,24 @@ public class QUTELexer implements QUTEConstants {
                 int error_line=input_stream.getEndLine();
                 int error_column=input_stream.getEndColumn();
                 String error_after=null;
-                //    input_stream.backup(1);
                 error_after=curPos<=1?"":
                 input_stream.getImage();
-                Token invalidToken=new InvalidToken(""+curChar);
-                invalidToken.specialToken=specialToken;
-                invalidToken.setBeginLine(error_line);
+                if (invalidToken==null) {
+                    invalidToken=new InvalidToken(""+curChar);
+                    invalidToken.setBeginLine(error_line);
+                    invalidToken.setBeginColumn(error_column);
+                }
+                else {
+                    invalidToken.image=invalidToken.image+curChar;
+                }
                 invalidToken.setEndLine(error_line);
-                invalidToken.setBeginColumn(error_column);
                 invalidToken.setEndColumn(error_column);
                 return invalidToken;
             }
         }
     }
 
-    void tokenLexicalActions(Token matchedToken) {
-        //       int matchedKind = (matchedToken != null) ? matchedToken.kind : jjmatchedKind; // REVISIT
-        matchedToken=null;
+    private void tokenLexicalActions() {
         switch(jjmatchedKind) {
             default:
             break;

@@ -4,6 +4,9 @@ package qute;
 import java.io.IOException;
 import java.io.*;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.nio.file.Files;
+import java.nio.charset.Charset;
 /**
  * Rather bloody-minded implementation of a class to read in a file 
  * and store the contents in a String, and keep track of where the 
@@ -24,8 +27,11 @@ public class FileLineMap {
     // A list of offsets of the beginning of lines
     private int[] lineOffsets=new int[1024];
     private int startingLine=1,startingColumn=1;
-    public FileLineMap(String inputSource,CharSequence charSequence) {
+    private LinkedList<Token>tokenList=new LinkedList<>();
+    public FileLineMap(String inputSource,CharSequence charSequence,int startingLine,int startingColumn) {
         this.inputSource=inputSource;
+        this.startingLine=startingLine;
+        this.startingColumn=startingColumn;
         this.rawContent=charSequence.toString();
         // We will likely need this eventually, I suppose.
         this.content=mungeContent(rawContent,0,true,false);
@@ -36,6 +42,10 @@ public class FileLineMap {
         if (inputSource!=null&&inputSource.length()>0) {
             tableLookup.put(inputSource,this);
         }
+    }
+
+    public FileLineMap(String inputSource,CharSequence charSequence) {
+        this(inputSource,charSequence,1,1);
     }
 
     public FileLineMap(String inputSource,Reader reader) {
@@ -50,6 +60,10 @@ public class FileLineMap {
 
     public FileLineMap(String inputSource,File file) throws IOException {
         this(inputSource,new FileReader(file));
+    }
+
+    void addToken(Token token) {
+        tokenList.add(token);
     }
 
     // Icky method to handle annoying stuff. Might make this public later if it is needed elsewhere
@@ -180,6 +194,15 @@ public class FileLineMap {
     static private String readToEnd(Reader reader) {
         try {
             return readFully(reader);
+        }
+        catch(IOException ioe) {
+            throw new RuntimeException(ioe);
+        }
+    }
+
+    static String readFully(File file) {
+        try {
+            return new String(Files.readAllBytes(file.toPath()),Charset.forName("UTF-8"));
         }
         catch(IOException ioe) {
             throw new RuntimeException(ioe);

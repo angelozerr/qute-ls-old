@@ -19,7 +19,10 @@ public interface Node {
      * @return Returns <code>true</code> if this node has any children,
      *         <code>false</code> otherwise.
      */
-    boolean hasChildNodes();
+    default boolean hasChildNodes() {
+        return getChildCount()>0;
+    }
+
     void setParent(Node n);
     Node getParent();
     // The following 9 methods will typically just 
@@ -46,7 +49,14 @@ public interface Node {
       * Most implementations of this should return a copy or
       * an immutable wrapper around the list.
       */
-    List<Node>children();
+    default List<Node>children() {
+        List<Node>result=new ArrayList<>();
+        for (int i=0; i<getChildCount(); i++) {
+            result.add(getChild(i));
+        }
+        return result;
+    }
+
     // The following 3 methods will typically delegate
     // straightforwardly to a Map<String, Object> object-s get/set/containsKey/keySet methods.
     Object getAttribute(String name);
@@ -222,6 +232,20 @@ public interface Node {
         return result;
     }
 
+    default List<Node>descendants(Filter filter) {
+        List<Node>result=new ArrayList<>();
+        for (Node child : children()) {
+            if (filter.accept(child)) {
+                result.add(child);
+            }
+            result.addAll(child.descendants(filter));
+        }
+        return result;
+    }
+
+    public interface Filter {
+        boolean accept(Node node);
+    }
     static abstract public class Visitor {
         static private Method baseVisitMethod;
         private HashMap<Class<?extends Node>,Method>methodCache=new HashMap<>();
@@ -236,7 +260,7 @@ public interface Node {
             Class<?extends Node>nodeClass=node.getClass();
             if (!methodCache.containsKey(nodeClass)) {
                 try {
-                    Method method=nodeClass.getMethod("visit",new Class[]{nodeClass});
+                    Method method=this.getClass().getMethod("visit",new Class[]{nodeClass});
                     if (method.equals(getBaseVisitMethod())) {
                         method=null;
                         // Have to avoid infinite recursion, no?

@@ -39,10 +39,6 @@ public class BaseNode implements Node {
     public void close() {
     }
 
-    @Override public boolean hasChildNodes() {
-        return getChildCount()>0;
-    }
-
     public void setParent(Node n) {
         parent=n;
     }

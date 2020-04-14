@@ -54,7 +54,15 @@ public class Token implements QUTEConstants,Node {
      * token.  Otherwise, see below for a description of the contents of
      * this field.
      */
-    Token next;
+    private Token next;
+    Token getNext() {
+        return next;
+    }
+
+    void setNext(Token next) {
+        this.next=next;
+    }
+
     /**
      * This field is used to access special tokens that occur prior to this
      * token, but after the immediately preceding regular (non-special) token.
@@ -295,10 +303,6 @@ public class Token implements QUTEConstants,Node {
 
     private Node parent;
     private Map<String,Object>attributes;
-    @Override public boolean hasChildNodes() {
-        return getChildCount()>0;
-    }
-
     public void setChild(int i,Node n) {
         throw new UnsupportedOperationException();
     }
