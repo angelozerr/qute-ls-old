@@ -3,8 +3,8 @@ package qute;
 
 @SuppressWarnings("unused")
 public class STRING_LITERAL extends Token {
-    public STRING_LITERAL(int kind,String image) {
-        super(kind,image);
+    public STRING_LITERAL(TokenType type,String image) {
+        super(type,image);
     }
 
 }

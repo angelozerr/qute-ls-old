@@ -3,8 +3,8 @@ package qute;
 
 @SuppressWarnings("unused")
 public class DECIMAL extends Token {
-    public DECIMAL(int kind,String image) {
-        super(kind,image);
+    public DECIMAL(TokenType type,String image) {
+        super(type,image);
     }
 
 }

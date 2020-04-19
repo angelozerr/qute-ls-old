@@ -3,8 +3,8 @@ package qute;
 
 @SuppressWarnings("unused")
 public class ENDIF extends Token {
-    public ENDIF(int kind,String image) {
-        super(kind,image);
+    public ENDIF(TokenType type,String image) {
+        super(type,image);
     }
 
 }

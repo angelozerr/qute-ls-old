@@ -3,8 +3,8 @@ package qute;
 
 @SuppressWarnings("unused")
 public class ELSEIF extends Token {
-    public ELSEIF(int kind,String image) {
-        super(kind,image);
+    public ELSEIF(TokenType type,String image) {
+        super(type,image);
     }
 
 }

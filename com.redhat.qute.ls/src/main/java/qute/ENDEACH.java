@@ -3,8 +3,8 @@ package qute;
 
 @SuppressWarnings("unused")
 public class ENDEACH extends Token {
-    public ENDEACH(int kind,String image) {
-        super(kind,image);
+    public ENDEACH(TokenType type,String image) {
+        super(type,image);
     }
 
 }

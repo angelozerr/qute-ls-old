@@ -39,8 +39,9 @@ public class QuteParser {
 //				}
 //			}
 			template.setRoot(root);
+			template.setParsingProblems(parser.getParsingProblems());
 		} catch (ParseException e) {
-			//template.setProblems(Arrays.asList(new Problem(e., e.getMessage())));
+			e.printStackTrace();
 		}
 		return template;
 	}

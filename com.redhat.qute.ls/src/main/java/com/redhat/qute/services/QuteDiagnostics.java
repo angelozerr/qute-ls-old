@@ -25,6 +25,8 @@ import com.redhat.qute.parser.Template;
 import com.redhat.qute.settings.QuteValidationSettings;
 import com.redhat.qute.utils.QutePositionUtility;
 
+import qute.ParsingProblem;
+
 /**
  * Qute diagnostics support.
  *
@@ -46,17 +48,17 @@ class QuteDiagnostics {
 			validationSettings = QuteValidationSettings.DEFAULT;
 		}
 		List<Diagnostic> diagnostics = new ArrayList<Diagnostic>();
-		if (validationSettings.isEnabled()) {
-			List<Problem> problems = template.getProblems();
+		//if (validationSettings.isEnabled()) {
+			List<ParsingProblem> problems = template.getProblems();
 			if (problems != null) {
 				problems.forEach(p -> {
 					Range range = QutePositionUtility.toRange(p.getNode());
-					Diagnostic diagnostic = new Diagnostic(range, p.getMessage(), DiagnosticSeverity.Error, "qute",
+					Diagnostic diagnostic = new Diagnostic(range, p.getDescription(), DiagnosticSeverity.Error, "qute",
 							null);
 					diagnostics.add(diagnostic);
 				});
 			}
-		}
+		//}
 		return diagnostics;
 	}
 

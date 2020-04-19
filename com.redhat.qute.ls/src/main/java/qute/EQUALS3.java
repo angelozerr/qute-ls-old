@@ -3,8 +3,8 @@ package qute;
 
 @SuppressWarnings("unused")
 public class EQUALS3 extends Token {
-    public EQUALS3(int kind,String image) {
-        super(kind,image);
+    public EQUALS3(TokenType type,String image) {
+        super(type,image);
     }
 
 }

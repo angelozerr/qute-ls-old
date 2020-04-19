@@ -3,8 +3,8 @@ package qute;
 
 @SuppressWarnings("unused")
 public class OPEN_BRACKET extends Token {
-    public OPEN_BRACKET(int kind,String image) {
-        super(kind,image);
+    public OPEN_BRACKET(TokenType type,String image) {
+        super(type,image);
     }
 
 }

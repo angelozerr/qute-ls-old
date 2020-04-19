@@ -3,8 +3,8 @@ package qute;
 
 @SuppressWarnings("unused")
 public class ENDINCLUDE extends Token {
-    public ENDINCLUDE(int kind,String image) {
-        super(kind,image);
+    public ENDINCLUDE(TokenType type,String image) {
+        super(type,image);
     }
 
 }

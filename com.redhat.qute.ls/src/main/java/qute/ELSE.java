@@ -3,8 +3,8 @@ package qute;
 
 @SuppressWarnings("unused")
 public class ELSE extends Token {
-    public ELSE(int kind,String image) {
-        super(kind,image);
+    public ELSE(TokenType type,String image) {
+        super(type,image);
     }
 
 }

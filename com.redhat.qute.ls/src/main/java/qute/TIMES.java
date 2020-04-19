@@ -3,8 +3,8 @@ package qute;
 
 @SuppressWarnings("unused")
 public class TIMES extends Token {
-    public TIMES(int kind,String image) {
-        super(kind,image);
+    public TIMES(TokenType type,String image) {
+        super(type,image);
     }
 
 }

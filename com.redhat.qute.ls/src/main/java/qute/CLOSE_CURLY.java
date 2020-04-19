@@ -3,8 +3,8 @@ package qute;
 
 @SuppressWarnings("unused")
 public class CLOSE_CURLY extends Token {
-    public CLOSE_CURLY(int kind,String image) {
-        super(kind,image);
+    public CLOSE_CURLY(TokenType type,String image) {
+        super(type,image);
     }
 
 }

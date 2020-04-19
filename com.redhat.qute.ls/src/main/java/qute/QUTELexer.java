@@ -13,12 +13,14 @@ public class QUTELexer implements QUTEConstants {
         input_stream.addToken(token);
     }
 
+    int tabSize=8;
     int[] jjemptyLineNo=new int[3];
     int[] jjemptyColNo=new int[3];
     boolean[] jjbeenHere=new boolean[3];
     private int jjnewStateCnt;
     private int jjround;
     private int jjmatchedPos;
+    //FIXME,should be an enum.
     private int jjmatchedKind;
     private String inputSource="input";
     private boolean trace_enabled=false;
@@ -35,9 +37,6 @@ public class QUTELexer implements QUTEConstants {
     }
 
     private LexicalState lexicalState=LexicalState.QUTE_TEXT;
-    public enum LexicalState {
-        QUTE_TEXT,QUTE_EXPRESSION,IN_COMMENT,
-    }
     void doLexicalStateSwitch(int tokenType) {
         LexicalState newLexState=newLexicalStates[tokenType];
         if (newLexState!=null) {
@@ -45,15 +44,19 @@ public class QUTELexer implements QUTEConstants {
         }
     }
 
+    void doLexicalStateSwitch(TokenType tokenType) {
+        doLexicalStateSwitch(tokenType.ordinal());
+    }
+
     private static final LexicalState[] newLexicalStates={null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,LexicalState.QUTE_EXPRESSION,null,LexicalState.QUTE_EXPRESSION,null,LexicalState.QUTE_EXPRESSION,null,LexicalState.QUTE_EXPRESSION,LexicalState.QUTE_EXPRESSION,null,null,LexicalState.QUTE_EXPRESSION,null,LexicalState.QUTE_EXPRESSION,null,LexicalState.QUTE_EXPRESSION,null,LexicalState.QUTE_EXPRESSION,null,LexicalState.QUTE_EXPRESSION,LexicalState.IN_COMMENT,null,LexicalState.QUTE_TEXT,LexicalState.QUTE_TEXT,LexicalState.QUTE_TEXT,};
-    // Bit vector for TOKEN
-    static final long[] jjtoToken={0xffc7088fffffffffL,0x63ffL,};
-    // Bit vector for SKIP
-    static final long[] jjtoSkip={0x0L,0x1000L,};
-    // Bit vector for SPECIAL
-    static final long[] jjtoSpecial={0x0L,0x1000L,};
-    // Bit vector for MORE
-    static final long[] jjtoMore={0x0L,0xc00L,};
+    // BitSet for TOKEN
+    static private BitSet tokenSet=BitSet.valueOf(new long[]{-16034659104194561L,25599L,});
+    // BitSet for SKIP
+    static private BitSet skipSet=BitSet.valueOf(new long[]{68719476736L,4096L,});
+    // BitSet for SPECIAL
+    static private BitSet specialSet=BitSet.valueOf(new long[]{0L,4096L,});
+    // BitSet for MORE
+    static private BitSet moreSet=BitSet.valueOf(new long[]{0L,3072L,});
     private final int[] jjrounds=new int[70];
     private final int[] jjstateSet=new int[140];
     private final StringBuilder image=new StringBuilder();
@@ -65,7 +68,7 @@ public class QUTELexer implements QUTEConstants {
     }
 
     public QUTELexer(String inputSource,CharSequence chars) {
-        this(inputSource,chars,LexicalState.values()[0],1,1);
+        this(inputSource,chars,LexicalState.QUTE_TEXT,1,1);
     }
 
     public QUTELexer(String inputSource,CharSequence chars,LexicalState lexState,int line,int column) {
@@ -74,7 +77,7 @@ public class QUTELexer implements QUTEConstants {
     }
 
     public QUTELexer(Reader reader) {
-        this(reader,LexicalState.values()[0],1,1);
+        this(reader,LexicalState.QUTE_TEXT,1,1);
     }
 
     public QUTELexer(Reader reader,LexicalState lexState,int line,int column) {
@@ -97,13 +100,6 @@ public class QUTELexer implements QUTEConstants {
         this.lexicalState=lexState;
     }
 
-    /**
-      * @deprecated Use the switchTo method that takes an Enum
-      */
-    @Deprecated public void SwitchTo(int lexState) {
-        switchTo(LexicalState.values()[lexState]);
-    }
-
     public Token getNextToken() {
         Token tok=null;
         do {
@@ -111,10 +107,10 @@ public class QUTELexer implements QUTEConstants {
         }
         while (tok instanceof InvalidToken);
         if (invalidToken!=null) {
-            input_stream.addToken(invalidToken);
+            addToken(invalidToken);
             invalidToken=null;
         }
-        input_stream.addToken(tok);
+        addToken(tok);
         return tok;
     }
 
@@ -133,7 +129,7 @@ public class QUTELexer implements QUTEConstants {
                 Token eof=jjFillToken();
                 tokenLexicalActions();
                 eof.specialToken=specialToken;
-                input_stream.addToken(eof);
+                addToken(eof);
                 return eof;
             }
             image.setLength(0);
@@ -165,19 +161,19 @@ public class QUTELexer implements QUTEConstants {
                         input_stream.backup(curPos-jjmatchedPos-1);
                     }
                     if (trace_enabled) LOGGER.info("****** FOUND A "+tokenImage[jjmatchedKind]+" MATCH ("+ParseException.addEscapes(input_stream.getSuffix(jjmatchedPos+1))+") ******\n");
-                    if ((jjtoToken[jjmatchedKind>>6]&(1L<<(jjmatchedKind&077)))!=0L) {
+                    if (tokenSet.get(jjmatchedKind)) {
                         matchedToken=jjFillToken();
                         matchedToken.specialToken=specialToken;
                         tokenLexicalActions();
-                        jjmatchedKind=matchedToken.kind;
+                        jjmatchedKind=matchedToken.getType().ordinal();
                         if (newLexicalStates[jjmatchedKind]!=null) {
                             switchTo(newLexicalStates[jjmatchedKind]);
                         }
-                        input_stream.addToken(matchedToken);
+                        addToken(matchedToken);
                         return matchedToken;
                     }
-                    else if ((jjtoSkip[jjmatchedKind>>6]&(1L<<(jjmatchedKind&077)))!=0L) {
-                        if ((jjtoSpecial[jjmatchedKind>>6]&(1L<<(jjmatchedKind&077)))!=0L) {
+                    else if (skipSet.get(jjmatchedKind)) {
+                        if (specialSet.get(jjmatchedKind)) {
                             matchedToken=jjFillToken();
                             matchedToken.setUnparsed(true);
                             if (specialToken==null) {
@@ -187,7 +183,7 @@ public class QUTELexer implements QUTEConstants {
                                 matchedToken.specialToken=specialToken;
                                 specialToken.setNext(matchedToken);
                                 specialToken=matchedToken;
-                                input_stream.addToken(specialToken);
+                                addToken(specialToken);
                             }
                             tokenLexicalActions();
                         }
@@ -247,7 +243,7 @@ public class QUTELexer implements QUTEConstants {
         beginColumn=input_stream.getBeginColumn();
         endLine=input_stream.getEndLine();
         endColumn=input_stream.getEndColumn();
-        t=Token.newToken(jjmatchedKind,curTokenImage);
+        t=Token.newToken(TokenType.values()[jjmatchedKind],curTokenImage);
         t.beginLine=beginLine;
         t.endLine=endLine;
         t.beginColumn=beginColumn;
@@ -307,9 +303,9 @@ public class QUTELexer implements QUTEConstants {
         return pos+1;
     }
 
-    static final long[] jjbitVec0={0xfffffffffffffffeL,0xffffffffffffffffL,0xffffffffffffffffL,0xffffffffffffffffL};
-    static final long[] jjbitVec1={0xffffffffffffffffL,0xffffffffffffffffL,0xffffffffffffffffL,0xffffffffffffffffL};
-    static final long[] jjbitVec2={0x0L,0x0L,0xffffffffffffffffL,0xffffffffffffffffL};
+    private static final long[] jjbitVec0={0xfffffffffffffffeL,0xffffffffffffffffL,0xffffffffffffffffL,0xffffffffffffffffL};
+    private static final long[] jjbitVec1={0xffffffffffffffffL,0xffffffffffffffffL,0xffffffffffffffffL,0xffffffffffffffffL};
+    private static final long[] jjbitVec2={0x0L,0x0L,0xffffffffffffffffL,0xffffffffffffffffL};
     private int jjStartNfa_QUTE_TEXT(int pos,long active0,long active1) {
         return jjMoveNfa_QUTE_TEXT(jjStopStringLiteralDfa_QUTE_TEXT(pos,active0,active1),pos+1);
     }
@@ -1736,21 +1732,4 @@ public class QUTELexer implements QUTEConstants {
     }
 
     static final int[] jjnextStates={66,67,69,67,68,69,61,62,63,9,14,18,27,34,43,51,57,58,60,64,29,30,25,26,27,30,32,33,39,40,42,43,16,23,1,3,4,17,18,20,18,20,30,32,33,39,40,42,43,6,9};
-    private int tabSize=8;
-    /**
-     * sets the size of a tab for location reporting 
-     * purposes, default value is 8.
-     */
-    public void setTabSize(int tabSize) {
-        this.tabSize=tabSize;
-    }
-
-    /**
-     * returns the size of a tab for location reporting 
-     * purposes, default value is 8.
-     */
-    public int getTabSize() {
-        return tabSize;
-    }
-
 }

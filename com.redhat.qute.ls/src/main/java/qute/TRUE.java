@@ -3,8 +3,8 @@ package qute;
 
 @SuppressWarnings("unused")
 public class TRUE extends Token {
-    public TRUE(int kind,String image) {
-        super(kind,image);
+    public TRUE(TokenType type,String image) {
+        super(type,image);
     }
 
 }

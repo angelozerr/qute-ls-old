@@ -3,8 +3,8 @@ package qute;
 
 @SuppressWarnings("unused")
 public class ALT_GT extends Token {
-    public ALT_GT(int kind,String image) {
-        super(kind,image);
+    public ALT_GT(TokenType type,String image) {
+        super(type,image);
     }
 
 }

@@ -3,8 +3,8 @@ package qute;
 
 @SuppressWarnings("unused")
 public class ENDINSERT extends Token {
-    public ENDINSERT(int kind,String image) {
-        super(kind,image);
+    public ENDINSERT(TokenType type,String image) {
+        super(type,image);
     }
 
 }

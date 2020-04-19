@@ -3,8 +3,8 @@ package qute;
 
 @SuppressWarnings("unused")
 public class Comment extends Token {
-    public Comment(int kind,String image) {
-        super(kind,image);
+    public Comment(TokenType type,String image) {
+        super(type,image);
     }
 
 }

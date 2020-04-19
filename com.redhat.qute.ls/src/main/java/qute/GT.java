@@ -3,8 +3,8 @@ package qute;
 
 @SuppressWarnings("unused")
 public class GT extends Token {
-    public GT(int kind,String image) {
-        super(kind,image);
+    public GT(TokenType type,String image) {
+        super(type,image);
     }
 
 }

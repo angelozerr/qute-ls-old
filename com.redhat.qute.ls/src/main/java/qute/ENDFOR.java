@@ -3,8 +3,8 @@ package qute;
 
 @SuppressWarnings("unused")
 public class ENDFOR extends Token {
-    public ENDFOR(int kind,String image) {
-        super(kind,image);
+    public ENDFOR(TokenType type,String image) {
+        super(type,image);
     }
 
 }

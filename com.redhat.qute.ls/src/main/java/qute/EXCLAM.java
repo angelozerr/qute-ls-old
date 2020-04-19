@@ -3,8 +3,8 @@ package qute;
 
 @SuppressWarnings("unused")
 public class EXCLAM extends Token {
-    public EXCLAM(int kind,String image) {
-        super(kind,image);
+    public EXCLAM(TokenType type,String image) {
+        super(type,image);
     }
 
 }

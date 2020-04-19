@@ -3,8 +3,8 @@ package qute;
 
 @SuppressWarnings("unused")
 public class NumberLiteral2 extends Literal {
-    public NumberLiteral2(int kind,String image) {
-        super(kind,image);
+    public NumberLiteral2(TokenType type,String image) {
+        super(type,image);
     }
 
 }

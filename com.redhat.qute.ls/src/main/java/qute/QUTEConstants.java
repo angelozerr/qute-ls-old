@@ -5,91 +5,127 @@ package qute;
  * Token literal values and constants.
  */
 public interface QUTEConstants {
-    int INVALID=-1;
-    // Used for Lexically invalid input
-    int EOF=0;
-    // End of file
-    int COMMA=1;
-    int IN=2;
-    int AS=3;
-    int OR=4;
-    int OR2=5;
-    int AND=6;
-    int AND2=7;
-    int SIMPLE_EQUALS=8;
-    int EQUALS=9;
-    int EQUALS2=10;
-    int EQUALS3=11;
-    int GT=12;
-    int ALT_GT=13;
-    int GE=14;
-    int ALT_GE=15;
-    int LT=16;
-    int ALT_LT=17;
-    int LE=18;
-    int ALT_LE=19;
-    int DOT_DOT=20;
-    int PLUS=21;
-    int MINUS=22;
-    int TIMES=23;
-    int DIVIDE=24;
-    int DOT=25;
-    int EXCLAM=26;
-    int OPEN_BRACKET=27;
-    int CLOSE_BRACKET=28;
-    int NULL=29;
-    int TRUE=30;
-    int FALSE=31;
-    int INTEGER=32;
-    int DECIMAL=33;
-    int STRING_LITERAL=34;
-    int RAW_STRING=35;
-    int ASCII_LETTER=37;
-    int ASCII_DIGIT=38;
-    int C_IDENTIFIER=39;
-    int ESCAPE1=40;
-    int ESCAPE2=41;
-    int REGULAR_CHAR=42;
-    int ZERO=44;
-    int NON_ZERO=45;
-    int FRACTION=46;
-    int EXPONENT=47;
-    int NUMBER=48;
-    int OPEN_PAREN=49;
-    int CLOSE_PAREN=50;
-    int NO_OPEN_CURLY=51;
-    int ESCAPED_OPEN_CURLY=52;
-    int WS=53;
-    int TEXT=54;
-    int OPEN_CURLY=55;
-    int ABBREVIATED_END=56;
-    int EACH=57;
-    int ENDEACH=58;
-    int FOR=59;
-    int ENDFOR=60;
-    int IF=61;
-    int ELSEIF=62;
-    int ELSE=63;
-    int ENDIF=64;
-    int QUTE_INCLUDE=65;
-    int ENDINCLUDE=66;
-    int INSERT=67;
-    int ENDINSERT=68;
-    int WITH=69;
-    int ENDWITH=70;
-    int START_SECTION=71;
-    int END_SECTION=72;
-    int START_PARAMETER_DECL=73;
-    int OPEN_COMMENT=74;
-    int CLOSE_COMMENT=76;
-    int CLOSE_CURLY=77;
-    int CLOSE_EMPTY=78;
+    public enum TokenType {
+        EOF,COMMA,IN,AS,OR,OR2,AND,AND2,SIMPLE_EQUALS,EQUALS,EQUALS2,EQUALS3,GT,ALT_GT,GE,ALT_GE,LT,ALT_LT,LE,ALT_LE,DOT_DOT,PLUS,MINUS,TIMES,DIVIDE,DOT,EXCLAM,OPEN_BRACKET,CLOSE_BRACKET,NULL,TRUE,FALSE,INTEGER,DECIMAL,STRING_LITERAL,RAW_STRING,_TOKEN_36,ASCII_LETTER,ASCII_DIGIT,C_IDENTIFIER,ESCAPE1,ESCAPE2,REGULAR_CHAR,JSON_STRING,ZERO,NON_ZERO,FRACTION,EXPONENT,NUMBER,OPEN_PAREN,CLOSE_PAREN,NO_OPEN_CURLY,ESCAPED_OPEN_CURLY,WS,TEXT,OPEN_CURLY,ABBREVIATED_END,EACH,ENDEACH,FOR,ENDFOR,IF,ELSEIF,ELSE,ENDIF,QUTE_INCLUDE,ENDINCLUDE,INSERT,ENDINSERT,WITH,ENDWITH,START_SECTION,END_SECTION,START_PARAMETER_DECL,OPEN_COMMENT,_TOKEN_75,CLOSE_COMMENT,CLOSE_CURLY,CLOSE_EMPTY,INVALID
+    }
     /**
    * Lexical States
    */
-    int QUTE_TEXT=0;
-    int QUTE_EXPRESSION=1;
-    int IN_COMMENT=2;
-    String[] tokenImage={"<EOF>","\",\"","\"in\"","\"as\"","\"||\"","\"or\"","\"&&\"","\"and\"","\"=\"","\"==\"","\"eq\"","\"is\"","\">\"","\"gt\"","\">=\"","\"ge\"","\"<\"","\"lt\"","\"<=\"","\"le\"","\"..\"","\"+\"","\"-\"","\"*\"","\"/\"","\".\"","\"!\"","\"[\"","\"]\"","\"null\"","\"true\"","\"false\"","<INTEGER>","<DECIMAL>","<STRING_LITERAL>","<RAW_STRING>","<36>","<ASCII_LETTER>","<ASCII_DIGIT>","<C_IDENTIFIER>","<ESCAPE1>","<ESCAPE2>","<REGULAR_CHAR>","<STRING_LITERAL>","\"0\"","<NON_ZERO>","<FRACTION>","<EXPONENT>","<NUMBER>","\"(\"","\")\"","<NO_OPEN_CURLY>","\"\\\\{\"","<WS>","<TEXT>","\"{\"","\"{/}\"","<EACH>","\"{/each}\"","<FOR>","\"{/for}\"","<IF>","<ELSEIF>","<ELSE>","\"{/if}\"","<QUTE_INCLUDE>","\"{/include}\"","<INSERT>","\"{/insert}\"","<WITH>","\"{/with}\"","<START_SECTION>","<END_SECTION>","<START_PARAMETER_DECL>","\"{!\"","<75>","\"!}\"","\"}\"","\"/}\"",};
-    String[] nodeNames={"EOF","COMMA","IN","AS","OR","OR2","AND","AND2","SIMPLE_EQUALS","EQUALS","EQUALS2","EQUALS3","GT","ALT_GT","GE","ALT_GE","LT","ALT_LT","LE","ALT_LE","DOT_DOT","PLUS","MINUS","TIMES","DIVIDE","DOT","EXCLAM","OPEN_BRACKET","CLOSE_BRACKET","NULL","TRUE","FALSE","INTEGER","DECIMAL","STRING_LITERAL","RAW_STRING","ASCII_LETTER","ASCII_DIGIT","C_IDENTIFIER","ESCAPE1","ESCAPE2","REGULAR_CHAR","ZERO","NON_ZERO","FRACTION","EXPONENT","NUMBER","OPEN_PAREN","CLOSE_PAREN","NO_OPEN_CURLY","ESCAPED_OPEN_CURLY","WS","TEXT","OPEN_CURLY","ABBREVIATED_END","EACH","ENDEACH","FOR","ENDFOR","IF","ELSEIF","ELSE","ENDIF","QUTE_INCLUDE","ENDINCLUDE","INSERT","ENDINSERT","WITH","ENDWITH","START_SECTION","END_SECTION","START_PARAMETER_DECL","OPEN_COMMENT","CLOSE_COMMENT","CLOSE_CURLY","CLOSE_EMPTY","Expression","OrExpression","AndExpression","EqualityExpression","RelationalExpression","RangeExpression","AdditiveExpression","MultiplicativeExpression","UnaryPlusMinusExpression","NotExpression","DefaultToExpression","PrimaryExpression","BaseExpression","PositionalArgsList","StringLiteral","Parenthesis","NumberLiteral","BooleanLiteral","NullLiteral","ParameterDeclaration","Interpolation","EachSection","ForSection","IfSection","ElseIfSection","ElseBlock","IncludeSection","InsertSection","WithSection","UserSection","Block","Root",};
+    public enum LexicalState {
+        QUTE_TEXT,QUTE_EXPRESSION,IN_COMMENT,
+    }
+    String[] tokenImage={"<EOF>","\",\"","\"in\"","\"as\"","\"||\"","\"or\"","\"&&\"","\"and\"","\"=\"","\"==\"","\"eq\"","\"is\"","\">\"","\"gt\"","\">=\"","\"ge\"","\"<\"","\"lt\"","\"<=\"","\"le\"","\"..\"","\"+\"","\"-\"","\"*\"","\"/\"","\".\"","\"!\"","\"[\"","\"]\"","\"null\"","\"true\"","\"false\"","<INTEGER>","<DECIMAL>","<STRING_LITERAL>","<RAW_STRING>","<_TOKEN_36>","<ASCII_LETTER>","<ASCII_DIGIT>","<C_IDENTIFIER>","<ESCAPE1>","<ESCAPE2>","<REGULAR_CHAR>","<JSON_STRING>","\"0\"","<NON_ZERO>","<FRACTION>","<EXPONENT>","<NUMBER>","\"(\"","\")\"","<NO_OPEN_CURLY>","\"\\\\{\"","<WS>","<TEXT>","\"{\"","\"{/}\"","<EACH>","\"{/each}\"","<FOR>","\"{/for}\"","<IF>","<ELSEIF>","<ELSE>","\"{/if}\"","<QUTE_INCLUDE>","\"{/include}\"","<INSERT>","\"{/insert}\"","<WITH>","\"{/with}\"","<START_SECTION>","<END_SECTION>","<START_PARAMETER_DECL>","\"{!\"","<_TOKEN_75>","\"!}\"","\"}\"","\"/}\"",};
+    /*
+   String[] nodeNames = {
+       "EOF", 
+          "COMMA",
+          "IN",
+          "AS",
+          "OR",
+          "OR2",
+          "AND",
+          "AND2",
+          "SIMPLE_EQUALS",
+          "EQUALS",
+          "EQUALS2",
+          "EQUALS3",
+          "GT",
+          "ALT_GT",
+          "GE",
+          "ALT_GE",
+          "LT",
+          "ALT_LT",
+          "LE",
+          "ALT_LE",
+          "DOT_DOT",
+          "PLUS",
+          "MINUS",
+          "TIMES",
+          "DIVIDE",
+          "DOT",
+          "EXCLAM",
+          "OPEN_BRACKET",
+          "CLOSE_BRACKET",
+          "NULL",
+          "TRUE",
+          "FALSE",
+          "INTEGER",
+          "DECIMAL",
+          "STRING_LITERAL",
+          "RAW_STRING",
+          "ASCII_LETTER",
+          "ASCII_DIGIT",
+          "C_IDENTIFIER",
+          "ESCAPE1",
+          "ESCAPE2",
+          "REGULAR_CHAR",
+          "JSON_STRING",
+          "ZERO",
+          "NON_ZERO",
+          "FRACTION",
+          "EXPONENT",
+          "NUMBER",
+          "OPEN_PAREN",
+          "CLOSE_PAREN",
+          "NO_OPEN_CURLY",
+          "ESCAPED_OPEN_CURLY",
+          "WS",
+          "TEXT",
+          "OPEN_CURLY",
+          "ABBREVIATED_END",
+          "EACH",
+          "ENDEACH",
+          "FOR",
+          "ENDFOR",
+          "IF",
+          "ELSEIF",
+          "ELSE",
+          "ENDIF",
+          "QUTE_INCLUDE",
+          "ENDINCLUDE",
+          "INSERT",
+          "ENDINSERT",
+          "WITH",
+          "ENDWITH",
+          "START_SECTION",
+          "END_SECTION",
+          "START_PARAMETER_DECL",
+          "OPEN_COMMENT",
+          "CLOSE_COMMENT",
+          "CLOSE_CURLY",
+          "CLOSE_EMPTY",
+              "Expression", 
+              "OrExpression", 
+              "AndExpression", 
+              "EqualityExpression", 
+              "RelationalExpression", 
+              "RangeExpression", 
+              "AdditiveExpression", 
+              "MultiplicativeExpression", 
+              "UnaryPlusMinusExpression", 
+              "NotExpression", 
+              "DefaultToExpression", 
+              "PrimaryExpression", 
+              "BaseExpression", 
+              "PositionalArgsList", 
+              "StringLiteral", 
+              "Parenthesis", 
+              "NumberLiteral", 
+              "BooleanLiteral", 
+              "NullLiteral", 
+              "ParameterDeclaration", 
+              "Interpolation", 
+              "EachSection", 
+              "ForSection", 
+              "IfSection", 
+              "ElseIfSection", 
+              "ElseBlock", 
+              "IncludeSection", 
+              "InsertSection", 
+              "WithSection", 
+              "UserSection", 
+              "Block", 
+              "Root", 
+   };
+*/
 }

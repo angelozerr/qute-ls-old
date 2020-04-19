@@ -3,8 +3,8 @@ package qute;
 
 @SuppressWarnings("unused")
 public class OR2 extends Token {
-    public OR2(int kind,String image) {
-        super(kind,image);
+    public OR2(TokenType type,String image) {
+        super(type,image);
     }
 
 }

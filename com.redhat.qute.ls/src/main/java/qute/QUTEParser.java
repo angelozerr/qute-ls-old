@@ -2,17 +2,43 @@
 package qute;
 
 import java.util.*;
+import java.util.concurrent.CancellationException;
 import java.util.logging.*;
 import java.io.*;
 @SuppressWarnings("unused")
 public class QUTEParser implements QUTEConstants {
-    static final java.util.logging.Logger LOGGER=Logger.getLogger("QUTEParser");
-    static public void setLogLevel(Level level) {
+    private static final java.util.logging.Logger LOGGER=Logger.getLogger(QUTEParser.class.getName());
+    public static void setLogLevel(Level level) {
         LOGGER.setLevel(level);
         Logger.getGlobal().getParent().getHandlers()[0].setLevel(level);
     }
 
+    private boolean cancelled;
+    public void cancel() {
+        cancelled=true;
+    }
+
+    public boolean isCancelled() {
+        return cancelled;
+    }
+
     private boolean tolerantParsing=true;
+    private List<ParsingProblem>parsingProblems;
+    public void addParsingProblem(ParsingProblem problem) {
+        if (parsingProblems==null) {
+            parsingProblems=new ArrayList<>();
+        }
+        parsingProblems.add(problem);
+    }
+
+    public List<ParsingProblem>getParsingProblems() {
+        return parsingProblems;
+    }
+
+    public boolean hasParsingProblems() {
+        return parsingProblems!=null&&!parsingProblems.isEmpty();
+    }
+
     public boolean isParserTolerant() {
         return tolerantParsing;
     }
@@ -251,13 +277,14 @@ public class QUTEParser implements QUTEConstants {
         }
 
     }
-    static private final int INFINITY=Integer.MAX_VALUE;
+    static private final int INDEFINITE=Integer.MAX_VALUE;
     //=================================
     // Start of methods for BNF Productions
     //=================================
     // QEL.javacc, line 130
     final public void Expression() throws ParseException {
         if (trace_enabled) LOGGER.info("Entering production defined on line 130 of QEL.javacc");
+        if (cancelled) throw new CancellationException();
         // Code for expansion specified on line 132 of QEL.javacc
         boolean Expression1forced=false;
         Expression Expression1=null;
@@ -290,8 +317,10 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException1: "+parseException1.getMessage());
                     Expression1.setParseException(parseException1);
                     if (Expression1forced) {
-                        //		                attemptRecovery(Expression1, DOT_DOT, TIMES, EXCLAM, CLOSE_BRACKET, NULL, TRUE, FALSE, INTEGER, DECIMAL, STRING_LITERAL, RAW_STRING, C_IDENTIFIER, CLOSE_PAREN);
-                        insertVirtualToken(DOT_DOT);
+                        Token virtualToken=insertVirtualToken(TokenType.DOT_DOT);
+                        String message="Inserted virtual token of type "+virtualToken.getType()+"\non line "+virtualToken.getBeginLine()+", column "+virtualToken.getBeginColumn()+" of "+token_source.getInputSource()+"\n to complete expansion in Expression\n";
+                        message+=parseException1.getMessage();
+                        addParsingProblem(new ParsingProblem(message,Expression1));
                         closeNodeScope(Expression1,true);
                     }
                     else {
@@ -307,6 +336,7 @@ public class QUTEParser implements QUTEConstants {
     // QEL.javacc, line 135
     final public void OrExpression() throws ParseException {
         if (trace_enabled) LOGGER.info("Entering production defined on line 135 of QEL.javacc");
+        if (cancelled) throw new CancellationException();
         // Code for expansion specified on line 137 of QEL.javacc
         boolean OrExpression2forced=false;
         OrExpression OrExpression2=null;
@@ -323,28 +353,27 @@ public class QUTEParser implements QUTEConstants {
             // Code for AndExpression specified on line 137 of QEL.javacc
             AndExpression();
             // Code for expansion specified on line 140 of QEL.javacc
-            label_1:
+            ZeroOrMore$QEL_javacc$line_140:
             while (true) {
-                int int1=nextTokenKind();
-                if (!(int1==OR||int1==OR2)) {
-                    break label_1;
+                TokenType tokentype1=nextTokenType();
+                if (!(tokentype1==TokenType.OR||tokentype1==TokenType.OR2)) {
+                    break ZeroOrMore$QEL_javacc$line_140;
                 }
                 // Code for expansion specified on line 139 of QEL.javacc
                 // Code for expansion specified on line 139 of QEL.javacc
-                switch(nextTokenKind()) {
+                switch(nextTokenType()) {
                     case OR:
                     // Code for expansion specified on line 139 of QEL.javacc
                     // Code for expansion specified on line 139 of QEL.javacc
-                    consumeToken(OR,false);
+                    consumeToken(TokenType.OR,false);
                     break;
                     case OR2:
                     // Code for expansion specified on line 139 of QEL.javacc
                     // Code for expansion specified on line 139 of QEL.javacc
-                    consumeToken(OR2,false);
+                    consumeToken(TokenType.OR2,false);
                     break;
                     default:
-                    consumeToken(-1);
-                    throw new ParseException();
+                    throw new ParseException(current_token.getNext());
                 }
                 // Code for AndExpression specified on line 139 of QEL.javacc
                 AndExpression();
@@ -366,8 +395,10 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException2: "+parseException2.getMessage());
                     OrExpression2.setParseException(parseException2);
                     if (OrExpression2forced) {
-                        //		                attemptRecovery(OrExpression2, DOT_DOT, TIMES, EXCLAM, CLOSE_BRACKET, NULL, TRUE, FALSE, INTEGER, DECIMAL, STRING_LITERAL, RAW_STRING, C_IDENTIFIER, CLOSE_PAREN);
-                        insertVirtualToken(DOT_DOT);
+                        Token virtualToken=insertVirtualToken(TokenType.DOT_DOT);
+                        String message="Inserted virtual token of type "+virtualToken.getType()+"\non line "+virtualToken.getBeginLine()+", column "+virtualToken.getBeginColumn()+" of "+token_source.getInputSource()+"\n to complete expansion in OrExpression\n";
+                        message+=parseException2.getMessage();
+                        addParsingProblem(new ParsingProblem(message,OrExpression2));
                         closeNodeScope(OrExpression2,true);
                     }
                     else {
@@ -383,6 +414,7 @@ public class QUTEParser implements QUTEConstants {
     // QEL.javacc, line 143
     final public void AndExpression() throws ParseException {
         if (trace_enabled) LOGGER.info("Entering production defined on line 143 of QEL.javacc");
+        if (cancelled) throw new CancellationException();
         // Code for expansion specified on line 145 of QEL.javacc
         boolean AndExpression3forced=false;
         AndExpression AndExpression3=null;
@@ -399,28 +431,27 @@ public class QUTEParser implements QUTEConstants {
             // Code for EqualityExpression specified on line 145 of QEL.javacc
             EqualityExpression();
             // Code for expansion specified on line 148 of QEL.javacc
-            label_2:
+            ZeroOrMore$QEL_javacc$line_148:
             while (true) {
-                int int2=nextTokenKind();
-                if (!(int2==AND||int2==AND2)) {
-                    break label_2;
+                TokenType tokentype2=nextTokenType();
+                if (!(tokentype2==TokenType.AND||tokentype2==TokenType.AND2)) {
+                    break ZeroOrMore$QEL_javacc$line_148;
                 }
                 // Code for expansion specified on line 147 of QEL.javacc
                 // Code for expansion specified on line 147 of QEL.javacc
-                switch(nextTokenKind()) {
+                switch(nextTokenType()) {
                     case AND:
                     // Code for expansion specified on line 147 of QEL.javacc
                     // Code for expansion specified on line 147 of QEL.javacc
-                    consumeToken(AND,false);
+                    consumeToken(TokenType.AND,false);
                     break;
                     case AND2:
                     // Code for expansion specified on line 147 of QEL.javacc
                     // Code for expansion specified on line 147 of QEL.javacc
-                    consumeToken(AND2,false);
+                    consumeToken(TokenType.AND2,false);
                     break;
                     default:
-                    consumeToken(-1);
-                    throw new ParseException();
+                    throw new ParseException(current_token.getNext());
                 }
                 // Code for EqualityExpression specified on line 147 of QEL.javacc
                 EqualityExpression();
@@ -442,8 +473,10 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException3: "+parseException3.getMessage());
                     AndExpression3.setParseException(parseException3);
                     if (AndExpression3forced) {
-                        //		                attemptRecovery(AndExpression3, DOT_DOT, TIMES, EXCLAM, CLOSE_BRACKET, NULL, TRUE, FALSE, INTEGER, DECIMAL, STRING_LITERAL, RAW_STRING, C_IDENTIFIER, CLOSE_PAREN);
-                        insertVirtualToken(DOT_DOT);
+                        Token virtualToken=insertVirtualToken(TokenType.DOT_DOT);
+                        String message="Inserted virtual token of type "+virtualToken.getType()+"\non line "+virtualToken.getBeginLine()+", column "+virtualToken.getBeginColumn()+" of "+token_source.getInputSource()+"\n to complete expansion in AndExpression\n";
+                        message+=parseException3.getMessage();
+                        addParsingProblem(new ParsingProblem(message,AndExpression3));
                         closeNodeScope(AndExpression3,true);
                     }
                     else {
@@ -459,6 +492,7 @@ public class QUTEParser implements QUTEConstants {
     // QEL.javacc, line 151
     final public void EqualityExpression() throws ParseException {
         if (trace_enabled) LOGGER.info("Entering production defined on line 151 of QEL.javacc");
+        if (cancelled) throw new CancellationException();
         // Code for expansion specified on line 153 of QEL.javacc
         boolean EqualityExpression4forced=false;
         EqualityExpression EqualityExpression4=null;
@@ -475,29 +509,28 @@ public class QUTEParser implements QUTEConstants {
             // Code for RelationalExpression specified on line 153 of QEL.javacc
             RelationalExpression();
             // Code for expansion specified on line 154 of QEL.javacc
-            int int3=nextTokenKind();
-            if (int3==EQUALS||int3==EQUALS2||int3==EQUALS3) {
+            TokenType tokentype3=nextTokenType();
+            if (tokentype3==TokenType.EQUALS||tokentype3==TokenType.EQUALS2||tokentype3==TokenType.EQUALS3) {
                 // Code for expansion specified on line 155 of QEL.javacc
                 // Code for expansion specified on line 155 of QEL.javacc
-                switch(nextTokenKind()) {
+                switch(nextTokenType()) {
                     case EQUALS:
                     // Code for expansion specified on line 155 of QEL.javacc
                     // Code for expansion specified on line 155 of QEL.javacc
-                    consumeToken(EQUALS,false);
+                    consumeToken(TokenType.EQUALS,false);
                     break;
                     case EQUALS2:
                     // Code for expansion specified on line 155 of QEL.javacc
                     // Code for expansion specified on line 155 of QEL.javacc
-                    consumeToken(EQUALS2,false);
+                    consumeToken(TokenType.EQUALS2,false);
                     break;
                     case EQUALS3:
                     // Code for expansion specified on line 155 of QEL.javacc
                     // Code for expansion specified on line 155 of QEL.javacc
-                    consumeToken(EQUALS3,false);
+                    consumeToken(TokenType.EQUALS3,false);
                     break;
                     default:
-                    consumeToken(-1);
-                    throw new ParseException();
+                    throw new ParseException(current_token.getNext());
                 }
                 // Code for RelationalExpression specified on line 156 of QEL.javacc
                 RelationalExpression();
@@ -519,8 +552,10 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException4: "+parseException4.getMessage());
                     EqualityExpression4.setParseException(parseException4);
                     if (EqualityExpression4forced) {
-                        //		                attemptRecovery(EqualityExpression4, DOT_DOT, TIMES, EXCLAM, CLOSE_BRACKET, NULL, TRUE, FALSE, INTEGER, DECIMAL, STRING_LITERAL, RAW_STRING, C_IDENTIFIER, CLOSE_PAREN);
-                        insertVirtualToken(DOT_DOT);
+                        Token virtualToken=insertVirtualToken(TokenType.DOT_DOT);
+                        String message="Inserted virtual token of type "+virtualToken.getType()+"\non line "+virtualToken.getBeginLine()+", column "+virtualToken.getBeginColumn()+" of "+token_source.getInputSource()+"\n to complete expansion in EqualityExpression\n";
+                        message+=parseException4.getMessage();
+                        addParsingProblem(new ParsingProblem(message,EqualityExpression4));
                         closeNodeScope(EqualityExpression4,true);
                     }
                     else {
@@ -536,6 +571,7 @@ public class QUTEParser implements QUTEConstants {
     // QEL.javacc, line 160
     final public void RelationalExpression() throws ParseException {
         if (trace_enabled) LOGGER.info("Entering production defined on line 160 of QEL.javacc");
+        if (cancelled) throw new CancellationException();
         // Code for expansion specified on line 162 of QEL.javacc
         boolean RelationalExpression5forced=false;
         RelationalExpression RelationalExpression5=null;
@@ -552,54 +588,53 @@ public class QUTEParser implements QUTEConstants {
             // Code for RangeExpression specified on line 162 of QEL.javacc
             RangeExpression();
             // Code for expansion specified on line 163 of QEL.javacc
-            int int4=nextTokenKind();
-            if (int4==GT||int4==ALT_GT||int4==GE||int4==ALT_GE||int4==LT||int4==ALT_LT||int4==LE||int4==ALT_LE) {
+            TokenType tokentype4=nextTokenType();
+            if (tokentype4==TokenType.GT||tokentype4==TokenType.ALT_GT||tokentype4==TokenType.GE||tokentype4==TokenType.ALT_GE||tokentype4==TokenType.LT||tokentype4==TokenType.ALT_LT||tokentype4==TokenType.LE||tokentype4==TokenType.ALT_LE) {
                 // Code for expansion specified on line 164 of QEL.javacc
                 // Code for expansion specified on line 164 of QEL.javacc
-                switch(nextTokenKind()) {
+                switch(nextTokenType()) {
                     case GT:
                     // Code for expansion specified on line 164 of QEL.javacc
                     // Code for expansion specified on line 164 of QEL.javacc
-                    consumeToken(GT,false);
+                    consumeToken(TokenType.GT,false);
                     break;
                     case GE:
                     // Code for expansion specified on line 164 of QEL.javacc
                     // Code for expansion specified on line 164 of QEL.javacc
-                    consumeToken(GE,false);
+                    consumeToken(TokenType.GE,false);
                     break;
                     case LT:
                     // Code for expansion specified on line 164 of QEL.javacc
                     // Code for expansion specified on line 164 of QEL.javacc
-                    consumeToken(LT,false);
+                    consumeToken(TokenType.LT,false);
                     break;
                     case LE:
                     // Code for expansion specified on line 164 of QEL.javacc
                     // Code for expansion specified on line 164 of QEL.javacc
-                    consumeToken(LE,false);
+                    consumeToken(TokenType.LE,false);
                     break;
                     case ALT_GT:
                     // Code for expansion specified on line 164 of QEL.javacc
                     // Code for expansion specified on line 164 of QEL.javacc
-                    consumeToken(ALT_GT,false);
+                    consumeToken(TokenType.ALT_GT,false);
                     break;
                     case ALT_GE:
                     // Code for expansion specified on line 164 of QEL.javacc
                     // Code for expansion specified on line 164 of QEL.javacc
-                    consumeToken(ALT_GE,false);
+                    consumeToken(TokenType.ALT_GE,false);
                     break;
                     case ALT_LE:
                     // Code for expansion specified on line 164 of QEL.javacc
                     // Code for expansion specified on line 164 of QEL.javacc
-                    consumeToken(ALT_LE,false);
+                    consumeToken(TokenType.ALT_LE,false);
                     break;
                     case ALT_LT:
                     // Code for expansion specified on line 164 of QEL.javacc
                     // Code for expansion specified on line 164 of QEL.javacc
-                    consumeToken(ALT_LT,false);
+                    consumeToken(TokenType.ALT_LT,false);
                     break;
                     default:
-                    consumeToken(-1);
-                    throw new ParseException();
+                    throw new ParseException(current_token.getNext());
                 }
                 // Code for RangeExpression specified on line 165 of QEL.javacc
                 RangeExpression();
@@ -621,8 +656,10 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException5: "+parseException5.getMessage());
                     RelationalExpression5.setParseException(parseException5);
                     if (RelationalExpression5forced) {
-                        //		                attemptRecovery(RelationalExpression5, DOT_DOT, TIMES, EXCLAM, CLOSE_BRACKET, NULL, TRUE, FALSE, INTEGER, DECIMAL, STRING_LITERAL, RAW_STRING, C_IDENTIFIER, CLOSE_PAREN);
-                        insertVirtualToken(DOT_DOT);
+                        Token virtualToken=insertVirtualToken(TokenType.DOT_DOT);
+                        String message="Inserted virtual token of type "+virtualToken.getType()+"\non line "+virtualToken.getBeginLine()+", column "+virtualToken.getBeginColumn()+" of "+token_source.getInputSource()+"\n to complete expansion in RelationalExpression\n";
+                        message+=parseException5.getMessage();
+                        addParsingProblem(new ParsingProblem(message,RelationalExpression5));
                         closeNodeScope(RelationalExpression5,true);
                     }
                     else {
@@ -638,6 +675,7 @@ public class QUTEParser implements QUTEConstants {
     // QEL.javacc, line 169
     final public void RangeExpression() throws ParseException {
         if (trace_enabled) LOGGER.info("Entering production defined on line 169 of QEL.javacc");
+        if (cancelled) throw new CancellationException();
         // Code for expansion specified on line 171 of QEL.javacc
         boolean RangeExpression6forced=false;
         RangeExpression RangeExpression6=null;
@@ -654,13 +692,13 @@ public class QUTEParser implements QUTEConstants {
             // Code for AdditiveExpression specified on line 171 of QEL.javacc
             AdditiveExpression();
             // Code for expansion specified on line 172 of QEL.javacc
-            int int5=nextTokenKind();
-            if (int5==DOT_DOT) {
+            TokenType tokentype5=nextTokenType();
+            if (tokentype5==TokenType.DOT_DOT) {
                 // Code for expansion specified on line 173 of QEL.javacc
                 // Code for expansion specified on line 173 of QEL.javacc
-                consumeToken(DOT_DOT,false);
+                consumeToken(TokenType.DOT_DOT,false);
                 // Code for expansion specified on line 174 of QEL.javacc
-                if (phase2_6_QEL_javacc_line_175(INFINITY)) {
+                if (lookahead$QEL_javacc$line_175$column_20(INDEFINITE)) {
                     // Code for expansion specified on line 175 of QEL.javacc
                     // Code for AdditiveExpression specified on line 176 of QEL.javacc
                     AdditiveExpression();
@@ -683,8 +721,10 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException6: "+parseException6.getMessage());
                     RangeExpression6.setParseException(parseException6);
                     if (RangeExpression6forced) {
-                        //		                attemptRecovery(RangeExpression6, DOT_DOT, TIMES, EXCLAM, CLOSE_BRACKET, NULL, TRUE, FALSE, INTEGER, DECIMAL, STRING_LITERAL, RAW_STRING, C_IDENTIFIER, CLOSE_PAREN);
-                        insertVirtualToken(DOT_DOT);
+                        Token virtualToken=insertVirtualToken(TokenType.DOT_DOT);
+                        String message="Inserted virtual token of type "+virtualToken.getType()+"\non line "+virtualToken.getBeginLine()+", column "+virtualToken.getBeginColumn()+" of "+token_source.getInputSource()+"\n to complete expansion in RangeExpression\n";
+                        message+=parseException6.getMessage();
+                        addParsingProblem(new ParsingProblem(message,RangeExpression6));
                         closeNodeScope(RangeExpression6,true);
                     }
                     else {
@@ -700,6 +740,7 @@ public class QUTEParser implements QUTEConstants {
     // QEL.javacc, line 181
     final public void AdditiveExpression() throws ParseException {
         if (trace_enabled) LOGGER.info("Entering production defined on line 181 of QEL.javacc");
+        if (cancelled) throw new CancellationException();
         // Code for expansion specified on line 183 of QEL.javacc
         boolean AdditiveExpression7forced=false;
         AdditiveExpression AdditiveExpression7=null;
@@ -716,27 +757,26 @@ public class QUTEParser implements QUTEConstants {
             // Code for MultiplicativeExpression specified on line 183 of QEL.javacc
             MultiplicativeExpression();
             // Code for expansion specified on line 188 of QEL.javacc
-            label_8:
+            ZeroOrMore$QEL_javacc$line_188:
             while (true) {
-                if (!(phase2_8_QEL_javacc_line_185(INFINITY))) {
-                    break label_8;
+                if (!(lookahead$QEL_javacc$line_185$column_19(INDEFINITE))) {
+                    break ZeroOrMore$QEL_javacc$line_188;
                 }
                 // Code for expansion specified on line 185 of QEL.javacc
                 // Code for expansion specified on line 186 of QEL.javacc
-                switch(nextTokenKind()) {
+                switch(nextTokenType()) {
                     case PLUS:
                     // Code for expansion specified on line 186 of QEL.javacc
                     // Code for expansion specified on line 186 of QEL.javacc
-                    consumeToken(PLUS,false);
+                    consumeToken(TokenType.PLUS,false);
                     break;
                     case MINUS:
                     // Code for expansion specified on line 186 of QEL.javacc
                     // Code for expansion specified on line 186 of QEL.javacc
-                    consumeToken(MINUS,false);
+                    consumeToken(TokenType.MINUS,false);
                     break;
                     default:
-                    consumeToken(-1);
-                    throw new ParseException();
+                    throw new ParseException(current_token.getNext());
                 }
                 // Code for MultiplicativeExpression specified on line 187 of QEL.javacc
                 MultiplicativeExpression();
@@ -758,8 +798,10 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException7: "+parseException7.getMessage());
                     AdditiveExpression7.setParseException(parseException7);
                     if (AdditiveExpression7forced) {
-                        //		                attemptRecovery(AdditiveExpression7, TIMES, EXCLAM, CLOSE_BRACKET, NULL, TRUE, FALSE, INTEGER, DECIMAL, STRING_LITERAL, RAW_STRING, C_IDENTIFIER, CLOSE_PAREN);
-                        insertVirtualToken(TIMES);
+                        Token virtualToken=insertVirtualToken(TokenType.TIMES);
+                        String message="Inserted virtual token of type "+virtualToken.getType()+"\non line "+virtualToken.getBeginLine()+", column "+virtualToken.getBeginColumn()+" of "+token_source.getInputSource()+"\n to complete expansion in AdditiveExpression\n";
+                        message+=parseException7.getMessage();
+                        addParsingProblem(new ParsingProblem(message,AdditiveExpression7));
                         closeNodeScope(AdditiveExpression7,true);
                     }
                     else {
@@ -775,6 +817,7 @@ public class QUTEParser implements QUTEConstants {
     // QEL.javacc, line 191
     final public void MultiplicativeExpression() throws ParseException {
         if (trace_enabled) LOGGER.info("Entering production defined on line 191 of QEL.javacc");
+        if (cancelled) throw new CancellationException();
         // Code for expansion specified on line 193 of QEL.javacc
         boolean MultiplicativeExpression8forced=false;
         MultiplicativeExpression MultiplicativeExpression8=null;
@@ -791,28 +834,27 @@ public class QUTEParser implements QUTEConstants {
             // Code for UnaryExpression specified on line 193 of QEL.javacc
             UnaryExpression();
             // Code for expansion specified on line 197 of QEL.javacc
-            label_10:
+            ZeroOrMore$QEL_javacc$line_197:
             while (true) {
-                int int6=nextTokenKind();
-                if (!(int6==TIMES||int6==DIVIDE)) {
-                    break label_10;
+                TokenType tokentype6=nextTokenType();
+                if (!(tokentype6==TokenType.TIMES||tokentype6==TokenType.DIVIDE)) {
+                    break ZeroOrMore$QEL_javacc$line_197;
                 }
                 // Code for expansion specified on line 195 of QEL.javacc
                 // Code for expansion specified on line 195 of QEL.javacc
-                switch(nextTokenKind()) {
+                switch(nextTokenType()) {
                     case TIMES:
                     // Code for expansion specified on line 195 of QEL.javacc
                     // Code for expansion specified on line 195 of QEL.javacc
-                    consumeToken(TIMES,false);
+                    consumeToken(TokenType.TIMES,false);
                     break;
                     case DIVIDE:
                     // Code for expansion specified on line 195 of QEL.javacc
                     // Code for expansion specified on line 195 of QEL.javacc
-                    consumeToken(DIVIDE,false);
+                    consumeToken(TokenType.DIVIDE,false);
                     break;
                     default:
-                    consumeToken(-1);
-                    throw new ParseException();
+                    throw new ParseException(current_token.getNext());
                 }
                 // Code for UnaryExpression specified on line 196 of QEL.javacc
                 UnaryExpression();
@@ -834,8 +876,10 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException8: "+parseException8.getMessage());
                     MultiplicativeExpression8.setParseException(parseException8);
                     if (MultiplicativeExpression8forced) {
-                        //		                attemptRecovery(MultiplicativeExpression8, TIMES, EXCLAM, CLOSE_BRACKET, NULL, TRUE, FALSE, INTEGER, DECIMAL, STRING_LITERAL, RAW_STRING, C_IDENTIFIER, CLOSE_PAREN);
-                        insertVirtualToken(TIMES);
+                        Token virtualToken=insertVirtualToken(TokenType.TIMES);
+                        String message="Inserted virtual token of type "+virtualToken.getType()+"\non line "+virtualToken.getBeginLine()+", column "+virtualToken.getBeginColumn()+" of "+token_source.getInputSource()+"\n to complete expansion in MultiplicativeExpression\n";
+                        message+=parseException8.getMessage();
+                        addParsingProblem(new ParsingProblem(message,MultiplicativeExpression8));
                         closeNodeScope(MultiplicativeExpression8,true);
                     }
                     else {
@@ -851,8 +895,9 @@ public class QUTEParser implements QUTEConstants {
     // QEL.javacc, line 200
     final public void UnaryExpression() throws ParseException {
         if (trace_enabled) LOGGER.info("Entering production defined on line 200 of QEL.javacc");
+        if (cancelled) throw new CancellationException();
         // Code for expansion specified on line 202 of QEL.javacc
-        switch(nextTokenKind()) {
+        switch(nextTokenType()) {
             case PLUS:
             case MINUS:
             // Code for expansion specified on line 202 of QEL.javacc
@@ -878,8 +923,7 @@ public class QUTEParser implements QUTEConstants {
             DefaultToExpression();
             break;
             default:
-            consumeToken(-1);
-            throw new ParseException();
+            throw new ParseException(current_token.getNext());
         }
         if (trace_enabled) LOGGER.info("Exiting normally from UnaryExpression");
     }
@@ -887,6 +931,7 @@ public class QUTEParser implements QUTEConstants {
     // QEL.javacc, line 209
     final public void UnaryPlusMinusExpression() throws ParseException {
         if (trace_enabled) LOGGER.info("Entering production defined on line 209 of QEL.javacc");
+        if (cancelled) throw new CancellationException();
         // Code for expansion specified on line 211 of QEL.javacc
         boolean UnaryPlusMinusExpression9forced=false;
         UnaryPlusMinusExpression UnaryPlusMinusExpression9=null;
@@ -901,20 +946,19 @@ public class QUTEParser implements QUTEConstants {
         ParseException parseException9=null;
         try {
             // Code for expansion specified on line 211 of QEL.javacc
-            switch(nextTokenKind()) {
+            switch(nextTokenType()) {
                 case PLUS:
                 // Code for expansion specified on line 211 of QEL.javacc
                 // Code for expansion specified on line 211 of QEL.javacc
-                consumeToken(PLUS,false);
+                consumeToken(TokenType.PLUS,false);
                 break;
                 case MINUS:
                 // Code for expansion specified on line 211 of QEL.javacc
                 // Code for expansion specified on line 211 of QEL.javacc
-                consumeToken(MINUS,false);
+                consumeToken(TokenType.MINUS,false);
                 break;
                 default:
-                consumeToken(-1);
-                throw new ParseException();
+                throw new ParseException(current_token.getNext());
             }
             // Code for DefaultToExpression specified on line 211 of QEL.javacc
             DefaultToExpression();
@@ -935,8 +979,10 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException9: "+parseException9.getMessage());
                     UnaryPlusMinusExpression9.setParseException(parseException9);
                     if (UnaryPlusMinusExpression9forced) {
-                        //		                attemptRecovery(UnaryPlusMinusExpression9, TIMES, EXCLAM, CLOSE_BRACKET, NULL, TRUE, FALSE, INTEGER, DECIMAL, STRING_LITERAL, RAW_STRING, C_IDENTIFIER, CLOSE_PAREN);
-                        insertVirtualToken(TIMES);
+                        Token virtualToken=insertVirtualToken(TokenType.TIMES);
+                        String message="Inserted virtual token of type "+virtualToken.getType()+"\non line "+virtualToken.getBeginLine()+", column "+virtualToken.getBeginColumn()+" of "+token_source.getInputSource()+"\n to complete expansion in UnaryPlusMinusExpression\n";
+                        message+=parseException9.getMessage();
+                        addParsingProblem(new ParsingProblem(message,UnaryPlusMinusExpression9));
                         closeNodeScope(UnaryPlusMinusExpression9,true);
                     }
                     else {
@@ -952,6 +998,7 @@ public class QUTEParser implements QUTEConstants {
     // QEL.javacc, line 214
     final public void NotExpression() throws ParseException {
         if (trace_enabled) LOGGER.info("Entering production defined on line 214 of QEL.javacc");
+        if (cancelled) throw new CancellationException();
         // Code for expansion specified on line 216 of QEL.javacc
         boolean NotExpression10forced=false;
         NotExpression NotExpression10=null;
@@ -966,7 +1013,7 @@ public class QUTEParser implements QUTEConstants {
         ParseException parseException10=null;
         try {
             // Code for expansion specified on line 216 of QEL.javacc
-            consumeToken(EXCLAM,false);
+            consumeToken(TokenType.EXCLAM,false);
             // Code for DefaultToExpression specified on line 217 of QEL.javacc
             DefaultToExpression();
             if (trace_enabled) LOGGER.info("Exiting normally from NotExpression");
@@ -986,8 +1033,10 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException10: "+parseException10.getMessage());
                     NotExpression10.setParseException(parseException10);
                     if (NotExpression10forced) {
-                        //		                attemptRecovery(NotExpression10, TIMES, EXCLAM, CLOSE_BRACKET, NULL, TRUE, FALSE, INTEGER, DECIMAL, STRING_LITERAL, RAW_STRING, C_IDENTIFIER, CLOSE_PAREN);
-                        insertVirtualToken(TIMES);
+                        Token virtualToken=insertVirtualToken(TokenType.TIMES);
+                        String message="Inserted virtual token of type "+virtualToken.getType()+"\non line "+virtualToken.getBeginLine()+", column "+virtualToken.getBeginColumn()+" of "+token_source.getInputSource()+"\n to complete expansion in NotExpression\n";
+                        message+=parseException10.getMessage();
+                        addParsingProblem(new ParsingProblem(message,NotExpression10));
                         closeNodeScope(NotExpression10,true);
                     }
                     else {
@@ -1003,6 +1052,7 @@ public class QUTEParser implements QUTEConstants {
     // QEL.javacc, line 220
     final public void DefaultToExpression() throws ParseException {
         if (trace_enabled) LOGGER.info("Entering production defined on line 220 of QEL.javacc");
+        if (cancelled) throw new CancellationException();
         // Code for expansion specified on line 222 of QEL.javacc
         boolean DefaultToExpression11forced=false;
         DefaultToExpression DefaultToExpression11=null;
@@ -1019,23 +1069,23 @@ public class QUTEParser implements QUTEConstants {
             // Code for PrimaryExpression specified on line 222 of QEL.javacc
             PrimaryExpression();
             // Code for expansion specified on line 226 of QEL.javacc
-            label_11:
+            ZeroOrMore$QEL_javacc$line_226:
             while (true) {
-                if (!(phase2_11_QEL_javacc_line_224(INFINITY)&&(getToken(2).kind!=C_IDENTIFIER||getToken(3).kind!=SIMPLE_EQUALS))) {
-                    break label_11;
+                if (!(lookahead$QEL_javacc$line_224$column_19(INDEFINITE)&&(getToken(2).getType()!=TokenType.C_IDENTIFIER||getToken(3).getType()!=TokenType.SIMPLE_EQUALS))) {
+                    break ZeroOrMore$QEL_javacc$line_226;
                 }
                 // Code for expansion specified on line 224 of QEL.javacc
                 // Code for expansion specified on line 225 of QEL.javacc
-                consumeToken(EXCLAM,false);
+                consumeToken(TokenType.EXCLAM,false);
                 // Code for PrimaryExpression specified on line 225 of QEL.javacc
                 PrimaryExpression();
             }
             // Code for expansion specified on line 227 of QEL.javacc
-            int int7=nextTokenKind();
-            if (int7==EXCLAM) {
+            TokenType tokentype7=nextTokenType();
+            if (tokentype7==TokenType.EXCLAM) {
                 // Code for expansion specified on line 228 of QEL.javacc
                 // Code for expansion specified on line 229 of QEL.javacc
-                consumeToken(EXCLAM,false);
+                consumeToken(TokenType.EXCLAM,false);
             }
             if (trace_enabled) LOGGER.info("Exiting normally from DefaultToExpression");
         }
@@ -1054,8 +1104,10 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException11: "+parseException11.getMessage());
                     DefaultToExpression11.setParseException(parseException11);
                     if (DefaultToExpression11forced) {
-                        //		                attemptRecovery(DefaultToExpression11, TIMES, EXCLAM, CLOSE_BRACKET, NULL, TRUE, FALSE, INTEGER, DECIMAL, STRING_LITERAL, RAW_STRING, C_IDENTIFIER, CLOSE_PAREN);
-                        insertVirtualToken(TIMES);
+                        Token virtualToken=insertVirtualToken(TokenType.TIMES);
+                        String message="Inserted virtual token of type "+virtualToken.getType()+"\non line "+virtualToken.getBeginLine()+", column "+virtualToken.getBeginColumn()+" of "+token_source.getInputSource()+"\n to complete expansion in DefaultToExpression\n";
+                        message+=parseException11.getMessage();
+                        addParsingProblem(new ParsingProblem(message,DefaultToExpression11));
                         closeNodeScope(DefaultToExpression11,true);
                     }
                     else {
@@ -1071,6 +1123,7 @@ public class QUTEParser implements QUTEConstants {
     // QEL.javacc, line 233
     final public void PrimaryExpression() throws ParseException {
         if (trace_enabled) LOGGER.info("Entering production defined on line 233 of QEL.javacc");
+        if (cancelled) throw new CancellationException();
         // Code for expansion specified on line 235 of QEL.javacc
         boolean PrimaryExpression12forced=false;
         PrimaryExpression PrimaryExpression12=null;
@@ -1087,14 +1140,14 @@ public class QUTEParser implements QUTEConstants {
             // Code for BaseExpression specified on line 235 of QEL.javacc
             BaseExpression();
             // Code for expansion specified on line 245 of QEL.javacc
-            label_14:
+            ZeroOrMore$QEL_javacc$line_245:
             while (true) {
-                if (!(phase2_14_QEL_javacc_line_237(INFINITY))) {
-                    break label_14;
+                if (!(lookahead$QEL_javacc$line_237$column_15(INDEFINITE))) {
+                    break ZeroOrMore$QEL_javacc$line_245;
                 }
                 // Code for expansion specified on line 237 of QEL.javacc
                 // Code for expansion specified on line 239 of QEL.javacc
-                switch(nextTokenKind()) {
+                switch(nextTokenType()) {
                     case DOT:
                     // Code for expansion specified on line 239 of QEL.javacc
                     // Code for DotKey specified on line 239 of QEL.javacc
@@ -1111,8 +1164,7 @@ public class QUTEParser implements QUTEConstants {
                     MethodInvoke();
                     break;
                     default:
-                    consumeToken(-1);
-                    throw new ParseException();
+                    throw new ParseException(current_token.getNext());
                 }
             }
             if (trace_enabled) LOGGER.info("Exiting normally from PrimaryExpression");
@@ -1132,8 +1184,10 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException12: "+parseException12.getMessage());
                     PrimaryExpression12.setParseException(parseException12);
                     if (PrimaryExpression12forced) {
-                        //		                attemptRecovery(PrimaryExpression12, TIMES, CLOSE_BRACKET, NULL, TRUE, FALSE, INTEGER, DECIMAL, STRING_LITERAL, RAW_STRING, C_IDENTIFIER, CLOSE_PAREN);
-                        insertVirtualToken(TIMES);
+                        Token virtualToken=insertVirtualToken(TokenType.TIMES);
+                        String message="Inserted virtual token of type "+virtualToken.getType()+"\non line "+virtualToken.getBeginLine()+", column "+virtualToken.getBeginColumn()+" of "+token_source.getInputSource()+"\n to complete expansion in PrimaryExpression\n";
+                        message+=parseException12.getMessage();
+                        addParsingProblem(new ParsingProblem(message,PrimaryExpression12));
                         closeNodeScope(PrimaryExpression12,true);
                     }
                     else {
@@ -1149,6 +1203,7 @@ public class QUTEParser implements QUTEConstants {
     // QEL.javacc, line 248
     final public void BaseExpression() throws ParseException {
         if (trace_enabled) LOGGER.info("Entering production defined on line 248 of QEL.javacc");
+        if (cancelled) throw new CancellationException();
         // Code for expansion specified on line 250 of QEL.javacc
         boolean BaseExpression13forced=false;
         BaseExpression BaseExpression13=null;
@@ -1162,11 +1217,11 @@ public class QUTEParser implements QUTEConstants {
         }
         ParseException parseException13=null;
         try {
-            switch(nextTokenKind()) {
+            switch(nextTokenType()) {
                 case C_IDENTIFIER:
                 // Code for expansion specified on line 250 of QEL.javacc
                 // Code for expansion specified on line 250 of QEL.javacc
-                consumeToken(C_IDENTIFIER,false);
+                consumeToken(TokenType.C_IDENTIFIER,false);
                 break;
                 case INTEGER:
                 case DECIMAL:
@@ -1197,8 +1252,7 @@ public class QUTEParser implements QUTEConstants {
                 Parenthesis();
                 break;
                 default:
-                consumeToken(-1);
-                throw new ParseException();
+                throw new ParseException(current_token.getNext());
             }
             if (trace_enabled) LOGGER.info("Exiting normally from BaseExpression");
         }
@@ -1217,8 +1271,10 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException13: "+parseException13.getMessage());
                     BaseExpression13.setParseException(parseException13);
                     if (BaseExpression13forced) {
-                        //		                attemptRecovery(BaseExpression13, NULL, TRUE, FALSE, INTEGER, DECIMAL, STRING_LITERAL, RAW_STRING, C_IDENTIFIER, CLOSE_PAREN);
-                        insertVirtualToken(NULL);
+                        Token virtualToken=insertVirtualToken(TokenType.NULL);
+                        String message="Inserted virtual token of type "+virtualToken.getType()+"\non line "+virtualToken.getBeginLine()+", column "+virtualToken.getBeginColumn()+" of "+token_source.getInputSource()+"\n to complete expansion in BaseExpression\n";
+                        message+=parseException13.getMessage();
+                        addParsingProblem(new ParsingProblem(message,BaseExpression13));
                         closeNodeScope(BaseExpression13,true);
                     }
                     else {
@@ -1234,24 +1290,24 @@ public class QUTEParser implements QUTEConstants {
     // QEL.javacc, line 264
     final public void DotKey() throws ParseException {
         if (trace_enabled) LOGGER.info("Entering production defined on line 264 of QEL.javacc");
+        if (cancelled) throw new CancellationException();
         // Code for expansion specified on line 266 of QEL.javacc
         // Code for expansion specified on line 266 of QEL.javacc
-        consumeToken(DOT,false);
+        consumeToken(TokenType.DOT,false);
         // Code for expansion specified on line 267 of QEL.javacc
-        switch(nextTokenKind()) {
+        switch(nextTokenType()) {
             case C_IDENTIFIER:
             // Code for expansion specified on line 267 of QEL.javacc
             // Code for expansion specified on line 267 of QEL.javacc
-            consumeToken(C_IDENTIFIER,false);
+            consumeToken(TokenType.C_IDENTIFIER,false);
             break;
             case TIMES:
             // Code for expansion specified on line 267 of QEL.javacc
             // Code for expansion specified on line 267 of QEL.javacc
-            consumeToken(TIMES,false);
+            consumeToken(TokenType.TIMES,false);
             break;
             default:
-            consumeToken(-1);
-            throw new ParseException();
+            throw new ParseException(current_token.getNext());
         }
         if (trace_enabled) LOGGER.info("Exiting normally from DotKey");
     }
@@ -1259,37 +1315,40 @@ public class QUTEParser implements QUTEConstants {
     // QEL.javacc, line 270
     final public void DynamicKey() throws ParseException {
         if (trace_enabled) LOGGER.info("Entering production defined on line 270 of QEL.javacc");
+        if (cancelled) throw new CancellationException();
         // Code for expansion specified on line 272 of QEL.javacc
         // Code for expansion specified on line 272 of QEL.javacc
-        consumeToken(OPEN_BRACKET,false);
+        consumeToken(TokenType.OPEN_BRACKET,false);
         // Code for Expression specified on line 272 of QEL.javacc
         Expression();
         // Code for expansion specified on line 272 of QEL.javacc
-        consumeToken(CLOSE_BRACKET,false);
+        consumeToken(TokenType.CLOSE_BRACKET,false);
         if (trace_enabled) LOGGER.info("Exiting normally from DynamicKey");
     }
 
     // QEL.javacc, line 275
     final public void MethodInvoke() throws ParseException {
         if (trace_enabled) LOGGER.info("Entering production defined on line 275 of QEL.javacc");
+        if (cancelled) throw new CancellationException();
         // Code for expansion specified on line 277 of QEL.javacc
         // Code for expansion specified on line 277 of QEL.javacc
-        consumeToken(OPEN_PAREN,false);
+        consumeToken(TokenType.OPEN_PAREN,false);
         // Code for expansion specified on line 277 of QEL.javacc
-        int int8=nextTokenKind();
-        if (int8==PLUS||int8==MINUS||int8==EXCLAM||int8==NULL||int8==TRUE||int8==FALSE||int8==INTEGER||int8==DECIMAL||int8==STRING_LITERAL||int8==RAW_STRING||int8==C_IDENTIFIER||int8==OPEN_PAREN) {
+        TokenType tokentype8=nextTokenType();
+        if (tokentype8==TokenType.PLUS||tokentype8==TokenType.MINUS||tokentype8==TokenType.EXCLAM||tokentype8==TokenType.NULL||tokentype8==TokenType.TRUE||tokentype8==TokenType.FALSE||tokentype8==TokenType.INTEGER||tokentype8==TokenType.DECIMAL||tokentype8==TokenType.STRING_LITERAL||tokentype8==TokenType.RAW_STRING||tokentype8==TokenType.C_IDENTIFIER||tokentype8==TokenType.OPEN_PAREN) {
             // Code for expansion specified on line 277 of QEL.javacc
             // Code for ArgsList specified on line 277 of QEL.javacc
             ArgsList();
         }
         // Code for expansion specified on line 277 of QEL.javacc
-        consumeToken(CLOSE_PAREN,false);
+        consumeToken(TokenType.CLOSE_PAREN,false);
         if (trace_enabled) LOGGER.info("Exiting normally from MethodInvoke");
     }
 
     // QEL.javacc, line 280
     final public void ArgsList() throws ParseException {
         if (trace_enabled) LOGGER.info("Entering production defined on line 280 of QEL.javacc");
+        if (cancelled) throw new CancellationException();
         // Code for expansion specified on line 282 of QEL.javacc
         // Code for expansion specified on line 283 of QEL.javacc
         // Code for PositionalArgsList specified on line 283 of QEL.javacc
@@ -1300,6 +1359,7 @@ public class QUTEParser implements QUTEConstants {
     // QEL.javacc, line 287
     final public void PositionalArgsList() throws ParseException {
         if (trace_enabled) LOGGER.info("Entering production defined on line 287 of QEL.javacc");
+        if (cancelled) throw new CancellationException();
         // Code for expansion specified on line 289 of QEL.javacc
         boolean PositionalArgsList14forced=false;
         PositionalArgsList PositionalArgsList14=null;
@@ -1316,19 +1376,19 @@ public class QUTEParser implements QUTEConstants {
             // Code for Expression specified on line 289 of QEL.javacc
             Expression();
             // Code for expansion specified on line 293 of QEL.javacc
-            label_17:
+            ZeroOrMore$QEL_javacc$line_293:
             while (true) {
-                int int9=nextTokenKind();
-                if (!(int9==COMMA||int9==PLUS||int9==MINUS||int9==EXCLAM||int9==NULL||int9==TRUE||int9==FALSE||int9==INTEGER||int9==DECIMAL||int9==STRING_LITERAL||int9==RAW_STRING||int9==C_IDENTIFIER||int9==OPEN_PAREN)) {
-                    break label_17;
+                TokenType tokentype9=nextTokenType();
+                if (!(tokentype9==TokenType.COMMA||tokentype9==TokenType.PLUS||tokentype9==TokenType.MINUS||tokentype9==TokenType.EXCLAM||tokentype9==TokenType.NULL||tokentype9==TokenType.TRUE||tokentype9==TokenType.FALSE||tokentype9==TokenType.INTEGER||tokentype9==TokenType.DECIMAL||tokentype9==TokenType.STRING_LITERAL||tokentype9==TokenType.RAW_STRING||tokentype9==TokenType.C_IDENTIFIER||tokentype9==TokenType.OPEN_PAREN)) {
+                    break ZeroOrMore$QEL_javacc$line_293;
                 }
                 // Code for expansion specified on line 291 of QEL.javacc
                 // Code for expansion specified on line 291 of QEL.javacc
-                int int10=nextTokenKind();
-                if (int10==COMMA) {
+                TokenType tokentype10=nextTokenType();
+                if (tokentype10==TokenType.COMMA) {
                     // Code for expansion specified on line 291 of QEL.javacc
                     // Code for expansion specified on line 291 of QEL.javacc
-                    consumeToken(COMMA,false);
+                    consumeToken(TokenType.COMMA,false);
                 }
                 // Code for Expression specified on line 292 of QEL.javacc
                 Expression();
@@ -1350,8 +1410,10 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException14: "+parseException14.getMessage());
                     PositionalArgsList14.setParseException(parseException14);
                     if (PositionalArgsList14forced) {
-                        //		                attemptRecovery(PositionalArgsList14, DOT_DOT, TIMES, EXCLAM, CLOSE_BRACKET, NULL, TRUE, FALSE, INTEGER, DECIMAL, STRING_LITERAL, RAW_STRING, C_IDENTIFIER, CLOSE_PAREN);
-                        insertVirtualToken(DOT_DOT);
+                        Token virtualToken=insertVirtualToken(TokenType.DOT_DOT);
+                        String message="Inserted virtual token of type "+virtualToken.getType()+"\non line "+virtualToken.getBeginLine()+", column "+virtualToken.getBeginColumn()+" of "+token_source.getInputSource()+"\n to complete expansion in PositionalArgsList\n";
+                        message+=parseException14.getMessage();
+                        addParsingProblem(new ParsingProblem(message,PositionalArgsList14));
                         closeNodeScope(PositionalArgsList14,true);
                     }
                     else {
@@ -1367,6 +1429,7 @@ public class QUTEParser implements QUTEConstants {
     // QEL.javacc, line 296
     final public void StringLiteral() throws ParseException {
         if (trace_enabled) LOGGER.info("Entering production defined on line 296 of QEL.javacc");
+        if (cancelled) throw new CancellationException();
         // Code for expansion specified on line 298 of QEL.javacc
         boolean StringLiteral15forced=false;
         StringLiteral StringLiteral15=null;
@@ -1380,20 +1443,19 @@ public class QUTEParser implements QUTEConstants {
         }
         ParseException parseException15=null;
         try {
-            switch(nextTokenKind()) {
+            switch(nextTokenType()) {
                 case STRING_LITERAL:
                 // Code for expansion specified on line 298 of QEL.javacc
                 // Code for expansion specified on line 298 of QEL.javacc
-                consumeToken(STRING_LITERAL,false);
+                consumeToken(TokenType.STRING_LITERAL,false);
                 break;
                 case RAW_STRING:
                 // Code for expansion specified on line 298 of QEL.javacc
                 // Code for expansion specified on line 298 of QEL.javacc
-                consumeToken(RAW_STRING,false);
+                consumeToken(TokenType.RAW_STRING,false);
                 break;
                 default:
-                consumeToken(-1);
-                throw new ParseException();
+                throw new ParseException(current_token.getNext());
             }
             if (trace_enabled) LOGGER.info("Exiting normally from StringLiteral");
         }
@@ -1412,8 +1474,10 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException15: "+parseException15.getMessage());
                     StringLiteral15.setParseException(parseException15);
                     if (StringLiteral15forced) {
-                        //		                attemptRecovery(StringLiteral15, STRING_LITERAL, RAW_STRING);
-                        insertVirtualToken(STRING_LITERAL);
+                        Token virtualToken=insertVirtualToken(TokenType.STRING_LITERAL);
+                        String message="Inserted virtual token of type "+virtualToken.getType()+"\non line "+virtualToken.getBeginLine()+", column "+virtualToken.getBeginColumn()+" of "+token_source.getInputSource()+"\n to complete expansion in StringLiteral\n";
+                        message+=parseException15.getMessage();
+                        addParsingProblem(new ParsingProblem(message,StringLiteral15));
                         closeNodeScope(StringLiteral15,true);
                     }
                     else {
@@ -1429,6 +1493,7 @@ public class QUTEParser implements QUTEConstants {
     // QEL.javacc, line 301
     final public void Parenthesis() throws ParseException {
         if (trace_enabled) LOGGER.info("Entering production defined on line 301 of QEL.javacc");
+        if (cancelled) throw new CancellationException();
         // Code for expansion specified on line 303 of QEL.javacc
         boolean Parenthesis16forced=false;
         Parenthesis Parenthesis16=null;
@@ -1443,11 +1508,11 @@ public class QUTEParser implements QUTEConstants {
         ParseException parseException16=null;
         try {
             // Code for expansion specified on line 303 of QEL.javacc
-            consumeToken(OPEN_PAREN,false);
+            consumeToken(TokenType.OPEN_PAREN,false);
             // Code for Expression specified on line 304 of QEL.javacc
             Expression();
             // Code for expansion specified on line 305 of QEL.javacc
-            consumeToken(CLOSE_PAREN,true);
+            consumeToken(TokenType.CLOSE_PAREN,true);
             if (trace_enabled) LOGGER.info("Exiting normally from Parenthesis");
         }
         catch(ParseException e) {
@@ -1465,8 +1530,10 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException16: "+parseException16.getMessage());
                     Parenthesis16.setParseException(parseException16);
                     if (Parenthesis16forced) {
-                        //		                attemptRecovery(Parenthesis16, CLOSE_PAREN);
-                        insertVirtualToken(CLOSE_PAREN);
+                        Token virtualToken=insertVirtualToken(TokenType.CLOSE_PAREN);
+                        String message="Inserted virtual token of type "+virtualToken.getType()+"\non line "+virtualToken.getBeginLine()+", column "+virtualToken.getBeginColumn()+" of "+token_source.getInputSource()+"\n to complete expansion in Parenthesis\n";
+                        message+=parseException16.getMessage();
+                        addParsingProblem(new ParsingProblem(message,Parenthesis16));
                         closeNodeScope(Parenthesis16,true);
                     }
                     else {
@@ -1482,6 +1549,7 @@ public class QUTEParser implements QUTEConstants {
     // QEL.javacc, line 308
     final public void NumberLiteral() throws ParseException {
         if (trace_enabled) LOGGER.info("Entering production defined on line 308 of QEL.javacc");
+        if (cancelled) throw new CancellationException();
         // Code for expansion specified on line 310 of QEL.javacc
         boolean NumberLiteral17forced=false;
         NumberLiteral NumberLiteral17=null;
@@ -1495,20 +1563,19 @@ public class QUTEParser implements QUTEConstants {
         }
         ParseException parseException17=null;
         try {
-            switch(nextTokenKind()) {
+            switch(nextTokenType()) {
                 case INTEGER:
                 // Code for expansion specified on line 310 of QEL.javacc
                 // Code for expansion specified on line 310 of QEL.javacc
-                consumeToken(INTEGER,false);
+                consumeToken(TokenType.INTEGER,false);
                 break;
                 case DECIMAL:
                 // Code for expansion specified on line 310 of QEL.javacc
                 // Code for expansion specified on line 310 of QEL.javacc
-                consumeToken(DECIMAL,false);
+                consumeToken(TokenType.DECIMAL,false);
                 break;
                 default:
-                consumeToken(-1);
-                throw new ParseException();
+                throw new ParseException(current_token.getNext());
             }
             if (trace_enabled) LOGGER.info("Exiting normally from NumberLiteral");
         }
@@ -1527,8 +1594,10 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException17: "+parseException17.getMessage());
                     NumberLiteral17.setParseException(parseException17);
                     if (NumberLiteral17forced) {
-                        //		                attemptRecovery(NumberLiteral17, INTEGER, DECIMAL);
-                        insertVirtualToken(INTEGER);
+                        Token virtualToken=insertVirtualToken(TokenType.INTEGER);
+                        String message="Inserted virtual token of type "+virtualToken.getType()+"\non line "+virtualToken.getBeginLine()+", column "+virtualToken.getBeginColumn()+" of "+token_source.getInputSource()+"\n to complete expansion in NumberLiteral\n";
+                        message+=parseException17.getMessage();
+                        addParsingProblem(new ParsingProblem(message,NumberLiteral17));
                         closeNodeScope(NumberLiteral17,true);
                     }
                     else {
@@ -1544,6 +1613,7 @@ public class QUTEParser implements QUTEConstants {
     // QEL.javacc, line 313
     final public void BooleanLiteral() throws ParseException {
         if (trace_enabled) LOGGER.info("Entering production defined on line 313 of QEL.javacc");
+        if (cancelled) throw new CancellationException();
         // Code for expansion specified on line 315 of QEL.javacc
         boolean BooleanLiteral18forced=false;
         BooleanLiteral BooleanLiteral18=null;
@@ -1557,20 +1627,19 @@ public class QUTEParser implements QUTEConstants {
         }
         ParseException parseException18=null;
         try {
-            switch(nextTokenKind()) {
+            switch(nextTokenType()) {
                 case TRUE:
                 // Code for expansion specified on line 315 of QEL.javacc
                 // Code for expansion specified on line 315 of QEL.javacc
-                consumeToken(TRUE,false);
+                consumeToken(TokenType.TRUE,false);
                 break;
                 case FALSE:
                 // Code for expansion specified on line 315 of QEL.javacc
                 // Code for expansion specified on line 315 of QEL.javacc
-                consumeToken(FALSE,false);
+                consumeToken(TokenType.FALSE,false);
                 break;
                 default:
-                consumeToken(-1);
-                throw new ParseException();
+                throw new ParseException(current_token.getNext());
             }
             if (trace_enabled) LOGGER.info("Exiting normally from BooleanLiteral");
         }
@@ -1589,8 +1658,10 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException18: "+parseException18.getMessage());
                     BooleanLiteral18.setParseException(parseException18);
                     if (BooleanLiteral18forced) {
-                        //		                attemptRecovery(BooleanLiteral18, TRUE, FALSE);
-                        insertVirtualToken(TRUE);
+                        Token virtualToken=insertVirtualToken(TokenType.TRUE);
+                        String message="Inserted virtual token of type "+virtualToken.getType()+"\non line "+virtualToken.getBeginLine()+", column "+virtualToken.getBeginColumn()+" of "+token_source.getInputSource()+"\n to complete expansion in BooleanLiteral\n";
+                        message+=parseException18.getMessage();
+                        addParsingProblem(new ParsingProblem(message,BooleanLiteral18));
                         closeNodeScope(BooleanLiteral18,true);
                     }
                     else {
@@ -1606,6 +1677,7 @@ public class QUTEParser implements QUTEConstants {
     // QEL.javacc, line 318
     final public void NullLiteral() throws ParseException {
         if (trace_enabled) LOGGER.info("Entering production defined on line 318 of QEL.javacc");
+        if (cancelled) throw new CancellationException();
         // Code for expansion specified on line 320 of QEL.javacc
         boolean NullLiteral19forced=false;
         NullLiteral NullLiteral19=null;
@@ -1620,7 +1692,7 @@ public class QUTEParser implements QUTEConstants {
         ParseException parseException19=null;
         try {
             // Code for expansion specified on line 320 of QEL.javacc
-            consumeToken(NULL,false);
+            consumeToken(TokenType.NULL,false);
             if (trace_enabled) LOGGER.info("Exiting normally from NullLiteral");
         }
         catch(ParseException e) {
@@ -1638,8 +1710,10 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException19: "+parseException19.getMessage());
                     NullLiteral19.setParseException(parseException19);
                     if (NullLiteral19forced) {
-                        //		                attemptRecovery(NullLiteral19, NULL);
-                        insertVirtualToken(NULL);
+                        Token virtualToken=insertVirtualToken(TokenType.NULL);
+                        String message="Inserted virtual token of type "+virtualToken.getType()+"\non line "+virtualToken.getBeginLine()+", column "+virtualToken.getBeginColumn()+" of "+token_source.getInputSource()+"\n to complete expansion in NullLiteral\n";
+                        message+=parseException19.getMessage();
+                        addParsingProblem(new ParsingProblem(message,NullLiteral19));
                         closeNodeScope(NullLiteral19,true);
                     }
                     else {
@@ -1655,8 +1729,9 @@ public class QUTEParser implements QUTEConstants {
     // QUTE.javacc, line 85
     final public void ParameterDeclaration() throws ParseException {
         if (trace_enabled) LOGGER.info("Entering production defined on line 85 of QUTE.javacc");
+        if (cancelled) throw new CancellationException();
         // Code for expansion specified on line 87 of QUTE.javacc
-        boolean ParameterDeclaration20forced=false;
+        boolean ParameterDeclaration20forced=this.tolerantParsing;
         ParameterDeclaration ParameterDeclaration20=null;
         if (buildTree) {
             ParameterDeclaration20=new ParameterDeclaration();
@@ -1669,11 +1744,11 @@ public class QUTEParser implements QUTEConstants {
         ParseException parseException20=null;
         try {
             // Code for expansion specified on line 87 of QUTE.javacc
-            consumeToken(START_PARAMETER_DECL,false);
+            consumeToken(TokenType.START_PARAMETER_DECL,false);
             // Code for expansion specified on line 88 of QUTE.javacc
-            consumeToken(C_IDENTIFIER,false);
+            consumeToken(TokenType.C_IDENTIFIER,false);
             // Code for expansion specified on line 89 of QUTE.javacc
-            consumeToken(CLOSE_CURLY,false);
+            consumeToken(TokenType.CLOSE_CURLY,false);
             if (trace_enabled) LOGGER.info("Exiting normally from ParameterDeclaration");
         }
         catch(ParseException e) {
@@ -1691,8 +1766,10 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException20: "+parseException20.getMessage());
                     ParameterDeclaration20.setParseException(parseException20);
                     if (ParameterDeclaration20forced) {
-                        //		                attemptRecovery(ParameterDeclaration20, CLOSE_CURLY);
-                        insertVirtualToken(CLOSE_CURLY);
+                        Token virtualToken=insertVirtualToken(TokenType.CLOSE_CURLY);
+                        String message="Inserted virtual token of type "+virtualToken.getType()+"\non line "+virtualToken.getBeginLine()+", column "+virtualToken.getBeginColumn()+" of "+token_source.getInputSource()+"\n to complete expansion in ParameterDeclaration\n";
+                        message+=parseException20.getMessage();
+                        addParsingProblem(new ParsingProblem(message,ParameterDeclaration20));
                         closeNodeScope(ParameterDeclaration20,true);
                     }
                     else {
@@ -1708,6 +1785,7 @@ public class QUTEParser implements QUTEConstants {
     // QUTE.javacc, line 92
     final public void Interpolation() throws ParseException {
         if (trace_enabled) LOGGER.info("Entering production defined on line 92 of QUTE.javacc");
+        if (cancelled) throw new CancellationException();
         // Code for expansion specified on line 94 of QUTE.javacc
         boolean Interpolation21forced=this.tolerantParsing;
         Interpolation Interpolation21=null;
@@ -1722,11 +1800,11 @@ public class QUTEParser implements QUTEConstants {
         ParseException parseException21=null;
         try {
             // Code for expansion specified on line 94 of QUTE.javacc
-            consumeToken(OPEN_CURLY,false);
+            consumeToken(TokenType.OPEN_CURLY,false);
             // Code for Expression specified on line 94 of QUTE.javacc
             Expression();
             // Code for expansion specified on line 94 of QUTE.javacc
-            consumeToken(CLOSE_CURLY,false);
+            consumeToken(TokenType.CLOSE_CURLY,false);
             if (trace_enabled) LOGGER.info("Exiting normally from Interpolation");
         }
         catch(ParseException e) {
@@ -1744,8 +1822,10 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException21: "+parseException21.getMessage());
                     Interpolation21.setParseException(parseException21);
                     if (Interpolation21forced) {
-                        //		                attemptRecovery(Interpolation21, CLOSE_CURLY);
-                        insertVirtualToken(CLOSE_CURLY);
+                        Token virtualToken=insertVirtualToken(TokenType.CLOSE_CURLY);
+                        String message="Inserted virtual token of type "+virtualToken.getType()+"\non line "+virtualToken.getBeginLine()+", column "+virtualToken.getBeginColumn()+" of "+token_source.getInputSource()+"\n to complete expansion in Interpolation\n";
+                        message+=parseException21.getMessage();
+                        addParsingProblem(new ParsingProblem(message,Interpolation21));
                         closeNodeScope(Interpolation21,true);
                     }
                     else {
@@ -1761,8 +1841,9 @@ public class QUTEParser implements QUTEConstants {
     // QUTE.javacc, line 97
     final public void EachSection() throws ParseException {
         if (trace_enabled) LOGGER.info("Entering production defined on line 97 of QUTE.javacc");
+        if (cancelled) throw new CancellationException();
         // Code for expansion specified on line 99 of QUTE.javacc
-        boolean EachSection22forced=false;
+        boolean EachSection22forced=this.tolerantParsing;
         EachSection EachSection22=null;
         if (buildTree) {
             EachSection22=new EachSection();
@@ -1775,28 +1856,27 @@ public class QUTEParser implements QUTEConstants {
         ParseException parseException22=null;
         try {
             // Code for expansion specified on line 99 of QUTE.javacc
-            consumeToken(EACH,false);
+            consumeToken(TokenType.EACH,false);
             // Code for Expression specified on line 100 of QUTE.javacc
             Expression();
             // Code for expansion specified on line 101 of QUTE.javacc
-            consumeToken(CLOSE_CURLY,false);
+            consumeToken(TokenType.CLOSE_CURLY,false);
             // Code for Block specified on line 102 of QUTE.javacc
             Block();
             // Code for expansion specified on line 103 of QUTE.javacc
-            switch(nextTokenKind()) {
+            switch(nextTokenType()) {
                 case ENDEACH:
                 // Code for expansion specified on line 103 of QUTE.javacc
                 // Code for expansion specified on line 103 of QUTE.javacc
-                consumeToken(ENDEACH,false);
+                consumeToken(TokenType.ENDEACH,false);
                 break;
                 case ABBREVIATED_END:
                 // Code for expansion specified on line 103 of QUTE.javacc
                 // Code for expansion specified on line 103 of QUTE.javacc
-                consumeToken(ABBREVIATED_END,false);
+                consumeToken(TokenType.ABBREVIATED_END,false);
                 break;
                 default:
-                consumeToken(-1);
-                throw new ParseException();
+                throw new ParseException(current_token.getNext());
             }
             if (trace_enabled) LOGGER.info("Exiting normally from EachSection");
         }
@@ -1815,8 +1895,10 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException22: "+parseException22.getMessage());
                     EachSection22.setParseException(parseException22);
                     if (EachSection22forced) {
-                        //		                attemptRecovery(EachSection22, ABBREVIATED_END, ENDEACH);
-                        insertVirtualToken(ABBREVIATED_END);
+                        Token virtualToken=insertVirtualToken(TokenType.ABBREVIATED_END);
+                        String message="Inserted virtual token of type "+virtualToken.getType()+"\non line "+virtualToken.getBeginLine()+", column "+virtualToken.getBeginColumn()+" of "+token_source.getInputSource()+"\n to complete expansion in EachSection\n";
+                        message+=parseException22.getMessage();
+                        addParsingProblem(new ParsingProblem(message,EachSection22));
                         closeNodeScope(EachSection22,true);
                     }
                     else {
@@ -1832,8 +1914,9 @@ public class QUTEParser implements QUTEConstants {
     // QUTE.javacc, line 106
     final public void ForSection() throws ParseException {
         if (trace_enabled) LOGGER.info("Entering production defined on line 106 of QUTE.javacc");
+        if (cancelled) throw new CancellationException();
         // Code for expansion specified on line 108 of QUTE.javacc
-        boolean ForSection23forced=false;
+        boolean ForSection23forced=this.tolerantParsing;
         ForSection ForSection23=null;
         if (buildTree) {
             ForSection23=new ForSection();
@@ -1846,37 +1929,36 @@ public class QUTEParser implements QUTEConstants {
         ParseException parseException23=null;
         try {
             // Code for expansion specified on line 108 of QUTE.javacc
-            consumeToken(FOR,false);
+            consumeToken(TokenType.FOR,false);
             // Code for expansion specified on line 109 of QUTE.javacc
-            consumeToken(C_IDENTIFIER,false);
+            consumeToken(TokenType.C_IDENTIFIER,false);
             // Code for expansion specified on line 110 of QUTE.javacc
-            consumeToken(IN,false);
+            consumeToken(TokenType.IN,false);
             // Code for Expression specified on line 111 of QUTE.javacc
             Expression();
             // Code for expansion specified on line 112 of QUTE.javacc
-            consumeToken(CLOSE_CURLY,false);
+            consumeToken(TokenType.CLOSE_CURLY,false);
             // Code for expansion specified on line 113 of QUTE.javacc
-            int int11=nextTokenKind();
-            if (int11==TEXT||int11==OPEN_CURLY||int11==EACH||int11==FOR||int11==IF||int11==QUTE_INCLUDE||int11==INSERT||int11==WITH||int11==START_SECTION||int11==START_PARAMETER_DECL) {
+            TokenType tokentype11=nextTokenType();
+            if (tokentype11==TokenType.TEXT||tokentype11==TokenType.OPEN_CURLY||tokentype11==TokenType.EACH||tokentype11==TokenType.FOR||tokentype11==TokenType.IF||tokentype11==TokenType.QUTE_INCLUDE||tokentype11==TokenType.INSERT||tokentype11==TokenType.WITH||tokentype11==TokenType.START_SECTION||tokentype11==TokenType.START_PARAMETER_DECL) {
                 // Code for expansion specified on line 113 of QUTE.javacc
                 // Code for Block specified on line 113 of QUTE.javacc
                 Block();
             }
             // Code for expansion specified on line 114 of QUTE.javacc
-            switch(nextTokenKind()) {
+            switch(nextTokenType()) {
                 case ENDFOR:
                 // Code for expansion specified on line 114 of QUTE.javacc
                 // Code for expansion specified on line 114 of QUTE.javacc
-                consumeToken(ENDFOR,false);
+                consumeToken(TokenType.ENDFOR,false);
                 break;
                 case ABBREVIATED_END:
                 // Code for expansion specified on line 114 of QUTE.javacc
                 // Code for expansion specified on line 114 of QUTE.javacc
-                consumeToken(ABBREVIATED_END,false);
+                consumeToken(TokenType.ABBREVIATED_END,false);
                 break;
                 default:
-                consumeToken(-1);
-                throw new ParseException();
+                throw new ParseException(current_token.getNext());
             }
             if (trace_enabled) LOGGER.info("Exiting normally from ForSection");
         }
@@ -1895,8 +1977,10 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException23: "+parseException23.getMessage());
                     ForSection23.setParseException(parseException23);
                     if (ForSection23forced) {
-                        //		                attemptRecovery(ForSection23, ABBREVIATED_END, ENDFOR);
-                        insertVirtualToken(ABBREVIATED_END);
+                        Token virtualToken=insertVirtualToken(TokenType.ABBREVIATED_END);
+                        String message="Inserted virtual token of type "+virtualToken.getType()+"\non line "+virtualToken.getBeginLine()+", column "+virtualToken.getBeginColumn()+" of "+token_source.getInputSource()+"\n to complete expansion in ForSection\n";
+                        message+=parseException23.getMessage();
+                        addParsingProblem(new ParsingProblem(message,ForSection23));
                         closeNodeScope(ForSection23,true);
                     }
                     else {
@@ -1912,8 +1996,9 @@ public class QUTEParser implements QUTEConstants {
     // QUTE.javacc, line 117
     final public void IfSection() throws ParseException {
         if (trace_enabled) LOGGER.info("Entering production defined on line 117 of QUTE.javacc");
+        if (cancelled) throw new CancellationException();
         // Code for expansion specified on line 119 of QUTE.javacc
-        boolean IfSection24forced=false;
+        boolean IfSection24forced=this.tolerantParsing;
         IfSection IfSection24=null;
         if (buildTree) {
             IfSection24=new IfSection();
@@ -1926,46 +2011,45 @@ public class QUTEParser implements QUTEConstants {
         ParseException parseException24=null;
         try {
             // Code for expansion specified on line 119 of QUTE.javacc
-            consumeToken(IF,false);
+            consumeToken(TokenType.IF,false);
             // Code for Expression specified on line 120 of QUTE.javacc
             Expression();
             // Code for expansion specified on line 121 of QUTE.javacc
-            consumeToken(CLOSE_CURLY,false);
+            consumeToken(TokenType.CLOSE_CURLY,false);
             // Code for Block specified on line 122 of QUTE.javacc
             Block();
             // Code for expansion specified on line 123 of QUTE.javacc
-            label_20:
+            ZeroOrMore$QUTE_javacc$line_123:
             while (true) {
-                int int12=nextTokenKind();
-                if (!(int12==ELSEIF)) {
-                    break label_20;
+                TokenType tokentype12=nextTokenType();
+                if (!(tokentype12==TokenType.ELSEIF)) {
+                    break ZeroOrMore$QUTE_javacc$line_123;
                 }
                 // Code for expansion specified on line 123 of QUTE.javacc
                 // Code for ElseIfSection specified on line 123 of QUTE.javacc
                 ElseIfSection();
             }
             // Code for expansion specified on line 124 of QUTE.javacc
-            int int13=nextTokenKind();
-            if (int13==ELSE) {
+            TokenType tokentype13=nextTokenType();
+            if (tokentype13==TokenType.ELSE) {
                 // Code for expansion specified on line 124 of QUTE.javacc
                 // Code for ElseBlock specified on line 124 of QUTE.javacc
                 ElseBlock();
             }
             // Code for expansion specified on line 125 of QUTE.javacc
-            switch(nextTokenKind()) {
+            switch(nextTokenType()) {
                 case ENDIF:
                 // Code for expansion specified on line 125 of QUTE.javacc
                 // Code for expansion specified on line 125 of QUTE.javacc
-                consumeToken(ENDIF,false);
+                consumeToken(TokenType.ENDIF,false);
                 break;
                 case ABBREVIATED_END:
                 // Code for expansion specified on line 125 of QUTE.javacc
                 // Code for expansion specified on line 125 of QUTE.javacc
-                consumeToken(ABBREVIATED_END,false);
+                consumeToken(TokenType.ABBREVIATED_END,false);
                 break;
                 default:
-                consumeToken(-1);
-                throw new ParseException();
+                throw new ParseException(current_token.getNext());
             }
             if (trace_enabled) LOGGER.info("Exiting normally from IfSection");
         }
@@ -1984,8 +2068,10 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException24: "+parseException24.getMessage());
                     IfSection24.setParseException(parseException24);
                     if (IfSection24forced) {
-                        //		                attemptRecovery(IfSection24, ABBREVIATED_END, ENDIF);
-                        insertVirtualToken(ABBREVIATED_END);
+                        Token virtualToken=insertVirtualToken(TokenType.ABBREVIATED_END);
+                        String message="Inserted virtual token of type "+virtualToken.getType()+"\non line "+virtualToken.getBeginLine()+", column "+virtualToken.getBeginColumn()+" of "+token_source.getInputSource()+"\n to complete expansion in IfSection\n";
+                        message+=parseException24.getMessage();
+                        addParsingProblem(new ParsingProblem(message,IfSection24));
                         closeNodeScope(IfSection24,true);
                     }
                     else {
@@ -2001,6 +2087,7 @@ public class QUTEParser implements QUTEConstants {
     // QUTE.javacc, line 128
     final public void ElseIfSection() throws ParseException {
         if (trace_enabled) LOGGER.info("Entering production defined on line 128 of QUTE.javacc");
+        if (cancelled) throw new CancellationException();
         // Code for expansion specified on line 130 of QUTE.javacc
         boolean ElseIfSection25forced=false;
         ElseIfSection ElseIfSection25=null;
@@ -2015,11 +2102,11 @@ public class QUTEParser implements QUTEConstants {
         ParseException parseException25=null;
         try {
             // Code for expansion specified on line 130 of QUTE.javacc
-            consumeToken(ELSEIF,false);
+            consumeToken(TokenType.ELSEIF,false);
             // Code for Expression specified on line 131 of QUTE.javacc
             Expression();
             // Code for expansion specified on line 132 of QUTE.javacc
-            consumeToken(CLOSE_CURLY,true);
+            consumeToken(TokenType.CLOSE_CURLY,true);
             // Code for Block specified on line 133 of QUTE.javacc
             Block();
             if (trace_enabled) LOGGER.info("Exiting normally from ElseIfSection");
@@ -2039,8 +2126,10 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException25: "+parseException25.getMessage());
                     ElseIfSection25.setParseException(parseException25);
                     if (ElseIfSection25forced) {
-                        //		                attemptRecovery(ElseIfSection25, TEXT, ABBREVIATED_END, ENDEACH, ENDFOR, ENDIF, ENDINCLUDE, ENDINSERT, ENDWITH, END_SECTION, CLOSE_CURLY, CLOSE_EMPTY);
-                        insertVirtualToken(TEXT);
+                        Token virtualToken=insertVirtualToken(TokenType.TEXT);
+                        String message="Inserted virtual token of type "+virtualToken.getType()+"\non line "+virtualToken.getBeginLine()+", column "+virtualToken.getBeginColumn()+" of "+token_source.getInputSource()+"\n to complete expansion in ElseIfSection\n";
+                        message+=parseException25.getMessage();
+                        addParsingProblem(new ParsingProblem(message,ElseIfSection25));
                         closeNodeScope(ElseIfSection25,true);
                     }
                     else {
@@ -2056,6 +2145,7 @@ public class QUTEParser implements QUTEConstants {
     // QUTE.javacc, line 136
     final public void ElseBlock() throws ParseException {
         if (trace_enabled) LOGGER.info("Entering production defined on line 136 of QUTE.javacc");
+        if (cancelled) throw new CancellationException();
         // Code for expansion specified on line 138 of QUTE.javacc
         boolean ElseBlock26forced=false;
         ElseBlock ElseBlock26=null;
@@ -2070,7 +2160,7 @@ public class QUTEParser implements QUTEConstants {
         ParseException parseException26=null;
         try {
             // Code for expansion specified on line 138 of QUTE.javacc
-            consumeToken(ELSE,false);
+            consumeToken(TokenType.ELSE,false);
             // Code for Block specified on line 139 of QUTE.javacc
             Block();
             if (trace_enabled) LOGGER.info("Exiting normally from ElseBlock");
@@ -2090,8 +2180,10 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException26: "+parseException26.getMessage());
                     ElseBlock26.setParseException(parseException26);
                     if (ElseBlock26forced) {
-                        //		                attemptRecovery(ElseBlock26, TEXT, ABBREVIATED_END, ENDEACH, ENDFOR, ENDIF, ENDINCLUDE, ENDINSERT, ENDWITH, END_SECTION, CLOSE_CURLY, CLOSE_EMPTY);
-                        insertVirtualToken(TEXT);
+                        Token virtualToken=insertVirtualToken(TokenType.TEXT);
+                        String message="Inserted virtual token of type "+virtualToken.getType()+"\non line "+virtualToken.getBeginLine()+", column "+virtualToken.getBeginColumn()+" of "+token_source.getInputSource()+"\n to complete expansion in ElseBlock\n";
+                        message+=parseException26.getMessage();
+                        addParsingProblem(new ParsingProblem(message,ElseBlock26));
                         closeNodeScope(ElseBlock26,true);
                     }
                     else {
@@ -2107,8 +2199,9 @@ public class QUTEParser implements QUTEConstants {
     // QUTE.javacc, line 142
     final public void IncludeSection() throws ParseException {
         if (trace_enabled) LOGGER.info("Entering production defined on line 142 of QUTE.javacc");
+        if (cancelled) throw new CancellationException();
         // Code for expansion specified on line 144 of QUTE.javacc
-        boolean IncludeSection27forced=false;
+        boolean IncludeSection27forced=this.tolerantParsing;
         IncludeSection IncludeSection27=null;
         if (buildTree) {
             IncludeSection27=new IncludeSection();
@@ -2121,28 +2214,27 @@ public class QUTEParser implements QUTEConstants {
         ParseException parseException27=null;
         try {
             // Code for expansion specified on line 144 of QUTE.javacc
-            consumeToken(QUTE_INCLUDE,false);
+            consumeToken(TokenType.QUTE_INCLUDE,false);
             // Code for Expression specified on line 145 of QUTE.javacc
             Expression();
             // Code for expansion specified on line 146 of QUTE.javacc
-            consumeToken(CLOSE_CURLY,false);
+            consumeToken(TokenType.CLOSE_CURLY,false);
             // Code for Block specified on line 147 of QUTE.javacc
             Block();
             // Code for expansion specified on line 148 of QUTE.javacc
-            switch(nextTokenKind()) {
+            switch(nextTokenType()) {
                 case ENDINCLUDE:
                 // Code for expansion specified on line 148 of QUTE.javacc
                 // Code for expansion specified on line 148 of QUTE.javacc
-                consumeToken(ENDINCLUDE,false);
+                consumeToken(TokenType.ENDINCLUDE,false);
                 break;
                 case ABBREVIATED_END:
                 // Code for expansion specified on line 148 of QUTE.javacc
                 // Code for expansion specified on line 148 of QUTE.javacc
-                consumeToken(ABBREVIATED_END,false);
+                consumeToken(TokenType.ABBREVIATED_END,false);
                 break;
                 default:
-                consumeToken(-1);
-                throw new ParseException();
+                throw new ParseException(current_token.getNext());
             }
             if (trace_enabled) LOGGER.info("Exiting normally from IncludeSection");
         }
@@ -2161,8 +2253,10 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException27: "+parseException27.getMessage());
                     IncludeSection27.setParseException(parseException27);
                     if (IncludeSection27forced) {
-                        //		                attemptRecovery(IncludeSection27, ABBREVIATED_END, ENDINCLUDE);
-                        insertVirtualToken(ABBREVIATED_END);
+                        Token virtualToken=insertVirtualToken(TokenType.ABBREVIATED_END);
+                        String message="Inserted virtual token of type "+virtualToken.getType()+"\non line "+virtualToken.getBeginLine()+", column "+virtualToken.getBeginColumn()+" of "+token_source.getInputSource()+"\n to complete expansion in IncludeSection\n";
+                        message+=parseException27.getMessage();
+                        addParsingProblem(new ParsingProblem(message,IncludeSection27));
                         closeNodeScope(IncludeSection27,true);
                     }
                     else {
@@ -2178,8 +2272,9 @@ public class QUTEParser implements QUTEConstants {
     // QUTE.javacc, line 151
     final public void InsertSection() throws ParseException {
         if (trace_enabled) LOGGER.info("Entering production defined on line 151 of QUTE.javacc");
+        if (cancelled) throw new CancellationException();
         // Code for expansion specified on line 153 of QUTE.javacc
-        boolean InsertSection28forced=false;
+        boolean InsertSection28forced=this.tolerantParsing;
         InsertSection InsertSection28=null;
         if (buildTree) {
             InsertSection28=new InsertSection();
@@ -2192,28 +2287,27 @@ public class QUTEParser implements QUTEConstants {
         ParseException parseException28=null;
         try {
             // Code for expansion specified on line 153 of QUTE.javacc
-            consumeToken(INSERT,false);
+            consumeToken(TokenType.INSERT,false);
             // Code for Expression specified on line 154 of QUTE.javacc
             Expression();
             // Code for expansion specified on line 155 of QUTE.javacc
-            consumeToken(CLOSE_CURLY,false);
+            consumeToken(TokenType.CLOSE_CURLY,false);
             // Code for Block specified on line 156 of QUTE.javacc
             Block();
             // Code for expansion specified on line 157 of QUTE.javacc
-            switch(nextTokenKind()) {
+            switch(nextTokenType()) {
                 case ENDINSERT:
                 // Code for expansion specified on line 157 of QUTE.javacc
                 // Code for expansion specified on line 157 of QUTE.javacc
-                consumeToken(ENDINSERT,false);
+                consumeToken(TokenType.ENDINSERT,false);
                 break;
                 case ABBREVIATED_END:
                 // Code for expansion specified on line 157 of QUTE.javacc
                 // Code for expansion specified on line 157 of QUTE.javacc
-                consumeToken(ABBREVIATED_END,false);
+                consumeToken(TokenType.ABBREVIATED_END,false);
                 break;
                 default:
-                consumeToken(-1);
-                throw new ParseException();
+                throw new ParseException(current_token.getNext());
             }
             if (trace_enabled) LOGGER.info("Exiting normally from InsertSection");
         }
@@ -2232,8 +2326,10 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException28: "+parseException28.getMessage());
                     InsertSection28.setParseException(parseException28);
                     if (InsertSection28forced) {
-                        //		                attemptRecovery(InsertSection28, ABBREVIATED_END, ENDINSERT);
-                        insertVirtualToken(ABBREVIATED_END);
+                        Token virtualToken=insertVirtualToken(TokenType.ABBREVIATED_END);
+                        String message="Inserted virtual token of type "+virtualToken.getType()+"\non line "+virtualToken.getBeginLine()+", column "+virtualToken.getBeginColumn()+" of "+token_source.getInputSource()+"\n to complete expansion in InsertSection\n";
+                        message+=parseException28.getMessage();
+                        addParsingProblem(new ParsingProblem(message,InsertSection28));
                         closeNodeScope(InsertSection28,true);
                     }
                     else {
@@ -2249,8 +2345,9 @@ public class QUTEParser implements QUTEConstants {
     // QUTE.javacc, line 160
     final public void WithSection() throws ParseException {
         if (trace_enabled) LOGGER.info("Entering production defined on line 160 of QUTE.javacc");
+        if (cancelled) throw new CancellationException();
         // Code for expansion specified on line 162 of QUTE.javacc
-        boolean WithSection29forced=false;
+        boolean WithSection29forced=this.tolerantParsing;
         WithSection WithSection29=null;
         if (buildTree) {
             WithSection29=new WithSection();
@@ -2263,28 +2360,27 @@ public class QUTEParser implements QUTEConstants {
         ParseException parseException29=null;
         try {
             // Code for expansion specified on line 162 of QUTE.javacc
-            consumeToken(WITH,false);
+            consumeToken(TokenType.WITH,false);
             // Code for Expression specified on line 163 of QUTE.javacc
             Expression();
             // Code for expansion specified on line 164 of QUTE.javacc
-            consumeToken(CLOSE_CURLY,false);
+            consumeToken(TokenType.CLOSE_CURLY,false);
             // Code for Block specified on line 165 of QUTE.javacc
             Block();
             // Code for expansion specified on line 166 of QUTE.javacc
-            switch(nextTokenKind()) {
+            switch(nextTokenType()) {
                 case ENDWITH:
                 // Code for expansion specified on line 166 of QUTE.javacc
                 // Code for expansion specified on line 166 of QUTE.javacc
-                consumeToken(ENDWITH,false);
+                consumeToken(TokenType.ENDWITH,false);
                 break;
                 case ABBREVIATED_END:
                 // Code for expansion specified on line 166 of QUTE.javacc
                 // Code for expansion specified on line 166 of QUTE.javacc
-                consumeToken(ABBREVIATED_END,false);
+                consumeToken(TokenType.ABBREVIATED_END,false);
                 break;
                 default:
-                consumeToken(-1);
-                throw new ParseException();
+                throw new ParseException(current_token.getNext());
             }
             if (trace_enabled) LOGGER.info("Exiting normally from WithSection");
         }
@@ -2303,8 +2399,10 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException29: "+parseException29.getMessage());
                     WithSection29.setParseException(parseException29);
                     if (WithSection29forced) {
-                        //		                attemptRecovery(WithSection29, ABBREVIATED_END, ENDWITH);
-                        insertVirtualToken(ABBREVIATED_END);
+                        Token virtualToken=insertVirtualToken(TokenType.ABBREVIATED_END);
+                        String message="Inserted virtual token of type "+virtualToken.getType()+"\non line "+virtualToken.getBeginLine()+", column "+virtualToken.getBeginColumn()+" of "+token_source.getInputSource()+"\n to complete expansion in WithSection\n";
+                        message+=parseException29.getMessage();
+                        addParsingProblem(new ParsingProblem(message,WithSection29));
                         closeNodeScope(WithSection29,true);
                     }
                     else {
@@ -2320,6 +2418,7 @@ public class QUTEParser implements QUTEConstants {
     // QUTE.javacc, line 169
     final public void UserSection() throws ParseException {
         if (trace_enabled) LOGGER.info("Entering production defined on line 169 of QUTE.javacc");
+        if (cancelled) throw new CancellationException();
         // Code for expansion specified on line 171 of QUTE.javacc
         boolean UserSection30forced=false;
         UserSection UserSection30=null;
@@ -2334,48 +2433,46 @@ public class QUTEParser implements QUTEConstants {
         ParseException parseException30=null;
         try {
             // Code for expansion specified on line 171 of QUTE.javacc
-            consumeToken(START_SECTION,false);
+            consumeToken(TokenType.START_SECTION,false);
             // Code for expansion specified on line 171 of QUTE.javacc
-            int int14=nextTokenKind();
-            if (int14==PLUS||int14==MINUS||int14==EXCLAM||int14==NULL||int14==TRUE||int14==FALSE||int14==INTEGER||int14==DECIMAL||int14==STRING_LITERAL||int14==RAW_STRING||int14==C_IDENTIFIER||int14==OPEN_PAREN) {
+            TokenType tokentype14=nextTokenType();
+            if (tokentype14==TokenType.PLUS||tokentype14==TokenType.MINUS||tokentype14==TokenType.EXCLAM||tokentype14==TokenType.NULL||tokentype14==TokenType.TRUE||tokentype14==TokenType.FALSE||tokentype14==TokenType.INTEGER||tokentype14==TokenType.DECIMAL||tokentype14==TokenType.STRING_LITERAL||tokentype14==TokenType.RAW_STRING||tokentype14==TokenType.C_IDENTIFIER||tokentype14==TokenType.OPEN_PAREN) {
                 // Code for expansion specified on line 171 of QUTE.javacc
                 // Code for Expression specified on line 171 of QUTE.javacc
                 Expression();
             }
             // Code for expansion specified on line 173 of QUTE.javacc
-            switch(nextTokenKind()) {
+            switch(nextTokenType()) {
                 case CLOSE_EMPTY:
                 // Code for expansion specified on line 173 of QUTE.javacc
                 // Code for expansion specified on line 173 of QUTE.javacc
-                consumeToken(CLOSE_EMPTY,true);
+                consumeToken(TokenType.CLOSE_EMPTY,true);
                 break;
                 case CLOSE_CURLY:
                 // Code for expansion specified on line 175 of QUTE.javacc
                 // Code for expansion specified on line 176 of QUTE.javacc
                 // Code for expansion specified on line 176 of QUTE.javacc
-                consumeToken(CLOSE_CURLY,false);
+                consumeToken(TokenType.CLOSE_CURLY,false);
                 // Code for Block specified on line 177 of QUTE.javacc
                 Block();
                 // Code for expansion specified on line 179 of QUTE.javacc
-                switch(nextTokenKind()) {
+                switch(nextTokenType()) {
                     case END_SECTION:
                     // Code for expansion specified on line 179 of QUTE.javacc
                     // Code for expansion specified on line 179 of QUTE.javacc
-                    consumeToken(END_SECTION,false);
+                    consumeToken(TokenType.END_SECTION,false);
                     break;
                     case ABBREVIATED_END:
                     // Code for expansion specified on line 179 of QUTE.javacc
                     // Code for expansion specified on line 179 of QUTE.javacc
-                    consumeToken(ABBREVIATED_END,false);
+                    consumeToken(TokenType.ABBREVIATED_END,false);
                     break;
                     default:
-                    consumeToken(-1);
-                    throw new ParseException();
+                    throw new ParseException(current_token.getNext());
                 }
                 break;
                 default:
-                consumeToken(-1);
-                throw new ParseException();
+                throw new ParseException(current_token.getNext());
             }
             if (trace_enabled) LOGGER.info("Exiting normally from UserSection");
         }
@@ -2394,8 +2491,10 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException30: "+parseException30.getMessage());
                     UserSection30.setParseException(parseException30);
                     if (UserSection30forced) {
-                        //		                attemptRecovery(UserSection30, ABBREVIATED_END, END_SECTION, CLOSE_EMPTY);
-                        insertVirtualToken(ABBREVIATED_END);
+                        Token virtualToken=insertVirtualToken(TokenType.ABBREVIATED_END);
+                        String message="Inserted virtual token of type "+virtualToken.getType()+"\non line "+virtualToken.getBeginLine()+", column "+virtualToken.getBeginColumn()+" of "+token_source.getInputSource()+"\n to complete expansion in UserSection\n";
+                        message+=parseException30.getMessage();
+                        addParsingProblem(new ParsingProblem(message,UserSection30));
                         closeNodeScope(UserSection30,true);
                     }
                     else {
@@ -2411,6 +2510,7 @@ public class QUTEParser implements QUTEConstants {
     // QUTE.javacc, line 185
     final public void Block() throws ParseException {
         if (trace_enabled) LOGGER.info("Entering production defined on line 185 of QUTE.javacc");
+        if (cancelled) throw new CancellationException();
         // Code for expansion specified on line 187 of QUTE.javacc
         boolean Block31forced=false;
         Block Block31=null;
@@ -2425,14 +2525,14 @@ public class QUTEParser implements QUTEConstants {
         ParseException parseException31=null;
         try {
             // Code for expansion specified on line 207 of QUTE.javacc
-            label_23:
+            OneOrMore$QUTE_javacc$line_207:
             while (true) {
                 // Code for expansion specified on line 188 of QUTE.javacc
-                switch(nextTokenKind()) {
+                switch(nextTokenType()) {
                     case TEXT:
                     // Code for expansion specified on line 188 of QUTE.javacc
                     // Code for expansion specified on line 188 of QUTE.javacc
-                    consumeToken(TEXT,false);
+                    consumeToken(TokenType.TEXT,false);
                     break;
                     case START_PARAMETER_DECL:
                     // Code for expansion specified on line 190 of QUTE.javacc
@@ -2480,12 +2580,11 @@ public class QUTEParser implements QUTEConstants {
                     UserSection();
                     break;
                     default:
-                    consumeToken(-1);
-                    throw new ParseException();
+                    throw new ParseException(current_token.getNext());
                 }
-                int int15=nextTokenKind();
-                if (!(int15==TEXT||int15==OPEN_CURLY||int15==EACH||int15==FOR||int15==IF||int15==QUTE_INCLUDE||int15==INSERT||int15==WITH||int15==START_SECTION||int15==START_PARAMETER_DECL)) {
-                    break label_23;
+                TokenType tokentype15=nextTokenType();
+                if (!(tokentype15==TokenType.TEXT||tokentype15==TokenType.OPEN_CURLY||tokentype15==TokenType.EACH||tokentype15==TokenType.FOR||tokentype15==TokenType.IF||tokentype15==TokenType.QUTE_INCLUDE||tokentype15==TokenType.INSERT||tokentype15==TokenType.WITH||tokentype15==TokenType.START_SECTION||tokentype15==TokenType.START_PARAMETER_DECL)) {
+                    break OneOrMore$QUTE_javacc$line_207;
                 }
             }
             if (trace_enabled) LOGGER.info("Exiting normally from Block");
@@ -2505,8 +2604,10 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException31: "+parseException31.getMessage());
                     Block31.setParseException(parseException31);
                     if (Block31forced) {
-                        //		                attemptRecovery(Block31, TEXT, ABBREVIATED_END, ENDEACH, ENDFOR, ENDIF, ENDINCLUDE, ENDINSERT, ENDWITH, END_SECTION, CLOSE_CURLY, CLOSE_EMPTY);
-                        insertVirtualToken(TEXT);
+                        Token virtualToken=insertVirtualToken(TokenType.TEXT);
+                        String message="Inserted virtual token of type "+virtualToken.getType()+"\non line "+virtualToken.getBeginLine()+", column "+virtualToken.getBeginColumn()+" of "+token_source.getInputSource()+"\n to complete expansion in Block\n";
+                        message+=parseException31.getMessage();
+                        addParsingProblem(new ParsingProblem(message,Block31));
                         closeNodeScope(Block31,true);
                     }
                     else {
@@ -2522,6 +2623,7 @@ public class QUTEParser implements QUTEConstants {
     // QUTE.javacc, line 211
     final public void Root() throws ParseException {
         if (trace_enabled) LOGGER.info("Entering production defined on line 211 of QUTE.javacc");
+        if (cancelled) throw new CancellationException();
         // Code for expansion specified on line 213 of QUTE.javacc
         boolean Root32forced=this.tolerantParsing;
         Root Root32=null;
@@ -2536,14 +2638,14 @@ public class QUTEParser implements QUTEConstants {
         ParseException parseException32=null;
         try {
             // Code for expansion specified on line 213 of QUTE.javacc
-            int int16=nextTokenKind();
-            if (int16==TEXT||int16==OPEN_CURLY||int16==EACH||int16==FOR||int16==IF||int16==QUTE_INCLUDE||int16==INSERT||int16==WITH||int16==START_SECTION||int16==START_PARAMETER_DECL) {
+            TokenType tokentype16=nextTokenType();
+            if (tokentype16==TokenType.TEXT||tokentype16==TokenType.OPEN_CURLY||tokentype16==TokenType.EACH||tokentype16==TokenType.FOR||tokentype16==TokenType.IF||tokentype16==TokenType.QUTE_INCLUDE||tokentype16==TokenType.INSERT||tokentype16==TokenType.WITH||tokentype16==TokenType.START_SECTION||tokentype16==TokenType.START_PARAMETER_DECL) {
                 // Code for expansion specified on line 213 of QUTE.javacc
                 // Code for Block specified on line 213 of QUTE.javacc
                 Block();
             }
             // Code for expansion specified on line 214 of QUTE.javacc
-            consumeToken(0,false);
+            consumeToken(TokenType.EOF,false);
             if (trace_enabled) LOGGER.info("Exiting normally from Root");
         }
         catch(ParseException e) {
@@ -2561,8 +2663,10 @@ public class QUTEParser implements QUTEConstants {
                     if (trace_enabled) LOGGER.warning("ParseException parseException32: "+parseException32.getMessage());
                     Root32.setParseException(parseException32);
                     if (Root32forced) {
-                        //		                attemptRecovery(Root32, 0);
-                        insertVirtualToken(0);
+                        Token virtualToken=insertVirtualToken(TokenType.EOF);
+                        String message="Inserted virtual token of type "+virtualToken.getType()+"\non line "+virtualToken.getBeginLine()+", column "+virtualToken.getBeginColumn()+" of "+token_source.getInputSource()+"\n to complete expansion in Root\n";
+                        message+=parseException32.getMessage();
+                        addParsingProblem(new ParsingProblem(message,Root32));
                         closeNodeScope(Root32,true);
                     }
                     else {
@@ -2578,44 +2682,48 @@ public class QUTEParser implements QUTEConstants {
     //====================================
     // Start of methods for Phase 2 Lookaheads
     //====================================
-    private boolean phase2_6_QEL_javacc_line_175(int maxLookahead) {
-        jj_la=maxLookahead;
-        jj_lastpos=jj_scanpos=current_token;
+    private boolean lookahead$QEL_javacc$line_175$column_20(int maxLookahead) {
+        indefiniteLookahead=(maxLookahead==INDEFINITE);
+        remainingLookahead=maxLookahead;
+        lastScannedToken=currentLookaheadToken=current_token;
         try {
-            return!phase3_6_QEL_javacc_line_175();
+            return!phase3$QEL_javacc$line_175$column_20();
         }
         catch(LookaheadSuccess ls) {
             return true;
         }
     }
 
-    private boolean phase2_8_QEL_javacc_line_185(int maxLookahead) {
-        jj_la=maxLookahead;
-        jj_lastpos=jj_scanpos=current_token;
+    private boolean lookahead$QEL_javacc$line_185$column_19(int maxLookahead) {
+        indefiniteLookahead=(maxLookahead==INDEFINITE);
+        remainingLookahead=maxLookahead;
+        lastScannedToken=currentLookaheadToken=current_token;
         try {
-            return!phase3_8_QEL_javacc_line_185();
+            return!phase3$QEL_javacc$line_185$column_19();
         }
         catch(LookaheadSuccess ls) {
             return true;
         }
     }
 
-    private boolean phase2_11_QEL_javacc_line_224(int maxLookahead) {
-        jj_la=maxLookahead;
-        jj_lastpos=jj_scanpos=current_token;
+    private boolean lookahead$QEL_javacc$line_224$column_19(int maxLookahead) {
+        indefiniteLookahead=(maxLookahead==INDEFINITE);
+        remainingLookahead=maxLookahead;
+        lastScannedToken=currentLookaheadToken=current_token;
         try {
-            return!phase3_11_QEL_javacc_line_224();
+            return!phase3$QEL_javacc$line_224$column_19();
         }
         catch(LookaheadSuccess ls) {
             return true;
         }
     }
 
-    private boolean phase2_14_QEL_javacc_line_237(int maxLookahead) {
-        jj_la=maxLookahead;
-        jj_lastpos=jj_scanpos=current_token;
+    private boolean lookahead$QEL_javacc$line_237$column_15(int maxLookahead) {
+        indefiniteLookahead=(maxLookahead==INDEFINITE);
+        remainingLookahead=maxLookahead;
+        lastScannedToken=currentLookaheadToken=current_token;
         try {
-            return!phase3_14_QEL_javacc_line_237();
+            return!phase3$QEL_javacc$line_237$column_15();
         }
         catch(LookaheadSuccess ls) {
             return true;
@@ -2625,73 +2733,73 @@ public class QUTEParser implements QUTEConstants {
     //====================================
     // Start of methods for Phase 3 Lookaheads
     //====================================
-    private boolean phase3_6_QEL_javacc_line_175() {
-        if (phase3R_173()) return true;
+    private boolean phase3$QEL_javacc$line_175$column_20() {
+        if (phase3$QEL_javacc$line_183$column_5()) return true;
         return false;
     }
 
-    private boolean phase3_8_QEL_javacc_line_185() {
-        Token token17=jj_scanpos;
-        if (phase3R_26()) {
-            jj_scanpos=token17;
-            if (phase3R_27()) return true;
+    private boolean phase3$QEL_javacc$line_185$column_19() {
+        Token token17=currentLookaheadToken;
+        if (phase3$QEL_javacc$line_185$column_19$()) {
+            currentLookaheadToken=token17;
+            if (phase3$QEL_javacc$line_185$column_26()) return true;
         }
         return false;
     }
 
-    private boolean phase3_11_QEL_javacc_line_224() {
-        if (jj_scan_token(EXCLAM)) return true;
-        if (phase3R_76()) return true;
+    private boolean phase3$QEL_javacc$line_224$column_19() {
+        if (scanToken(TokenType.EXCLAM)) return true;
+        if (phase3$QEL_javacc$line_250$column_5()) return true;
         return false;
     }
 
-    private boolean phase3_14_QEL_javacc_line_237() {
-        Token token18=jj_scanpos;
-        if (phase3R_29()) {
-            jj_scanpos=token18;
-            if (phase3R_30()) {
-                jj_scanpos=token18;
-                if (phase3R_31()) return true;
+    private boolean phase3$QEL_javacc$line_237$column_15() {
+        Token token18=currentLookaheadToken;
+        if (phase3$QEL_javacc$line_237$column_15$()) {
+            currentLookaheadToken=token18;
+            if (phase3$QEL_javacc$line_237$column_21()) {
+                currentLookaheadToken=token18;
+                if (phase3$QEL_javacc$line_237$column_36()) return true;
             }
         }
         return false;
     }
 
-    private boolean phase3R_173() {
-        if (phase3R_44()) return true;
+    private boolean phase3$QEL_javacc$line_183$column_5() {
+        if (phase3$QEL_javacc$line_193$column_5()) return true;
         while (true) {
-            Token token19=jj_scanpos;
-            if (phase3R_33()) {
-                jj_scanpos=token19;
+            Token token19=currentLookaheadToken;
+            if (phase3$QEL_javacc$line_185$column_9()) {
+                currentLookaheadToken=token19;
                 break;
             }
         }
         return false;
     }
 
-    private boolean phase3R_26() {
-        if (jj_scan_token(PLUS)) return true;
+    private boolean phase3$QEL_javacc$line_185$column_19$() {
+        if (scanToken(TokenType.PLUS)) return true;
         return false;
     }
 
-    private boolean phase3R_27() {
-        if (jj_scan_token(MINUS)) return true;
+    private boolean phase3$QEL_javacc$line_185$column_26() {
+        if (scanToken(TokenType.MINUS)) return true;
         return false;
     }
 
-    private boolean phase3R_76() {
-        Token token20=jj_scanpos;
-        if (phase3R_84()) {
-            jj_scanpos=token20;
-            if (phase3R_85()) {
-                jj_scanpos=token20;
-                if (phase3R_86()) {
-                    jj_scanpos=token20;
-                    if (phase3R_87()) {
-                        jj_scanpos=token20;
-                        if (phase3R_88()) {
-                            jj_scanpos=token20;
-                            if (phase3R_89()) return true;
+    private boolean phase3$QEL_javacc$line_250$column_5() {
+        Token token20=currentLookaheadToken;
+        if (phase3$QEL_javacc$line_250$column_5$()) {
+            currentLookaheadToken=token20;
+            if (phase3$QEL_javacc$line_252$column_5()) {
+                currentLookaheadToken=token20;
+                if (phase3$QEL_javacc$line_254$column_5()) {
+                    currentLookaheadToken=token20;
+                    if (phase3$QEL_javacc$line_256$column_5()) {
+                        currentLookaheadToken=token20;
+                        if (phase3$QEL_javacc$line_258$column_5()) {
+                            currentLookaheadToken=token20;
+                            if (phase3$QEL_javacc$line_260$column_5()) return true;
                         }
                     }
                 }
@@ -2700,434 +2808,434 @@ public class QUTEParser implements QUTEConstants {
         return false;
     }
 
-    private boolean phase3R_29() {
-        if (jj_scan_token(DOT)) return true;
+    private boolean phase3$QEL_javacc$line_237$column_15$() {
+        if (scanToken(TokenType.DOT)) return true;
         return false;
     }
 
-    private boolean phase3R_30() {
-        if (jj_scan_token(OPEN_BRACKET)) return true;
+    private boolean phase3$QEL_javacc$line_237$column_21() {
+        if (scanToken(TokenType.OPEN_BRACKET)) return true;
         return false;
     }
 
-    private boolean phase3R_31() {
-        if (jj_scan_token(OPEN_PAREN)) return true;
+    private boolean phase3$QEL_javacc$line_237$column_36() {
+        if (scanToken(TokenType.OPEN_PAREN)) return true;
         return false;
     }
 
-    private boolean phase3R_44() {
-        if (phase3R_55()) return true;
+    private boolean phase3$QEL_javacc$line_193$column_5() {
+        if (phase3$QEL_javacc$line_202$column_5()) return true;
         while (true) {
-            Token token21=jj_scanpos;
-            if (phase3R_41()) {
-                jj_scanpos=token21;
+            Token token21=currentLookaheadToken;
+            if (phase3$QEL_javacc$line_195$column_11()) {
+                currentLookaheadToken=token21;
                 break;
             }
         }
         return false;
     }
 
-    private boolean phase3R_33() {
-        Token token22=jj_scanpos;
-        if (phase3R_42()) {
-            jj_scanpos=token22;
-            if (phase3R_43()) return true;
+    private boolean phase3$QEL_javacc$line_185$column_9() {
+        Token token22=currentLookaheadToken;
+        if (phase3$QEL_javacc$line_186$column_13()) {
+            currentLookaheadToken=token22;
+            if (phase3$QEL_javacc$line_186$column_20()) return true;
         }
-        if (phase3R_44()) return true;
+        if (phase3$QEL_javacc$line_193$column_5()) return true;
         return false;
     }
 
-    private boolean phase3R_84() {
-        if (jj_scan_token(C_IDENTIFIER)) return true;
+    private boolean phase3$QEL_javacc$line_250$column_5$() {
+        if (scanToken(TokenType.C_IDENTIFIER)) return true;
         return false;
     }
 
-    private boolean phase3R_85() {
-        if (phase3R_98()) return true;
+    private boolean phase3$QEL_javacc$line_252$column_5() {
+        if (phase3$QEL_javacc$line_310$column_5()) return true;
         return false;
     }
 
-    private boolean phase3R_86() {
-        if (phase3R_99()) return true;
+    private boolean phase3$QEL_javacc$line_254$column_5() {
+        if (phase3$QEL_javacc$line_298$column_5()) return true;
         return false;
     }
 
-    private boolean phase3R_87() {
-        if (phase3R_100()) return true;
+    private boolean phase3$QEL_javacc$line_256$column_5() {
+        if (phase3$QEL_javacc$line_315$column_5()) return true;
         return false;
     }
 
-    private boolean phase3R_88() {
-        if (phase3R_101()) return true;
+    private boolean phase3$QEL_javacc$line_258$column_5() {
+        if (phase3$QEL_javacc$line_320$column_5()) return true;
         return false;
     }
 
-    private boolean phase3R_89() {
-        if (phase3R_102()) return true;
+    private boolean phase3$QEL_javacc$line_260$column_5() {
+        if (phase3$QEL_javacc$line_303$column_4()) return true;
         return false;
     }
 
-    private boolean phase3R_55() {
-        Token token23=jj_scanpos;
-        if (phase3R_50()) {
-            jj_scanpos=token23;
-            if (phase3R_51()) {
-                jj_scanpos=token23;
-                if (phase3R_52()) return true;
+    private boolean phase3$QEL_javacc$line_202$column_5() {
+        Token token23=currentLookaheadToken;
+        if (phase3$QEL_javacc$line_202$column_5$()) {
+            currentLookaheadToken=token23;
+            if (phase3$QEL_javacc$line_204$column_5()) {
+                currentLookaheadToken=token23;
+                if (phase3$QEL_javacc$line_206$column_5()) return true;
             }
         }
         return false;
     }
 
-    private boolean phase3R_41() {
-        Token token24=jj_scanpos;
-        if (phase3R_53()) {
-            jj_scanpos=token24;
-            if (phase3R_54()) return true;
+    private boolean phase3$QEL_javacc$line_195$column_11() {
+        Token token24=currentLookaheadToken;
+        if (phase3$QEL_javacc$line_195$column_12()) {
+            currentLookaheadToken=token24;
+            if (phase3$QEL_javacc$line_195$column_20()) return true;
         }
-        if (phase3R_55()) return true;
+        if (phase3$QEL_javacc$line_202$column_5()) return true;
         return false;
     }
 
-    private boolean phase3R_42() {
-        if (jj_scan_token(PLUS)) return true;
+    private boolean phase3$QEL_javacc$line_186$column_13() {
+        if (scanToken(TokenType.PLUS)) return true;
         return false;
     }
 
-    private boolean phase3R_43() {
-        if (jj_scan_token(MINUS)) return true;
+    private boolean phase3$QEL_javacc$line_186$column_20() {
+        if (scanToken(TokenType.MINUS)) return true;
         return false;
     }
 
-    private boolean phase3R_98() {
-        Token token25=jj_scanpos;
-        if (phase3R_112()) {
-            jj_scanpos=token25;
-            if (phase3R_113()) return true;
-        }
-        return false;
-    }
-
-    private boolean phase3R_99() {
-        Token token26=jj_scanpos;
-        if (phase3R_114()) {
-            jj_scanpos=token26;
-            if (phase3R_115()) return true;
+    private boolean phase3$QEL_javacc$line_310$column_5() {
+        Token token25=currentLookaheadToken;
+        if (phase3$QEL_javacc$line_310$column_5$()) {
+            currentLookaheadToken=token25;
+            if (phase3$QEL_javacc$line_310$column_15()) return true;
         }
         return false;
     }
 
-    private boolean phase3R_100() {
-        Token token27=jj_scanpos;
-        if (phase3R_116()) {
-            jj_scanpos=token27;
-            if (phase3R_117()) return true;
+    private boolean phase3$QEL_javacc$line_298$column_5() {
+        Token token26=currentLookaheadToken;
+        if (phase3$QEL_javacc$line_298$column_5$()) {
+            currentLookaheadToken=token26;
+            if (phase3$QEL_javacc$line_298$column_22()) return true;
         }
         return false;
     }
 
-    private boolean phase3R_101() {
-        if (jj_scan_token(NULL)) return true;
-        return false;
-    }
-
-    private boolean phase3R_102() {
-        if (jj_scan_token(OPEN_PAREN)) return true;
-        if (phase3R_154()) return true;
-        if (jj_scan_token(CLOSE_PAREN)) return true;
-        return false;
-    }
-
-    private boolean phase3R_50() {
-        if (phase3R_63()) return true;
-        return false;
-    }
-
-    private boolean phase3R_51() {
-        if (phase3R_64()) return true;
-        return false;
-    }
-
-    private boolean phase3R_52() {
-        if (phase3R_70()) return true;
-        return false;
-    }
-
-    private boolean phase3R_53() {
-        if (jj_scan_token(TIMES)) return true;
-        return false;
-    }
-
-    private boolean phase3R_54() {
-        if (jj_scan_token(DIVIDE)) return true;
-        return false;
-    }
-
-    private boolean phase3R_112() {
-        if (jj_scan_token(INTEGER)) return true;
-        return false;
-    }
-
-    private boolean phase3R_113() {
-        if (jj_scan_token(DECIMAL)) return true;
-        return false;
-    }
-
-    private boolean phase3R_114() {
-        if (jj_scan_token(STRING_LITERAL)) return true;
-        return false;
-    }
-
-    private boolean phase3R_115() {
-        if (jj_scan_token(RAW_STRING)) return true;
-        return false;
-    }
-
-    private boolean phase3R_116() {
-        if (jj_scan_token(TRUE)) return true;
-        return false;
-    }
-
-    private boolean phase3R_117() {
-        if (jj_scan_token(FALSE)) return true;
-        return false;
-    }
-
-    private boolean phase3R_154() {
-        if (phase3R_134()) return true;
-        return false;
-    }
-
-    private boolean phase3R_63() {
-        Token token28=jj_scanpos;
-        if (phase3R_67()) {
-            jj_scanpos=token28;
-            if (phase3R_68()) return true;
+    private boolean phase3$QEL_javacc$line_315$column_5() {
+        Token token27=currentLookaheadToken;
+        if (phase3$QEL_javacc$line_315$column_5$()) {
+            currentLookaheadToken=token27;
+            if (phase3$QEL_javacc$line_315$column_12()) return true;
         }
-        if (phase3R_70()) return true;
         return false;
     }
 
-    private boolean phase3R_64() {
-        if (jj_scan_token(EXCLAM)) return true;
-        if (phase3R_70()) return true;
+    private boolean phase3$QEL_javacc$line_320$column_5() {
+        if (scanToken(TokenType.NULL)) return true;
         return false;
     }
 
-    private boolean phase3R_70() {
-        if (phase3R_78()) return true;
+    private boolean phase3$QEL_javacc$line_303$column_4() {
+        if (scanToken(TokenType.OPEN_PAREN)) return true;
+        if (phase3$QEL_javacc$line_132$column_5()) return true;
+        if (scanToken(TokenType.CLOSE_PAREN)) return true;
+        return false;
+    }
+
+    private boolean phase3$QEL_javacc$line_202$column_5$() {
+        if (phase3$QEL_javacc$line_211$column_5()) return true;
+        return false;
+    }
+
+    private boolean phase3$QEL_javacc$line_204$column_5() {
+        if (phase3$QEL_javacc$line_216$column_5()) return true;
+        return false;
+    }
+
+    private boolean phase3$QEL_javacc$line_206$column_5() {
+        if (phase3$QEL_javacc$line_222$column_5()) return true;
+        return false;
+    }
+
+    private boolean phase3$QEL_javacc$line_195$column_12() {
+        if (scanToken(TokenType.TIMES)) return true;
+        return false;
+    }
+
+    private boolean phase3$QEL_javacc$line_195$column_20() {
+        if (scanToken(TokenType.DIVIDE)) return true;
+        return false;
+    }
+
+    private boolean phase3$QEL_javacc$line_310$column_5$() {
+        if (scanToken(TokenType.INTEGER)) return true;
+        return false;
+    }
+
+    private boolean phase3$QEL_javacc$line_310$column_15() {
+        if (scanToken(TokenType.DECIMAL)) return true;
+        return false;
+    }
+
+    private boolean phase3$QEL_javacc$line_298$column_5$() {
+        if (scanToken(TokenType.STRING_LITERAL)) return true;
+        return false;
+    }
+
+    private boolean phase3$QEL_javacc$line_298$column_22() {
+        if (scanToken(TokenType.RAW_STRING)) return true;
+        return false;
+    }
+
+    private boolean phase3$QEL_javacc$line_315$column_5$() {
+        if (scanToken(TokenType.TRUE)) return true;
+        return false;
+    }
+
+    private boolean phase3$QEL_javacc$line_315$column_12() {
+        if (scanToken(TokenType.FALSE)) return true;
+        return false;
+    }
+
+    private boolean phase3$QEL_javacc$line_132$column_5() {
+        if (phase3$QEL_javacc$line_137$column_5()) return true;
+        return false;
+    }
+
+    private boolean phase3$QEL_javacc$line_211$column_5() {
+        Token token28=currentLookaheadToken;
+        if (phase3$QEL_javacc$line_211$column_6()) {
+            currentLookaheadToken=token28;
+            if (phase3$QEL_javacc$line_211$column_13()) return true;
+        }
+        if (phase3$QEL_javacc$line_222$column_5()) return true;
+        return false;
+    }
+
+    private boolean phase3$QEL_javacc$line_216$column_5() {
+        if (scanToken(TokenType.EXCLAM)) return true;
+        if (phase3$QEL_javacc$line_222$column_5()) return true;
+        return false;
+    }
+
+    private boolean phase3$QEL_javacc$line_222$column_5() {
+        if (phase3$QEL_javacc$line_235$column_3()) return true;
         while (true) {
-            Token token29=jj_scanpos;
-            if (phase3R_72()) {
-                jj_scanpos=token29;
+            Token token29=currentLookaheadToken;
+            if (phase3$QEL_javacc$line_224$column_9()) {
+                currentLookaheadToken=token29;
                 break;
             }
         }
-        Token token30=jj_scanpos;
-        if (phase3R_73()) jj_scanpos=token30;
+        Token token30=currentLookaheadToken;
+        if (phase3$QEL_javacc$line_228$column_7()) currentLookaheadToken=token30;
         return false;
     }
 
-    private boolean phase3R_134() {
-        if (phase3R_145()) return true;
+    private boolean phase3$QEL_javacc$line_137$column_5() {
+        if (phase3$QEL_javacc$line_145$column_5()) return true;
         while (true) {
-            Token token31=jj_scanpos;
-            if (phase3R_138()) {
-                jj_scanpos=token31;
-                break;
-            }
-        }
-        return false;
-    }
-
-    private boolean phase3R_67() {
-        if (jj_scan_token(PLUS)) return true;
-        return false;
-    }
-
-    private boolean phase3R_68() {
-        if (jj_scan_token(MINUS)) return true;
-        return false;
-    }
-
-    private boolean phase3R_78() {
-        if (phase3R_76()) return true;
-        while (true) {
-            Token token32=jj_scanpos;
-            if (phase3R_77()) {
-                jj_scanpos=token32;
+            Token token31=currentLookaheadToken;
+            if (phase3$QEL_javacc$line_139$column_9()) {
+                currentLookaheadToken=token31;
                 break;
             }
         }
         return false;
     }
 
-    private boolean phase3R_72() {
-        if (jj_scan_token(EXCLAM)) return true;
-        if (phase3R_78()) return true;
+    private boolean phase3$QEL_javacc$line_211$column_6() {
+        if (scanToken(TokenType.PLUS)) return true;
         return false;
     }
 
-    private boolean phase3R_73() {
-        if (jj_scan_token(EXCLAM)) return true;
+    private boolean phase3$QEL_javacc$line_211$column_13() {
+        if (scanToken(TokenType.MINUS)) return true;
         return false;
     }
 
-    private boolean phase3R_145() {
-        if (phase3R_152()) return true;
+    private boolean phase3$QEL_javacc$line_235$column_3() {
+        if (phase3$QEL_javacc$line_250$column_5()) return true;
         while (true) {
-            Token token33=jj_scanpos;
-            if (phase3R_142()) {
-                jj_scanpos=token33;
+            Token token32=currentLookaheadToken;
+            if (phase3$QEL_javacc$line_237$column_5()) {
+                currentLookaheadToken=token32;
                 break;
             }
         }
         return false;
     }
 
-    private boolean phase3R_138() {
-        Token token34=jj_scanpos;
-        if (phase3R_143()) {
-            jj_scanpos=token34;
-            if (phase3R_144()) return true;
-        }
-        if (phase3R_145()) return true;
+    private boolean phase3$QEL_javacc$line_224$column_9() {
+        if (scanToken(TokenType.EXCLAM)) return true;
+        if (phase3$QEL_javacc$line_235$column_3()) return true;
         return false;
     }
 
-    private boolean phase3R_77() {
-        Token token35=jj_scanpos;
-        if (phase3R_90()) {
-            jj_scanpos=token35;
-            if (phase3R_91()) {
-                jj_scanpos=token35;
-                if (phase3R_92()) return true;
+    private boolean phase3$QEL_javacc$line_228$column_7() {
+        if (scanToken(TokenType.EXCLAM)) return true;
+        return false;
+    }
+
+    private boolean phase3$QEL_javacc$line_145$column_5() {
+        if (phase3$QEL_javacc$line_153$column_5()) return true;
+        while (true) {
+            Token token33=currentLookaheadToken;
+            if (phase3$QEL_javacc$line_147$column_9()) {
+                currentLookaheadToken=token33;
+                break;
             }
         }
         return false;
     }
 
-    private boolean phase3R_152() {
-        if (phase3R_160()) return true;
-        Token token36=jj_scanpos;
-        if (phase3R_149()) jj_scanpos=token36;
-        return false;
-    }
-
-    private boolean phase3R_142() {
-        Token token37=jj_scanpos;
-        if (phase3R_150()) {
-            jj_scanpos=token37;
-            if (phase3R_151()) return true;
+    private boolean phase3$QEL_javacc$line_139$column_9() {
+        Token token34=currentLookaheadToken;
+        if (phase3$QEL_javacc$line_139$column_10()) {
+            currentLookaheadToken=token34;
+            if (phase3$QEL_javacc$line_139$column_15()) return true;
         }
-        if (phase3R_152()) return true;
+        if (phase3$QEL_javacc$line_145$column_5()) return true;
         return false;
     }
 
-    private boolean phase3R_143() {
-        if (jj_scan_token(OR)) return true;
-        return false;
-    }
-
-    private boolean phase3R_144() {
-        if (jj_scan_token(OR2)) return true;
-        return false;
-    }
-
-    private boolean phase3R_90() {
-        if (phase3R_103()) return true;
-        return false;
-    }
-
-    private boolean phase3R_91() {
-        if (phase3R_104()) return true;
-        return false;
-    }
-
-    private boolean phase3R_92() {
-        if (phase3R_105()) return true;
-        return false;
-    }
-
-    private boolean phase3R_160() {
-        if (phase3R_171()) return true;
-        Token token38=jj_scanpos;
-        if (phase3R_156()) jj_scanpos=token38;
-        return false;
-    }
-
-    private boolean phase3R_149() {
-        Token token39=jj_scanpos;
-        if (phase3R_157()) {
-            jj_scanpos=token39;
-            if (phase3R_158()) {
-                jj_scanpos=token39;
-                if (phase3R_159()) return true;
+    private boolean phase3$QEL_javacc$line_237$column_5() {
+        Token token35=currentLookaheadToken;
+        if (phase3$QEL_javacc$line_239$column_7()) {
+            currentLookaheadToken=token35;
+            if (phase3$QEL_javacc$line_241$column_7()) {
+                currentLookaheadToken=token35;
+                if (phase3$QEL_javacc$line_243$column_7()) return true;
             }
         }
-        if (phase3R_160()) return true;
         return false;
     }
 
-    private boolean phase3R_150() {
-        if (jj_scan_token(AND)) return true;
+    private boolean phase3$QEL_javacc$line_153$column_5() {
+        if (phase3$QEL_javacc$line_162$column_5()) return true;
+        Token token36=currentLookaheadToken;
+        if (phase3$QEL_javacc$line_155$column_9()) currentLookaheadToken=token36;
         return false;
     }
 
-    private boolean phase3R_151() {
-        if (jj_scan_token(AND2)) return true;
+    private boolean phase3$QEL_javacc$line_147$column_9() {
+        Token token37=currentLookaheadToken;
+        if (phase3$QEL_javacc$line_147$column_10()) {
+            currentLookaheadToken=token37;
+            if (phase3$QEL_javacc$line_147$column_16()) return true;
+        }
+        if (phase3$QEL_javacc$line_153$column_5()) return true;
         return false;
     }
 
-    private boolean phase3R_103() {
-        if (jj_scan_token(DOT)) return true;
-        Token token40=jj_scanpos;
-        if (phase3R_119()) {
-            jj_scanpos=token40;
-            if (phase3R_120()) return true;
+    private boolean phase3$QEL_javacc$line_139$column_10() {
+        if (scanToken(TokenType.OR)) return true;
+        return false;
+    }
+
+    private boolean phase3$QEL_javacc$line_139$column_15() {
+        if (scanToken(TokenType.OR2)) return true;
+        return false;
+    }
+
+    private boolean phase3$QEL_javacc$line_239$column_7() {
+        if (phase3$QEL_javacc$line_266$column_5()) return true;
+        return false;
+    }
+
+    private boolean phase3$QEL_javacc$line_241$column_7() {
+        if (phase3$QEL_javacc$line_272$column_5()) return true;
+        return false;
+    }
+
+    private boolean phase3$QEL_javacc$line_243$column_7() {
+        if (phase3$QEL_javacc$line_277$column_3()) return true;
+        return false;
+    }
+
+    private boolean phase3$QEL_javacc$line_162$column_5() {
+        if (phase3$QEL_javacc$line_171$column_5()) return true;
+        Token token38=currentLookaheadToken;
+        if (phase3$QEL_javacc$line_164$column_9()) currentLookaheadToken=token38;
+        return false;
+    }
+
+    private boolean phase3$QEL_javacc$line_155$column_9() {
+        Token token39=currentLookaheadToken;
+        if (phase3$QEL_javacc$line_155$column_10()) {
+            currentLookaheadToken=token39;
+            if (phase3$QEL_javacc$line_155$column_19()) {
+                currentLookaheadToken=token39;
+                if (phase3$QEL_javacc$line_155$column_29()) return true;
+            }
+        }
+        if (phase3$QEL_javacc$line_162$column_5()) return true;
+        return false;
+    }
+
+    private boolean phase3$QEL_javacc$line_147$column_10() {
+        if (scanToken(TokenType.AND)) return true;
+        return false;
+    }
+
+    private boolean phase3$QEL_javacc$line_147$column_16() {
+        if (scanToken(TokenType.AND2)) return true;
+        return false;
+    }
+
+    private boolean phase3$QEL_javacc$line_266$column_5() {
+        if (scanToken(TokenType.DOT)) return true;
+        Token token40=currentLookaheadToken;
+        if (phase3$QEL_javacc$line_267$column_6()) {
+            currentLookaheadToken=token40;
+            if (phase3$QEL_javacc$line_267$column_21()) return true;
         }
         return false;
     }
 
-    private boolean phase3R_104() {
-        if (jj_scan_token(OPEN_BRACKET)) return true;
-        if (phase3R_154()) return true;
-        if (jj_scan_token(CLOSE_BRACKET)) return true;
+    private boolean phase3$QEL_javacc$line_272$column_5() {
+        if (scanToken(TokenType.OPEN_BRACKET)) return true;
+        if (phase3$QEL_javacc$line_132$column_5()) return true;
+        if (scanToken(TokenType.CLOSE_BRACKET)) return true;
         return false;
     }
 
-    private boolean phase3R_105() {
-        if (jj_scan_token(OPEN_PAREN)) return true;
-        Token token41=jj_scanpos;
-        if (phase3R_122()) jj_scanpos=token41;
-        if (jj_scan_token(CLOSE_PAREN)) return true;
+    private boolean phase3$QEL_javacc$line_277$column_3() {
+        if (scanToken(TokenType.OPEN_PAREN)) return true;
+        Token token41=currentLookaheadToken;
+        if (phase3$QEL_javacc$line_277$column_16()) currentLookaheadToken=token41;
+        if (scanToken(TokenType.CLOSE_PAREN)) return true;
         return false;
     }
 
-    private boolean phase3R_171() {
-        if (phase3R_173()) return true;
-        Token token42=jj_scanpos;
-        if (phase3R_162()) jj_scanpos=token42;
+    private boolean phase3$QEL_javacc$line_171$column_5() {
+        if (phase3$QEL_javacc$line_183$column_5()) return true;
+        Token token42=currentLookaheadToken;
+        if (phase3$QEL_javacc$line_173$column_8()) currentLookaheadToken=token42;
         return false;
     }
 
-    private boolean phase3R_156() {
-        Token token43=jj_scanpos;
-        if (phase3R_163()) {
-            jj_scanpos=token43;
-            if (phase3R_164()) {
-                jj_scanpos=token43;
-                if (phase3R_165()) {
-                    jj_scanpos=token43;
-                    if (phase3R_166()) {
-                        jj_scanpos=token43;
-                        if (phase3R_167()) {
-                            jj_scanpos=token43;
-                            if (phase3R_168()) {
-                                jj_scanpos=token43;
-                                if (phase3R_169()) {
-                                    jj_scanpos=token43;
-                                    if (phase3R_170()) return true;
+    private boolean phase3$QEL_javacc$line_164$column_9() {
+        Token token43=currentLookaheadToken;
+        if (phase3$QEL_javacc$line_164$column_10()) {
+            currentLookaheadToken=token43;
+            if (phase3$QEL_javacc$line_164$column_15()) {
+                currentLookaheadToken=token43;
+                if (phase3$QEL_javacc$line_164$column_20()) {
+                    currentLookaheadToken=token43;
+                    if (phase3$QEL_javacc$line_164$column_25()) {
+                        currentLookaheadToken=token43;
+                        if (phase3$QEL_javacc$line_164$column_30()) {
+                            currentLookaheadToken=token43;
+                            if (phase3$QEL_javacc$line_164$column_39()) {
+                                currentLookaheadToken=token43;
+                                if (phase3$QEL_javacc$line_164$column_48()) {
+                                    currentLookaheadToken=token43;
+                                    if (phase3$QEL_javacc$line_164$column_57()) return true;
                                 }
                             }
                         }
@@ -3135,127 +3243,128 @@ public class QUTEParser implements QUTEConstants {
                 }
             }
         }
-        if (phase3R_171()) return true;
+        if (phase3$QEL_javacc$line_171$column_5()) return true;
         return false;
     }
 
-    private boolean phase3R_157() {
-        if (jj_scan_token(EQUALS)) return true;
+    private boolean phase3$QEL_javacc$line_155$column_10() {
+        if (scanToken(TokenType.EQUALS)) return true;
         return false;
     }
 
-    private boolean phase3R_158() {
-        if (jj_scan_token(EQUALS2)) return true;
+    private boolean phase3$QEL_javacc$line_155$column_19() {
+        if (scanToken(TokenType.EQUALS2)) return true;
         return false;
     }
 
-    private boolean phase3R_159() {
-        if (jj_scan_token(EQUALS3)) return true;
+    private boolean phase3$QEL_javacc$line_155$column_29() {
+        if (scanToken(TokenType.EQUALS3)) return true;
         return false;
     }
 
-    private boolean phase3R_119() {
-        if (jj_scan_token(C_IDENTIFIER)) return true;
+    private boolean phase3$QEL_javacc$line_267$column_6() {
+        if (scanToken(TokenType.C_IDENTIFIER)) return true;
         return false;
     }
 
-    private boolean phase3R_120() {
-        if (jj_scan_token(TIMES)) return true;
+    private boolean phase3$QEL_javacc$line_267$column_21() {
+        if (scanToken(TokenType.TIMES)) return true;
         return false;
     }
 
-    private boolean phase3R_122() {
-        if (phase3R_135()) return true;
+    private boolean phase3$QEL_javacc$line_277$column_16() {
+        if (phase3$QEL_javacc$line_282$column_5()) return true;
         return false;
     }
 
-    private boolean phase3R_162() {
-        if (jj_scan_token(DOT_DOT)) return true;
-        Token token44=jj_scanpos;
-        if (phase3R_172()) jj_scanpos=token44;
+    private boolean phase3$QEL_javacc$line_173$column_8() {
+        if (scanToken(TokenType.DOT_DOT)) return true;
+        Token token44=currentLookaheadToken;
+        if (phase3$QEL_javacc$line_175$column_10()) currentLookaheadToken=token44;
         return false;
     }
 
-    private boolean phase3R_163() {
-        if (jj_scan_token(GT)) return true;
+    private boolean phase3$QEL_javacc$line_164$column_10() {
+        if (scanToken(TokenType.GT)) return true;
         return false;
     }
 
-    private boolean phase3R_164() {
-        if (jj_scan_token(GE)) return true;
+    private boolean phase3$QEL_javacc$line_164$column_15() {
+        if (scanToken(TokenType.GE)) return true;
         return false;
     }
 
-    private boolean phase3R_165() {
-        if (jj_scan_token(LT)) return true;
+    private boolean phase3$QEL_javacc$line_164$column_20() {
+        if (scanToken(TokenType.LT)) return true;
         return false;
     }
 
-    private boolean phase3R_166() {
-        if (jj_scan_token(LE)) return true;
+    private boolean phase3$QEL_javacc$line_164$column_25() {
+        if (scanToken(TokenType.LE)) return true;
         return false;
     }
 
-    private boolean phase3R_167() {
-        if (jj_scan_token(ALT_GT)) return true;
+    private boolean phase3$QEL_javacc$line_164$column_30() {
+        if (scanToken(TokenType.ALT_GT)) return true;
         return false;
     }
 
-    private boolean phase3R_168() {
-        if (jj_scan_token(ALT_GE)) return true;
+    private boolean phase3$QEL_javacc$line_164$column_39() {
+        if (scanToken(TokenType.ALT_GE)) return true;
         return false;
     }
 
-    private boolean phase3R_169() {
-        if (jj_scan_token(ALT_LE)) return true;
+    private boolean phase3$QEL_javacc$line_164$column_48() {
+        if (scanToken(TokenType.ALT_LE)) return true;
         return false;
     }
 
-    private boolean phase3R_170() {
-        if (jj_scan_token(ALT_LT)) return true;
+    private boolean phase3$QEL_javacc$line_164$column_57() {
+        if (scanToken(TokenType.ALT_LT)) return true;
         return false;
     }
 
-    private boolean phase3R_135() {
-        if (phase3R_139()) return true;
+    private boolean phase3$QEL_javacc$line_282$column_5() {
+        if (phase3$QEL_javacc$line_289$column_5()) return true;
         return false;
     }
 
-    private boolean phase3R_172() {
-        if (phase3R_173()) return true;
+    private boolean phase3$QEL_javacc$line_175$column_10() {
+        if (phase3$QEL_javacc$line_183$column_5()) return true;
         return false;
     }
 
-    private boolean phase3R_139() {
-        if (phase3R_154()) return true;
+    private boolean phase3$QEL_javacc$line_289$column_5() {
+        if (phase3$QEL_javacc$line_132$column_5()) return true;
         while (true) {
-            Token token45=jj_scanpos;
-            if (phase3R_147()) {
-                jj_scanpos=token45;
+            Token token45=currentLookaheadToken;
+            if (phase3$QEL_javacc$line_291$column_8()) {
+                currentLookaheadToken=token45;
                 break;
             }
         }
         return false;
     }
 
-    private boolean phase3R_147() {
-        Token token46=jj_scanpos;
-        if (phase3R_153()) jj_scanpos=token46;
-        if (phase3R_154()) return true;
+    private boolean phase3$QEL_javacc$line_291$column_8() {
+        Token token46=currentLookaheadToken;
+        if (phase3$QEL_javacc$line_291$column_9()) currentLookaheadToken=token46;
+        if (phase3$QEL_javacc$line_132$column_5()) return true;
         return false;
     }
 
-    private boolean phase3R_153() {
-        if (jj_scan_token(COMMA)) return true;
+    private boolean phase3$QEL_javacc$line_291$column_9() {
+        if (scanToken(TokenType.COMMA)) return true;
         return false;
     }
 
     Token current_token;
-    private Token jj_scanpos,jj_lastpos;
-    private int jj_la;
+    private Token currentLookaheadToken,lastScannedToken;
+    private int remainingLookahead;
+    private boolean indefiniteLookahead;
     private boolean semanticLookahead;
-    public QUTEParser(String inputSource,CharSequence chars) {
-        token_source=new QUTELexer(inputSource,chars);
+    public QUTEParser(String inputSource,CharSequence content) {
+        this(new QUTELexer(inputSource,content));
     }
 
     public QUTEParser(java.io.InputStream stream) {
@@ -3263,8 +3372,7 @@ public class QUTEParser implements QUTEConstants {
     }
 
     public QUTEParser(Reader reader) {
-        token_source=new QUTELexer(reader);
-        current_token=new Token();
+        this(new QUTELexer(reader));
     }
 
     /** Constructor with user supplied Lexer. */
@@ -3273,9 +3381,10 @@ public class QUTEParser implements QUTEConstants {
         current_token=new Token();
     }
 
-    private void insertVirtualToken(int tokenType) {
-        Token virtualToken=Token.newToken(tokenType,"VIRTUAL "+tokenImage[tokenType]);
+    private Token insertVirtualToken(TokenType tokenType) {
+        Token virtualToken=Token.newToken(tokenType,"VIRTUAL "+tokenType);
         virtualToken.setUnparsed(true);
+        virtualToken.setVirtual(true);
         int line=current_token.getEndLine();
         int column=current_token.getEndColumn();
         virtualToken.setBeginLine(line);
@@ -3286,99 +3395,52 @@ public class QUTEParser implements QUTEConstants {
         if (tokensAreNodes&&buildTree) {
             currentNodeScope.add(virtualToken);
         }
+        return virtualToken;
     }
 
-    /**
-     * Based on the type of the node and the terminating token, we attempt to scan forward and recover. 
-     */
-    private void attemptRecovery(Node node,int...finalTokenTypes) {
-        int finalTokenType=finalTokenTypes[0];
-        List<Token>scanAhead=getTokensToEOL(finalTokenTypes);
-        List<Token>unparsedTokens=null;
-        Token terminalTokenFound=null;
-        for (Token tok : scanAhead) {
-            if (!intArrayContains(finalTokenTypes,tok.kind)) {
-                tok.setUnparsed(true);
-                tok.ignored=true;
-                node.setEndLine(tok.getEndLine());
-                node.setEndColumn(tok.getEndColumn());
-                if (unparsedTokens==null) unparsedTokens=new ArrayList<Token>();
-                tok.unparsed=true;
-                unparsedTokens.add(tok);
-            }
-            else {
-                terminalTokenFound=tok;
-                tok.precedingUnparsedTokens=unparsedTokens;
-                token_source.doLexicalStateSwitch(tok.kind);
-            }
-        }
-        if (terminalTokenFound!=null) {
-            Token lastScanned=scanAhead.get(scanAhead.size()-1);
-            Token virtualToken=Token.newToken(finalTokenType,"VIRTUAL "+nodeNames[finalTokenType]);
-            virtualToken.setUnparsed(true);
-            virtualToken.setBeginLine(lastScanned.getEndLine());
-            virtualToken.setBeginColumn(lastScanned.getEndColumn());
-            virtualToken.setEndLine(lastScanned.getEndLine());
-            virtualToken.setEndColumn(lastScanned.getEndColumn());
-            if (tokensAreNodes) {
-                currentNodeScope.add(virtualToken);
-            }
-            node.setEndLine(virtualToken.getEndLine());
-            node.setEndColumn(virtualToken.getEndColumn());
-        }
-        token_source.doLexicalStateSwitch(finalTokenType);
-    }
-
-    private Token consumeToken(int expectedType) throws ParseException {
+    private Token consumeToken(TokenType expectedType) throws ParseException {
         return consumeToken(expectedType,false);
     }
 
-    private Token consumeToken(int expectedType,boolean forced) throws ParseException {
+    private Token consumeToken(TokenType expectedType,boolean forced) throws ParseException {
         Token oldToken=current_token;
         current_token=current_token.getNext();
         if (current_token==null) {
             current_token=token_source.getNextToken();
         }
-        if (!tolerantParsing&&current_token.invalidToken!=null) {
+        if (!tolerantParsing) {
             throw new ParseException(current_token);
         }
-        if (current_token.kind!=expectedType) {
+        if (current_token.getType()!=expectedType) {
             handleUnexpectedTokenType(expectedType,forced,oldToken);
         }
         if (buildTree&&tokensAreNodes) {
             pushNode(current_token);
         }
-        if (trace_enabled) LOGGER.info("Consumed token of type "+tokenImage[current_token.kind]+" from "+current_token.getLocation());
+        if (trace_enabled) LOGGER.info("Consumed token of type "+current_token.getType()+" from "+current_token.getLocation());
         return current_token;
     }
 
-    private void handleUnexpectedTokenType(int expectedType,boolean forced,Token oldToken) throws ParseException {
+    private void handleUnexpectedTokenType(TokenType expectedType,boolean forced,Token oldToken) throws ParseException {
         if (!tolerantParsing) {
-            //	    current_token = oldToken;
             throw new ParseException(current_token);
         }
         if (forced&&tolerantParsing) {
-            Token virtualToken=Token.newToken(expectedType,"");
-            virtualToken.setVirtual(true);
-            virtualToken.setBeginLine(oldToken.getEndLine());
-            virtualToken.setBeginColumn(oldToken.getEndColumn());
-            virtualToken.setEndLine(current_token.getBeginLine());
-            virtualToken.setEndColumn(current_token.getBeginColumn());
-            virtualToken.setNext(current_token);
+            Token nextToken=current_token;
+            current_token=oldToken;
+            Token virtualToken=insertVirtualToken(expectedType);
+            virtualToken.setNext(nextToken);
             current_token=virtualToken;
+            String message="Expecting token type "+expectedType+" but encountered "+nextToken.getType();
+            message+="\nInserting virtual token to continue parsing";
+            addParsingProblem(new ParsingProblem(message,virtualToken));
         }
         else {
-            //	      current_token = oldToken;
             throw new ParseException(current_token);
-            //	      throw new ParseException(generateErrorMessage(current_token));
         }
     }
 
     private String generateErrorMessage(Token t) {
-        if (t.invalidToken!=null) {
-            Token iv=t.invalidToken;
-            return"Encountered invalid input: "+iv.image+" on "+iv.getLocation();
-        }
         return"Encountered an error on (or somewhere around) line "+t.getBeginLine()+", column "+t.getBeginColumn()+" of "+t.getInputSource();
     }
 
@@ -3386,24 +3448,28 @@ public class QUTEParser implements QUTEConstants {
     static private final class LookaheadSuccess extends java.lang.Error {
     }
     final private LookaheadSuccess LOOKAHEAD_SUCCESS=new LookaheadSuccess();
-    private boolean jj_scan_token(int kind) {
-        if (jj_scanpos==jj_lastpos) {
-            jj_la--;
-            if (jj_scanpos.getNext()==null) {
+    private boolean scanToken(TokenType type) {
+        if (currentLookaheadToken==lastScannedToken) {
+            if (!indefiniteLookahead) {
+                --remainingLookahead;
+            }
+            if (currentLookaheadToken.getNext()==null) {
                 Token nextToken=token_source.getNextToken();
-                jj_scanpos.setNext(nextToken);
-                jj_scanpos=nextToken;
-                jj_lastpos=nextToken;
+                currentLookaheadToken.setNext(nextToken);
+                currentLookaheadToken=nextToken;
+                lastScannedToken=nextToken;
             }
             else {
-                jj_lastpos=jj_scanpos=jj_scanpos.getNext();
+                lastScannedToken=currentLookaheadToken=currentLookaheadToken.getNext();
             }
         }
         else {
-            jj_scanpos=jj_scanpos.getNext();
+            currentLookaheadToken=currentLookaheadToken.getNext();
         }
-        if (jj_scanpos.kind!=kind) return true;
-        if (jj_la==0&&jj_scanpos==jj_lastpos) throw LOOKAHEAD_SUCCESS;
+        if (currentLookaheadToken.getType()!=type) return true;
+        if (!indefiniteLookahead) {
+            if (remainingLookahead==0&&currentLookaheadToken==lastScannedToken) throw LOOKAHEAD_SUCCESS;
+        }
         return false;
     }
 
@@ -3431,40 +3497,20 @@ public class QUTEParser implements QUTEConstants {
         return t;
     }
 
-    private int nextTokenKind() {
+    /*  
+  private int nextTokenKind() {
+    if (current_token.getNext() == null) {
+        Token nextToken = token_source.getNextToken();
+        current_token.setNext(nextToken);
+    }
+    return current_token.getNext().getKind();
+  }*/
+    private TokenType nextTokenType() {
         if (current_token.getNext()==null) {
             Token nextToken=token_source.getNextToken();
             current_token.setNext(nextToken);
         }
-        return current_token.getNext().kind;
-    }
-
-    private List<Token>getTokensToEOL(int...desiredTokenTypes) {
-        ArrayList<Token>result=new ArrayList<>();
-        int currentLine=current_token.getBeginLine();
-        Token tok=current_token;
-        do {
-            Token prevToken=tok;
-            if (tok.getNext()!=null) {
-                tok=tok.getNext();
-            }
-            else {
-                tok=token_source.getNextToken();
-                prevToken.setNext(tok);
-            }
-            result.add(tok);
-        }
-        while (tok.getBeginLine()==currentLine&&!intArrayContains(desiredTokenTypes,tok.kind)&&tok.kind!=EOF);
-        return result;
-    }
-
-    static private boolean intArrayContains(int[] array,int elem) {
-        for (int i=0; i<array.length; i++) {
-            if (array[i]==elem) {
-                return true;
-            }
-        }
-        return false;
+        return current_token.getNext().getType();
     }
 
     private boolean trace_enabled=false;

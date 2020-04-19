@@ -3,8 +3,8 @@ package qute;
 
 @SuppressWarnings("unused")
 public class START_PARAMETER_DECL extends Token {
-    public START_PARAMETER_DECL(int kind,String image) {
-        super(kind,image);
+    public START_PARAMETER_DECL(TokenType type,String image) {
+        super(type,image);
     }
 
 }

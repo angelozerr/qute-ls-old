@@ -3,8 +3,8 @@ package qute;
 
 @SuppressWarnings("unused")
 public class C_IDENTIFIER extends Token {
-    public C_IDENTIFIER(int kind,String image) {
-        super(kind,image);
+    public C_IDENTIFIER(TokenType type,String image) {
+        super(type,image);
     }
 
 }

@@ -3,8 +3,8 @@ package qute;
 
 @SuppressWarnings("unused")
 public class AND2 extends Token {
-    public AND2(int kind,String image) {
-        super(kind,image);
+    public AND2(TokenType type,String image) {
+        super(type,image);
     }
 
 }

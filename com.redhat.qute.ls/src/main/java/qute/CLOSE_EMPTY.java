@@ -3,8 +3,8 @@ package qute;
 
 @SuppressWarnings("unused")
 public class CLOSE_EMPTY extends Token {
-    public CLOSE_EMPTY(int kind,String image) {
-        super(kind,image);
+    public CLOSE_EMPTY(TokenType type,String image) {
+        super(type,image);
     }
 
 }

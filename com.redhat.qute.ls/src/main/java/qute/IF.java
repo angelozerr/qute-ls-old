@@ -3,8 +3,8 @@ package qute;
 
 @SuppressWarnings("unused")
 public class IF extends Token {
-    public IF(int kind,String image) {
-        super(kind,image);
+    public IF(TokenType type,String image) {
+        super(type,image);
     }
 
 }

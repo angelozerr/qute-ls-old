@@ -3,8 +3,8 @@ package qute;
 
 @SuppressWarnings("unused")
 public class END_SECTION extends Token {
-    public END_SECTION(int kind,String image) {
-        super(kind,image);
+    public END_SECTION(TokenType type,String image) {
+        super(type,image);
     }
 
 }

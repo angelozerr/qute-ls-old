@@ -3,8 +3,8 @@ package qute;
 
 @SuppressWarnings("unused")
 public class EACH extends Token {
-    public EACH(int kind,String image) {
-        super(kind,image);
+    public EACH(TokenType type,String image) {
+        super(type,image);
     }
 
 }

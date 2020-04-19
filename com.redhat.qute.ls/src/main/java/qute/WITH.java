@@ -3,8 +3,8 @@ package qute;
 
 @SuppressWarnings("unused")
 public class WITH extends Token {
-    public WITH(int kind,String image) {
-        super(kind,image);
+    public WITH(TokenType type,String image) {
+        super(type,image);
     }
 
 }

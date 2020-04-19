@@ -3,8 +3,8 @@ package qute;
 
 @SuppressWarnings("unused")
 public class DIVIDE extends Token {
-    public DIVIDE(int kind,String image) {
-        super(kind,image);
+    public DIVIDE(TokenType type,String image) {
+        super(type,image);
     }
 
 }

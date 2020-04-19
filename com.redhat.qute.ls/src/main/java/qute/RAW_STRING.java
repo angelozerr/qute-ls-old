@@ -3,8 +3,8 @@ package qute;
 
 @SuppressWarnings("unused")
 public class RAW_STRING extends Token {
-    public RAW_STRING(int kind,String image) {
-        super(kind,image);
+    public RAW_STRING(TokenType type,String image) {
+        super(type,image);
     }
 
 }

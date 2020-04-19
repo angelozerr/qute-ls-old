@@ -3,8 +3,8 @@ package qute;
 
 @SuppressWarnings("unused")
 public class INTEGER extends Token {
-    public INTEGER(int kind,String image) {
-        super(kind,image);
+    public INTEGER(TokenType type,String image) {
+        super(type,image);
     }
 
 }

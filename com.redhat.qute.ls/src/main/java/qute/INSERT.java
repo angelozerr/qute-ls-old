@@ -3,8 +3,8 @@ package qute;
 
 @SuppressWarnings("unused")
 public class INSERT extends Token {
-    public INSERT(int kind,String image) {
-        super(kind,image);
+    public INSERT(TokenType type,String image) {
+        super(type,image);
     }
 
 }

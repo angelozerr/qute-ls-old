@@ -3,8 +3,8 @@ package qute;
 
 @SuppressWarnings("unused")
 public class Delimiter extends Token {
-    public Delimiter(int kind,String image) {
-        super(kind,image);
+    public Delimiter(TokenType type,String image) {
+        super(type,image);
     }
 
 }

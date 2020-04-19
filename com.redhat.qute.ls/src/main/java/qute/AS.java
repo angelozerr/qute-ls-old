@@ -3,8 +3,8 @@ package qute;
 
 @SuppressWarnings("unused")
 public class AS extends Token {
-    public AS(int kind,String image) {
-        super(kind,image);
+    public AS(TokenType type,String image) {
+        super(type,image);
     }
 
 }

@@ -3,8 +3,8 @@ package qute;
 
 @SuppressWarnings("unused")
 public class ENDWITH extends Token {
-    public ENDWITH(int kind,String image) {
-        super(kind,image);
+    public ENDWITH(TokenType type,String image) {
+        super(type,image);
     }
 
 }

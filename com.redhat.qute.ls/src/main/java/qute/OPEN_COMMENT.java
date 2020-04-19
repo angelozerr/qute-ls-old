@@ -3,8 +3,8 @@ package qute;
 
 @SuppressWarnings("unused")
 public class OPEN_COMMENT extends Token {
-    public OPEN_COMMENT(int kind,String image) {
-        super(kind,image);
+    public OPEN_COMMENT(TokenType type,String image) {
+        super(type,image);
     }
 
 }

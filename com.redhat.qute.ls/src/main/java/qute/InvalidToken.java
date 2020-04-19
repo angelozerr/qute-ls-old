@@ -6,11 +6,11 @@ package qute;
  */
 public class InvalidToken extends Token {
     public InvalidToken(String image) {
-        super(QUTEConstants.INVALID,image);
+        super(TokenType.INVALID,image);
     }
 
     public InvalidToken() {
-        super(QUTEConstants.INVALID);
+        super(TokenType.INVALID,null);
     }
 
     public String getNormalizedText() {

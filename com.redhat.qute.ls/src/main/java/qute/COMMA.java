@@ -3,8 +3,8 @@ package qute;
 
 @SuppressWarnings("unused")
 public class COMMA extends Token {
-    public COMMA(int kind,String image) {
-        super(kind,image);
+    public COMMA(TokenType type,String image) {
+        super(type,image);
     }
 
 }

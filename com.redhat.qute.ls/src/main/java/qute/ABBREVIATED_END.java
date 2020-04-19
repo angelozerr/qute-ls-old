@@ -3,8 +3,8 @@ package qute;
 
 @SuppressWarnings("unused")
 public class ABBREVIATED_END extends Token {
-    public ABBREVIATED_END(int kind,String image) {
-        super(kind,image);
+    public ABBREVIATED_END(TokenType type,String image) {
+        super(type,image);
     }
 
 }

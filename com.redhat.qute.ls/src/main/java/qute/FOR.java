@@ -3,8 +3,8 @@ package qute;
 
 @SuppressWarnings("unused")
 public class FOR extends Token {
-    public FOR(int kind,String image) {
-        super(kind,image);
+    public FOR(TokenType type,String image) {
+        super(type,image);
     }
 
 }

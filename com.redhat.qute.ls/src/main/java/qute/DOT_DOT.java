@@ -3,8 +3,8 @@ package qute;
 
 @SuppressWarnings("unused")
 public class DOT_DOT extends Token {
-    public DOT_DOT(int kind,String image) {
-        super(kind,image);
+    public DOT_DOT(TokenType type,String image) {
+        super(type,image);
     }
 
 }

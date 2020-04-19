@@ -3,8 +3,8 @@ package qute;
 
 @SuppressWarnings("unused")
 public class SIMPLE_EQUALS extends Token {
-    public SIMPLE_EQUALS(int kind,String image) {
-        super(kind,image);
+    public SIMPLE_EQUALS(TokenType type,String image) {
+        super(type,image);
     }
 
 }
