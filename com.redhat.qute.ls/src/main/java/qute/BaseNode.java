@@ -21,9 +21,18 @@ public class BaseNode implements Node {
 
     protected Node parent;
     protected List<Node>children=newList();
-    private int beginLine,beginColumn,endLine,endColumn;
+    private int beginLine, beginColumn, endLine, endColumn;
     private String inputSource;
-    private Map<String,Object>attributes;
+    private Map<String, Object>attributes;
+    private boolean unparsed;
+    public boolean isUnparsed() {
+        return this.unparsed;
+    }
+
+    public void setUnparsed(boolean unparsed) {
+        this.unparsed=unparsed;
+    }
+
     private ParseException parseException;
     public ParseException getParseException() {
         return parseException;
@@ -52,8 +61,8 @@ public class BaseNode implements Node {
         n.setParent(this);
     }
 
-    public void addChild(int i,Node n) {
-        children.add(i,n);
+    public void addChild(int i, Node n) {
+        children.add(i, n);
         n.setParent(this);
     }
 
@@ -61,8 +70,8 @@ public class BaseNode implements Node {
         return children.get(i);
     }
 
-    public void setChild(int i,Node n) {
-        children.set(i,n);
+    public void setChild(int i, Node n) {
+        children.set(i, n);
         n.setParent(this);
     }
 
@@ -91,11 +100,11 @@ public class BaseNode implements Node {
         attributes.get(name);
     }
 
-    public void setAttribute(String name,Object value) {
+    public void setAttribute(String name, Object value) {
         if (attributes==null) {
-            attributes=new HashMap<String,Object>();
+            attributes=new HashMap<String, Object>();
         }
-        attributes.put(name,value);
+        attributes.put(name, value);
     }
 
     public boolean hasAttribute(String name) {

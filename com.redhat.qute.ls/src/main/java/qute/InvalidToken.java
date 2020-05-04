@@ -6,15 +6,15 @@ package qute;
  */
 public class InvalidToken extends Token {
     public InvalidToken(String image) {
-        super(TokenType.INVALID,image);
+        super(TokenType.INVALID, image, "input");
     }
 
     public InvalidToken() {
-        super(TokenType.INVALID,null);
+        super(TokenType.INVALID, null, "input");
     }
 
     public String getNormalizedText() {
-        return"Lexically Invalid Input:"+image;
+        return"Lexically Invalid Input:"+getImage();
     }
 
     public boolean isDirty() {

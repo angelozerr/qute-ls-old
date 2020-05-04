@@ -52,7 +52,7 @@ abstract public class Nodes {
 
             public void add(Node n) {
                 if (justModified) throw new IllegalStateException();
-                node.addChild(current+1,n);
+                node.addChild(current+1, n);
                 justModified=true;
             }
 
@@ -69,7 +69,7 @@ abstract public class Nodes {
             }
 
             public void set(Node n) {
-                node.setChild(current,n);
+                node.setChild(current, n);
             }
 
         }
@@ -82,13 +82,13 @@ abstract public class Nodes {
      * @param n the Node 
      * @param recursive whether to recurse into child nodes.
      */
-    static public void expandSpecialTokens(Node n,boolean recursive) {
-        List<Token>expandedList=getAllTokens(n,true,false);
+    static public void expandSpecialTokens(Node n, boolean recursive) {
+        List<Token>expandedList=getAllTokens(n, true, false);
         n.clearChildren();
         for (Node child : expandedList) {
             n.addChild(child);
             if (recursive&&child.getChildCount()>0) {
-                expandSpecialTokens(child,true);
+                expandSpecialTokens(child, true);
             }
         }
     }
@@ -99,7 +99,7 @@ abstract public class Nodes {
      * @param includeCommentTokens Whether to include comment tokens
      * @param recursive Whether to recurse into child Nodes.
      */
-    static public List<Token>getAllTokens(Node n,boolean includeCommentTokens,boolean recursive) {
+    static public List<Token>getAllTokens(Node n, boolean includeCommentTokens, boolean recursive) {
         List<Token>result=new ArrayList<Token>();
         for (Iterator<Node>it=iterator(n); it.hasNext(); ) {
             Node child=it.next();
@@ -121,13 +121,13 @@ abstract public class Nodes {
                 result.add(token);
             }
             else if (child.getChildCount()>0) {
-                result.addAll(getAllTokens(child,includeCommentTokens,recursive));
+                result.addAll(getAllTokens(child, includeCommentTokens, recursive));
             }
         }
         return result;
     }
 
-    static public void copyLocationInfo(Node from,Node to) {
+    static public void copyLocationInfo(Node from, Node to) {
         to.setInputSource(from.getInputSource());
         to.setBeginLine(from.getBeginLine());
         to.setBeginColumn(from.getBeginColumn());
@@ -142,14 +142,14 @@ abstract public class Nodes {
         return n.getClass().getSimpleName();
     }
 
-    static public void dump(Node n,String prefix) {
+    static public void dump(Node n, String prefix) {
         String output=stringrep(n);
         if (output.length()>0) {
             System.out.println(prefix+output);
         }
         for (Iterator<Node>it=iterator(n); it.hasNext(); ) {
             Node child=it.next();
-            dump(child,prefix+"  ");
+            dump(child, prefix+"  ");
         }
     }
 

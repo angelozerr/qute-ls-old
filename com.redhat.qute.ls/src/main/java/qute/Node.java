@@ -3,7 +3,7 @@ package qute;
 
 import java.util.*;
 import java.lang.reflect.*;
-public interface Node {
+public interface Node extends Comparable<Node> {
     /** Life-cycle hook method called after the node has been made the current
 	 *  node 
 	 */
@@ -29,9 +29,9 @@ public interface Node {
     // delegate straightforwardly to a List object that
     // holds the child nodes
     void addChild(Node n);
-    void addChild(int i,Node n);
+    void addChild(int i, Node n);
     Node getChild(int i);
-    void setChild(int i,Node n);
+    void setChild(int i, Node n);
     Node removeChild(int i);
     boolean removeChild(Node n);
     default int indexOf(Node child) {
@@ -41,6 +41,21 @@ public interface Node {
             }
         }
         return-1;
+    }
+
+    /**
+      * Used to order Nodes by location.
+      */
+    default int compareTo(Node n) {
+        if (this==n) return 0;
+        int diff=this.getBeginLine()-n.getBeginLine();
+        if (diff!=0) return diff;
+        diff=this.getBeginColumn()-n.getBeginColumn();
+        if (diff!=0) return diff;
+        // A child node is considered to come after its parent.
+        diff=n.getEndLine()-this.getEndLine();
+        if (diff!=0) return diff;
+        return n.getEndColumn()-this.getEndColumn();
     }
 
     void clearChildren();
@@ -60,7 +75,7 @@ public interface Node {
     // The following 3 methods will typically delegate
     // straightforwardly to a Map<String, Object> object-s get/set/containsKey/keySet methods.
     Object getAttribute(String name);
-    void setAttribute(String name,Object value);
+    void setAttribute(String name, Object value);
     boolean hasAttribute(String name);
     java.util.Set<String>getAttributeNames();
     // The following ten methods are for location info.
@@ -70,6 +85,10 @@ public interface Node {
       */
     String getInputSource();
     void setInputSource(String inputSource);
+    default FileLineMap getFileLineMap() {
+        return FileLineMap.getFileLineMap(getInputSource());
+    }
+
     int getBeginLine();
     int getEndLine();
     int getBeginColumn();
@@ -82,6 +101,17 @@ public interface Node {
         return"line "+getBeginLine()+", column "+getBeginColumn()+" of "+getInputSource();
     }
 
+    /**
+      *  A regular node was created by the regular operations of the parsing machinery
+      * applying the rules, consuming tokens and building up the tree.
+      * An unparsed node is typically created as part of error recovery or possibly
+      * some post-parsing tree-walking adjustments maybe.
+      */
+    default boolean isUnparsed() {
+        return false;
+    }
+
+    void setUnparsed(boolean b);
     default boolean isDirty() {
         for (Node child : children()) {
             if (child.isDirty()) return true;
@@ -130,12 +160,12 @@ public interface Node {
         return null;
     }
 
-    default Node findNodeAt(int line,int column) {
-        if (!isIncluded(line,column)) {
+    default Node findNodeAt(int line, int column) {
+        if (!isIncluded(line, column)) {
             return null;
         }
         for (Node child : children()) {
-            Node match=child.findNodeAt(line,column);
+            Node match=child.findNodeAt(line, column);
             if (match!=null) {
                 return match;
             }
@@ -152,18 +182,18 @@ public interface Node {
      * @return true if the given position (line,column) is included in the given
      *         node and false otherwise.
      */
-    default boolean isIncluded(int line,int column) {
-        return isIncluded(getBeginLine(),getBeginColumn(),getEndLine(),getEndColumn(),line,column);
+    default boolean isIncluded(int line, int column) {
+        return isIncluded(getBeginLine(), getBeginColumn(), getEndLine(), getEndColumn(), line, column);
     }
 
-    default boolean isIncluded(int beginLine,int beginColumn,int endLine,int endColumn,int line,int column) {
+    default boolean isIncluded(int beginLine, int beginColumn, int endLine, int endColumn, int line, int column) {
         if (beginLine==line&&beginColumn==column) {
             return true;
         }
         if (endLine==line&&endColumn==column) {
             return true;
         }
-        return!isAfter(beginLine,beginColumn,line,column)&&isAfter(endLine,endColumn,line,column);
+        return!isAfter(beginLine, beginColumn, line, column)&&isAfter(endLine, endColumn, line, column);
     }
 
     /**
@@ -191,7 +221,7 @@ public interface Node {
         null;
     }
 
-    static boolean isAfter(int line1,int column1,int line2,int column2) {
+    static boolean isAfter(int line1, int column1, int line2, int column2) {
         if (line1>line2) {
             return true;
         }
@@ -248,10 +278,10 @@ public interface Node {
     }
     static abstract public class Visitor {
         static private Method baseVisitMethod;
-        private HashMap<Class<?extends Node>,Method>methodCache=new HashMap<>();
+        private HashMap<Class<?extends Node>, Method>methodCache=new HashMap<>();
         static private Method getBaseVisitMethod() throws NoSuchMethodException {
             if (baseVisitMethod==null) {
-                baseVisitMethod=Node.Visitor.class.getMethod("visit",new Class[]{Node.class});
+                baseVisitMethod=Node.Visitor.class.getMethod("visit", new Class[]{Node.class});
             }
             return baseVisitMethod;
         }
@@ -260,15 +290,15 @@ public interface Node {
             Class<?extends Node>nodeClass=node.getClass();
             if (!methodCache.containsKey(nodeClass)) {
                 try {
-                    Method method=this.getClass().getMethod("visit",new Class[]{nodeClass});
+                    Method method=this.getClass().getMethod("visit", new Class[]{nodeClass});
                     if (method.equals(getBaseVisitMethod())) {
                         method=null;
                         // Have to avoid infinite recursion, no?
                     }
-                    methodCache.put(nodeClass,method);
+                    methodCache.put(nodeClass, method);
                 }
                 catch(NoSuchMethodException nsme) {
-                    methodCache.put(nodeClass,null);
+                    methodCache.put(nodeClass, null);
                 }
             }
             return methodCache.get(nodeClass);
@@ -284,7 +314,7 @@ public interface Node {
                 fallback(node);
             }
             else try {
-                visitMethod.invoke(this,new Object[]{node});
+                visitMethod.invoke(this, new Object[]{node});
             }
             catch(InvocationTargetException ite) {
                 Throwable cause=ite.getCause();

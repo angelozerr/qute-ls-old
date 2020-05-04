@@ -23,13 +23,13 @@ import org.eclipse.lsp4j.jsonrpc.CancelChecker;
 import com.redhat.qute.parser.Template;
 import com.redhat.qute.utils.QutePositionUtility;
 
-import qute.Block;
-import qute.Comment;
-import qute.IF;
-import qute.Interpolation;
+import qute.ast.Block;
+import qute.ast.Comment;
+import qute.ast.IF;
+import qute.ast.Interpolation;
 import qute.Node;
-import qute.Text;
-import qute.UserSection;
+import qute.ast.Text;
+import qute.ast.UserSection;
 
 /**
  * Qute symbol provider.

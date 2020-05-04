@@ -7,15 +7,15 @@ import org.eclipse.lsp4j.Range;
 
 import com.redhat.qute.parser.Template;
 
-import qute.EACH;
-import qute.ENDEACH;
-import qute.ENDFOR;
-import qute.ENDIF;
-import qute.END_SECTION;
-import qute.FOR;
-import qute.IF;
 import qute.Node;
-import qute.START_SECTION;
+import qute.ast.EACH;
+import qute.ast.ENDEACH;
+import qute.ast.ENDFOR;
+import qute.ast.ENDIF;
+import qute.ast.END_SECTION;
+import qute.ast.FOR;
+import qute.ast.IF;
+import qute.ast.START_SECTION;
 
 public class QutePositionUtility {
 

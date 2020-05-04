@@ -2,10 +2,8 @@
 package qute;
 
 import java.util.*;
-/**
- * Describes the input token stream.
- */
-public class Token implements QUTEConstants,Node {
+import qute.ast.*;
+public class Token implements QUTEConstants, Node {
     // The token does not correspond to actual characters in the input.
     // It was typically inserted to (tolerantly) complete some grammatical production.
     private boolean virtual;
@@ -18,12 +16,6 @@ public class Token implements QUTEConstants,Node {
     }
 
     private String inputSource="";
-    /**
-     * An integer that describes the kind of this token.  This numbering
-     * system is determined by JavaCCParser, and a table of these numbers is
-     * stored in the file ...Constants.java.
-     */
-    //    int kind;
     private TokenType type;
     public TokenType getType() {
         return type;
@@ -31,7 +23,6 @@ public class Token implements QUTEConstants,Node {
 
     void setType(TokenType type) {
         this.type=type;
-        //        this.kind = type.ordinal();
     }
 
     /**
@@ -39,11 +30,37 @@ public class Token implements QUTEConstants,Node {
      * of this token; endLine and endColumn describe the position of the
      * last character of this token.
      */
-    int beginLine,beginColumn,endLine,endColumn;
+    int beginLine, beginColumn, endLine, endColumn;
     /**
      * The string image of the token.
      */
     String image;
+    public String getImage() {
+        if (image==null) {
+            FileLineMap lineMap=getFileLineMap();
+            if (lineMap!=null) {
+                return lineMap.getText(beginLine, beginColumn, endLine, endColumn);
+            }
+            else {
+                return""+getType();
+            }
+        }
+        return image;
+    }
+
+    void setImage(String image) {
+        this.image=image;
+    }
+
+    private LexicalState lexicalState;
+    void setLexicalState(LexicalState state) {
+        this.lexicalState=state;
+    }
+
+    LexicalState getLexicalState() {
+        return lexicalState;
+    }
+
     private Token next;
     Token getNext() {
         return next;
@@ -70,10 +87,10 @@ public class Token implements QUTEConstants,Node {
     public Token() {
     }
 
-    public Token(TokenType type,String image) {
+    public Token(TokenType type, String image, String inputSource) {
         this.type=type;
-        //        this.kind = type.ordinal();
         this.image=image;
+        this.inputSource=inputSource;
     }
 
     public boolean isUnparsed() {
@@ -91,149 +108,152 @@ public class Token implements QUTEConstants,Node {
         if (virtual) {
             return"Virtual Token of type "+getType();
         }
-        return image;
+        if (getType()==TokenType.EOF) {
+            return"EOF";
+        }
+        return getImage();
     }
 
     public String getRawText() {
-        return image;
+        return getImage();
     }
 
     public String toString() {
         return getNormalizedText();
     }
 
-    public static Token newToken(TokenType type,String image) {
+    public static Token newToken(TokenType type, String image, String inputSource) {
         switch(type) {
             case COMMA:
-            return new COMMA(TokenType.COMMA,image);
+            return new COMMA(TokenType.COMMA, image, inputSource);
             case IN:
-            return new IN(TokenType.IN,image);
+            return new IN(TokenType.IN, image, inputSource);
             case AS:
-            return new AS(TokenType.AS,image);
+            return new AS(TokenType.AS, image, inputSource);
             case OR:
-            return new OR(TokenType.OR,image);
+            return new OR(TokenType.OR, image, inputSource);
             case OR2:
-            return new OR2(TokenType.OR2,image);
+            return new OR2(TokenType.OR2, image, inputSource);
             case AND:
-            return new AND(TokenType.AND,image);
+            return new AND(TokenType.AND, image, inputSource);
             case AND2:
-            return new AND2(TokenType.AND2,image);
+            return new AND2(TokenType.AND2, image, inputSource);
             case SIMPLE_EQUALS:
-            return new SIMPLE_EQUALS(TokenType.SIMPLE_EQUALS,image);
+            return new SIMPLE_EQUALS(TokenType.SIMPLE_EQUALS, image, inputSource);
             case EQUALS:
-            return new EQUALS(TokenType.EQUALS,image);
+            return new EQUALS(TokenType.EQUALS, image, inputSource);
             case EQUALS2:
-            return new EQUALS2(TokenType.EQUALS2,image);
+            return new EQUALS2(TokenType.EQUALS2, image, inputSource);
             case EQUALS3:
-            return new EQUALS3(TokenType.EQUALS3,image);
+            return new EQUALS3(TokenType.EQUALS3, image, inputSource);
             case GT:
-            return new GT(TokenType.GT,image);
+            return new GT(TokenType.GT, image, inputSource);
             case ALT_GT:
-            return new ALT_GT(TokenType.ALT_GT,image);
+            return new ALT_GT(TokenType.ALT_GT, image, inputSource);
             case GE:
-            return new GE(TokenType.GE,image);
+            return new GE(TokenType.GE, image, inputSource);
             case ALT_GE:
-            return new ALT_GE(TokenType.ALT_GE,image);
+            return new ALT_GE(TokenType.ALT_GE, image, inputSource);
             case LT:
-            return new LT(TokenType.LT,image);
+            return new LT(TokenType.LT, image, inputSource);
             case ALT_LT:
-            return new ALT_LT(TokenType.ALT_LT,image);
+            return new ALT_LT(TokenType.ALT_LT, image, inputSource);
             case LE:
-            return new LE(TokenType.LE,image);
+            return new LE(TokenType.LE, image, inputSource);
             case ALT_LE:
-            return new ALT_LE(TokenType.ALT_LE,image);
+            return new ALT_LE(TokenType.ALT_LE, image, inputSource);
             case DOT_DOT:
-            return new DOT_DOT(TokenType.DOT_DOT,image);
+            return new DOT_DOT(TokenType.DOT_DOT, image, inputSource);
             case PLUS:
-            return new PLUS(TokenType.PLUS,image);
+            return new PLUS(TokenType.PLUS, image, inputSource);
             case MINUS:
-            return new MINUS(TokenType.MINUS,image);
+            return new MINUS(TokenType.MINUS, image, inputSource);
             case TIMES:
-            return new TIMES(TokenType.TIMES,image);
+            return new TIMES(TokenType.TIMES, image, inputSource);
             case DIVIDE:
-            return new DIVIDE(TokenType.DIVIDE,image);
+            return new DIVIDE(TokenType.DIVIDE, image, inputSource);
             case DOT:
-            return new DOT(TokenType.DOT,image);
+            return new DOT(TokenType.DOT, image, inputSource);
             case EXCLAM:
-            return new EXCLAM(TokenType.EXCLAM,image);
+            return new EXCLAM(TokenType.EXCLAM, image, inputSource);
             case OPEN_BRACKET:
-            return new OPEN_BRACKET(TokenType.OPEN_BRACKET,image);
+            return new OPEN_BRACKET(TokenType.OPEN_BRACKET, image, inputSource);
             case CLOSE_BRACKET:
-            return new CLOSE_BRACKET(TokenType.CLOSE_BRACKET,image);
+            return new CLOSE_BRACKET(TokenType.CLOSE_BRACKET, image, inputSource);
             case NULL:
-            return new NULL(TokenType.NULL,image);
+            return new NULL(TokenType.NULL, image, inputSource);
             case TRUE:
-            return new TRUE(TokenType.TRUE,image);
+            return new TRUE(TokenType.TRUE, image, inputSource);
             case FALSE:
-            return new FALSE(TokenType.FALSE,image);
+            return new FALSE(TokenType.FALSE, image, inputSource);
             case INTEGER:
-            return new INTEGER(TokenType.INTEGER,image);
+            return new INTEGER(TokenType.INTEGER, image, inputSource);
             case DECIMAL:
-            return new DECIMAL(TokenType.DECIMAL,image);
+            return new DECIMAL(TokenType.DECIMAL, image, inputSource);
             case STRING_LITERAL:
-            return new STRING_LITERAL(TokenType.STRING_LITERAL,image);
+            return new STRING_LITERAL(TokenType.STRING_LITERAL, image, inputSource);
             case RAW_STRING:
-            return new RAW_STRING(TokenType.RAW_STRING,image);
+            return new RAW_STRING(TokenType.RAW_STRING, image, inputSource);
             case C_IDENTIFIER:
-            return new C_IDENTIFIER(TokenType.C_IDENTIFIER,image);
+            return new C_IDENTIFIER(TokenType.C_IDENTIFIER, image, inputSource);
             case JSON_STRING:
-            return new JSONString(TokenType.JSON_STRING,image);
+            return new JSONString(TokenType.JSON_STRING, image, inputSource);
             case NUMBER:
-            return new NumberLiteral2(TokenType.NUMBER,image);
+            return new NumberLiteral2(TokenType.NUMBER, image, inputSource);
             case OPEN_PAREN:
-            return new Delimiter(TokenType.OPEN_PAREN,image);
+            return new Delimiter(TokenType.OPEN_PAREN, image, inputSource);
             case CLOSE_PAREN:
-            return new Delimiter(TokenType.CLOSE_PAREN,image);
+            return new Delimiter(TokenType.CLOSE_PAREN, image, inputSource);
             case TEXT:
-            return new Text(TokenType.TEXT,image);
+            return new Text(TokenType.TEXT, image, inputSource);
             case OPEN_CURLY:
-            return new OPEN_CURLY(TokenType.OPEN_CURLY,image);
+            return new OPEN_CURLY(TokenType.OPEN_CURLY, image, inputSource);
             case ABBREVIATED_END:
-            return new ABBREVIATED_END(TokenType.ABBREVIATED_END,image);
+            return new ABBREVIATED_END(TokenType.ABBREVIATED_END, image, inputSource);
             case EACH:
-            return new EACH(TokenType.EACH,image);
+            return new EACH(TokenType.EACH, image, inputSource);
             case ENDEACH:
-            return new ENDEACH(TokenType.ENDEACH,image);
+            return new ENDEACH(TokenType.ENDEACH, image, inputSource);
             case FOR:
-            return new FOR(TokenType.FOR,image);
+            return new FOR(TokenType.FOR, image, inputSource);
             case ENDFOR:
-            return new ENDFOR(TokenType.ENDFOR,image);
+            return new ENDFOR(TokenType.ENDFOR, image, inputSource);
             case IF:
-            return new IF(TokenType.IF,image);
+            return new IF(TokenType.IF, image, inputSource);
             case ELSEIF:
-            return new ELSEIF(TokenType.ELSEIF,image);
+            return new ELSEIF(TokenType.ELSEIF, image, inputSource);
             case ELSE:
-            return new ELSE(TokenType.ELSE,image);
+            return new ELSE(TokenType.ELSE, image, inputSource);
             case ENDIF:
-            return new ENDIF(TokenType.ENDIF,image);
+            return new ENDIF(TokenType.ENDIF, image, inputSource);
             case QUTE_INCLUDE:
-            return new QUTE_INCLUDE(TokenType.QUTE_INCLUDE,image);
+            return new QUTE_INCLUDE(TokenType.QUTE_INCLUDE, image, inputSource);
             case ENDINCLUDE:
-            return new ENDINCLUDE(TokenType.ENDINCLUDE,image);
+            return new ENDINCLUDE(TokenType.ENDINCLUDE, image, inputSource);
             case INSERT:
-            return new INSERT(TokenType.INSERT,image);
+            return new INSERT(TokenType.INSERT, image, inputSource);
             case ENDINSERT:
-            return new ENDINSERT(TokenType.ENDINSERT,image);
+            return new ENDINSERT(TokenType.ENDINSERT, image, inputSource);
             case WITH:
-            return new WITH(TokenType.WITH,image);
+            return new WITH(TokenType.WITH, image, inputSource);
             case ENDWITH:
-            return new ENDWITH(TokenType.ENDWITH,image);
+            return new ENDWITH(TokenType.ENDWITH, image, inputSource);
             case START_SECTION:
-            return new START_SECTION(TokenType.START_SECTION,image);
+            return new START_SECTION(TokenType.START_SECTION, image, inputSource);
             case END_SECTION:
-            return new END_SECTION(TokenType.END_SECTION,image);
+            return new END_SECTION(TokenType.END_SECTION, image, inputSource);
             case START_PARAMETER_DECL:
-            return new START_PARAMETER_DECL(TokenType.START_PARAMETER_DECL,image);
+            return new START_PARAMETER_DECL(TokenType.START_PARAMETER_DECL, image, inputSource);
             case OPEN_COMMENT:
-            return new OPEN_COMMENT(TokenType.OPEN_COMMENT,image);
+            return new OPEN_COMMENT(TokenType.OPEN_COMMENT, image, inputSource);
             case CLOSE_COMMENT:
-            return new Comment(TokenType.CLOSE_COMMENT,image);
+            return new Comment(TokenType.CLOSE_COMMENT, image, inputSource);
             case CLOSE_CURLY:
-            return new CLOSE_CURLY(TokenType.CLOSE_CURLY,image);
+            return new CLOSE_CURLY(TokenType.CLOSE_CURLY, image, inputSource);
             case CLOSE_EMPTY:
-            return new CLOSE_EMPTY(TokenType.CLOSE_EMPTY,image);
+            return new CLOSE_EMPTY(TokenType.CLOSE_EMPTY, image, inputSource);
         }
-        return new Token(type,image);
+        return new Token(type, image, inputSource);
     }
 
     public void setInputSource(String inputSource) {
@@ -277,8 +297,8 @@ public class Token implements QUTEConstants,Node {
     }
 
     private Node parent;
-    private Map<String,Object>attributes;
-    public void setChild(int i,Node n) {
+    private Map<String, Object>attributes;
+    public void setChild(int i, Node n) {
         throw new UnsupportedOperationException();
     }
 
@@ -286,7 +306,7 @@ public class Token implements QUTEConstants,Node {
         throw new UnsupportedOperationException();
     }
 
-    public void addChild(int i,Node n) {
+    public void addChild(int i, Node n) {
         throw new UnsupportedOperationException();
     }
 
@@ -333,11 +353,11 @@ public class Token implements QUTEConstants,Node {
         attributes.get(name);
     }
 
-    public void setAttribute(String name,Object value) {
+    public void setAttribute(String name, Object value) {
         if (attributes==null) {
-            attributes=new HashMap<String,Object>();
+            attributes=new HashMap<String, Object>();
         }
-        attributes.put(name,value);
+        attributes.put(name, value);
     }
 
     public boolean hasAttribute(String name) {

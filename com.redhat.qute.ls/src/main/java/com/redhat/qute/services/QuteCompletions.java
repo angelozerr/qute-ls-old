@@ -30,7 +30,7 @@ import com.redhat.qute.settings.QuteFormattingSettings;
 import com.redhat.qute.utils.QutePositionUtility;
 
 import qute.Node;
-import qute.Text;
+import qute.ast.Text;
 
 /**
  * The Qute completions

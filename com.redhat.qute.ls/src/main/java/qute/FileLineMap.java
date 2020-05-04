@@ -3,14 +3,15 @@ package qute;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 /**
  * Rather bloody-minded implementation of a class to read in a file 
  * and store the contents in a String, and keep track of where the 
  * lines are.
  */
 public class FileLineMap {
+    private static FileLineMap singleton;
+    private static Map<String, FileLineMap>lookup=Collections.synchronizedMap(new HashMap<>());
     private static final int[] EMPTY_INT=new int[0];
     // Munged content, possibly replace unicode escapes, tabs, or CRLF with LF.
     private final CharSequence content;
@@ -18,31 +19,54 @@ public class FileLineMap {
     private final String inputSource;
     // A list of offsets of the beginning of lines
     private final int[] lineOffsets;
-    private int startingLine,startingColumn;
-    private int bufferPosition,tokenBeginOffset,tokenBeginColumn,tokenBeginLine,line,column;
+    private int startingLine, startingColumn;
+    private int bufferPosition, tokenBeginOffset, tokenBeginColumn, tokenBeginLine, line, column;
     private final List<Token>tokenList;
-    public FileLineMap(Reader reader,int startingLine,int startingColumn) {
-        this("",readToEnd(reader),startingLine,startingColumn);
+    public FileLineMap(Reader reader, int startingLine, int startingColumn) {
+        this("", readToEnd(reader), startingLine, startingColumn);
     }
 
-    public FileLineMap(String inputSource,CharSequence content) {
-        this(inputSource,content,1,1);
+    public FileLineMap(String inputSource, CharSequence content) {
+        this(inputSource, content, 1, 1);
     }
 
-    public FileLineMap(String inputSource,CharSequence content,int startingLine,int startingColumn) {
+    public FileLineMap(String inputSource, CharSequence content, int startingLine, int startingColumn) {
         this.inputSource=inputSource;
-        this.content=mungeContent(content,0,true,false);
+        this.content=mungeContent(content, 0, true, false);
         this.lineOffsets=createLineOffsetsTable(this.content);
         this.tokenList=new LinkedList<>();
-        this.setStartPosition(startingLine,startingColumn);
+        this.setStartPosition(startingLine, startingColumn);
+        if (inputSource!=null&&inputSource.length()>0) {
+            lookup.put(inputSource, this);
+            if (lookup.size()==1) {
+                singleton=this;
+            }
+            else {
+                singleton=null;
+            }
+        }
+    }
+
+    static FileLineMap getFileLineMap(String inputSource) {
+        if (singleton!=null) {
+            //KLUDGE! 
+            // If there is only one FileLineMap object, just return it regardless of 
+            // what the key passed in is! REVISIT later probably... 
+            return singleton;
+        }
+        return lookup.get(inputSource);
+    }
+
+    static void clearLineMapLoookup() {
+        singleton=null;
+        lookup.clear();
     }
 
     // START API methods
     // Now some methods to fulfill the functionality that used to be in that
     // SimpleCharStream class
-    // REVISIT: Currently the backup() method does not handle any of the messiness
-    // with column numbers relating to tabs
-    // or unicode escapes. (Maybe REVISIT)
+    // This backup() method is dead simple by design and does not handle any of the messiness
+    // with column numbers relating to tabs or unicode escapes. 
     public void backup(int amount) {
         for (int i=0; i<amount; i++) {
             --bufferPosition;
@@ -52,6 +76,19 @@ public class FileLineMap {
             }
             else {
                 --column;
+            }
+        }
+    }
+
+    void forward(int amount) {
+        for (int i=0; i<amount; i++) {
+            ++bufferPosition;
+            if (column<getLineLength(line)) {
+                column++;
+            }
+            else {
+                ++line;
+                column=1;
             }
         }
     }
@@ -72,12 +109,12 @@ public class FileLineMap {
     }
 
     String getImage() {
-        return content.subSequence(tokenBeginOffset,bufferPosition).toString();
+        return content.subSequence(tokenBeginOffset, bufferPosition).toString();
     }
 
     String getSuffix(final int len) {
         int startPos=bufferPosition-len+1;
-        return content.subSequence(startPos,bufferPosition).toString();
+        return content.subSequence(startPos, bufferPosition).toString();
     }
 
     int beginToken() {
@@ -114,6 +151,13 @@ public class FileLineMap {
         tokenList.add(token);
     }
 
+    // But there is no goto in Java!!!
+    void goTo(int line, int column) {
+        this.bufferPosition=getOffset(line, column);
+        this.line=line;
+        this.column=column;
+    }
+
     // END API methods
     private int getLineLength(int lineNumber) {
         int startOffset=getLineStartOffset(lineNumber);
@@ -133,15 +177,15 @@ public class FileLineMap {
         return endOffset;
     }
 
-    private void setStartPosition(int line,int column) {
+    private void setStartPosition(int line, int column) {
         this.startingLine=line;
         this.startingColumn=column;
         this.line=line;
         this.column=column;
     }
 
-    private int getOffset(int line,int column) {
-        int columnAdjustment=(line==startingLine)?column-startingColumn:
+    private int getOffset(int line, int column) {
+        int columnAdjustment=(line==startingLine)?startingColumn:
         1;
         return lineOffsets[line-startingLine]+column-columnAdjustment;
     }
@@ -149,7 +193,7 @@ public class FileLineMap {
     // ------------- private utilities method
     // Icky method to handle annoying stuff. Might make this public later if it is
     // needed elsewhere
-    private static CharSequence mungeContent(CharSequence content,int tabsToSpaces,boolean preserveLines,boolean javaUnicodeEscape) {
+    private static CharSequence mungeContent(CharSequence content, int tabsToSpaces, boolean preserveLines, boolean javaUnicodeEscape) {
         if (tabsToSpaces<=0&&preserveLines&&!javaUnicodeEscape) return content;
         StringBuilder buf=new StringBuilder();
         int index=0;
@@ -171,12 +215,12 @@ public class FileLineMap {
                         index++;
                         // col++;
                     }
-                    String hex=content.subSequence(index,index+=4).toString();
-                    buf.append((char) Integer.parseInt(hex,16));
+                    String hex=content.subSequence(index, index+=4).toString();
+                    buf.append((char) Integer.parseInt(hex, 16));
                     // col +=6;
                     ++col;
-                    // REVISIT. Should this increase by six or one? Really just a corner case
-                    // anyway.
+                    // We're not going to be trying to track line/column information relative to the original content
+                    // with tabs or unicode escape, so we just increment 1, not 6
                 }
             }
             else if (ch=='\r'&&!preserveLines) {
@@ -246,14 +290,14 @@ public class FileLineMap {
         return lineOffsets.length;
     }
 
-    private String getText(int beginLine,int beginColumn,int endLine,int endColumn) {
-        int startOffset=getOffset(beginLine,beginColumn);
-        int endOffset=getOffset(endLine,endColumn);
-        return getText(startOffset,endOffset);
+    String getText(int beginLine, int beginColumn, int endLine, int endColumn) {
+        int startOffset=getOffset(beginLine, beginColumn);
+        int endOffset=getOffset(endLine, endColumn);
+        return getText(startOffset, endOffset);
     }
 
-    private String getText(int startOffset,int endOffset) {
-        return content.subSequence(startOffset,endOffset).toString();
+    private String getText(int startOffset, int endOffset) {
+        return content.subSequence(startOffset, endOffset).toString();
     }
 
     private String getLine(int lineNumber) {
@@ -261,7 +305,7 @@ public class FileLineMap {
         int startOffset=lineOffsets[realLineNumber];
         int endOffset=(realLineNumber+1==lineOffsets.length)?content.length():
         lineOffsets[realLineNumber+1];
-        return getText(startOffset,endOffset);
+        return getText(startOffset, endOffset);
     }
 
     private int getLineNumber(int offset) {
@@ -291,16 +335,16 @@ public class FileLineMap {
         }
         else if (charsRead<BUF_SIZE) {
             char[] result=new char[charsRead];
-            System.arraycopy(block,0,result,0,charsRead);
+            System.arraycopy(block, 0, result, 0, charsRead);
             reader.close();
-            return new String(block,0,charsRead);
+            return new String(block, 0, charsRead);
         }
         StringBuilder buf=new StringBuilder();
         buf.append(block);
         do {
             charsRead=reader.read(block);
             if (charsRead>0) {
-                buf.append(block,0,charsRead);
+                buf.append(block, 0, charsRead);
             }
         }
         while (charsRead==BUF_SIZE);
